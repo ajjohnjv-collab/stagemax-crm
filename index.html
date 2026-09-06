@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ShopDesk — StageMax</title>
+<title>STAGEMAX CRM</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#12100E; --panel:#1B1815; --panel-2:#241F1B; --line:#332C26;
-  --paper:#EDE7DF; --muted:#9A8E82;
-  --amber:#E8A33D; --rose:#C2506B; --cyan:#4AA3B8; --green:#6E9E5C; --violet:#8A6BA8;
-  --r:10px;
+--ink:#12100E; --panel:#1B1815; --panel-2:#241F1B; --line:#332C26;
+--paper:#EDE7DF; --muted:#9A8E82;
+--amber:#E8A33D; --rose:#C2506B; --cyan:#4AA3B8; --green:#6E9E5C; --violet:#8A6BA8;
+--r:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--ink);color:var(--paper);font:400 15px/1.5 Archivo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -85,345 +85,345 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 /* ─────────────────────────────────────────────
-   PASTE YOUR TWO VALUES HERE
-   Supabase → Project Settings → API
-   ───────────────────────────────────────────── */
-const SUPABASE_URL  = 'https://yuntnxsfwszzhcticwfr.supabase.co';
+PASTE YOUR TWO VALUES HERE
+Supabase → Project Settings → API
+───────────────────────────────────────────── */
+const SUPABASE_URL = 'https://yuntnxsfwszzhcticwfr.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_WV9HzwnxjOjy9AzyGyvT2w_qGv825o_';
 /* ───────────────────────────────────────────── */
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {
-  auth: { persistSession: false, autoRefreshToken: true }
+auth: { persistSession: false, autoRefreshToken: true }
 });
 
 const app = document.getElementById('app');
-const rs  = n => '₹' + Number(n||0).toLocaleString('en-IN');
+const rs = n => '₹' + Number(n||0).toLocaleString('en-IN');
 const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const day = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
 
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null,
-          pipelines:[], stages:[], products:[], profiles:[], deals:[], pending:[], movement:[], err:'' };
+pipelines:[], stages:[], products:[], profiles:[], deals:[], pending:[], movement:[], err:'' };
 
 /* ── auth ── */
 async function boot(){
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session) return renderLogin();
-  const { data:prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-  S.me = prof || { full_name: session.user.email, role:'cre', id: session.user.id };
-  await loadRefs();
-  await loadTab();
+const { data:{ session } } = await sb.auth.getSession();
+if(!session) return renderLogin();
+const { data:prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+S.me = prof || { full_name: session.user.email, role:'cre', id: session.user.id };
+await loadRefs();
+await loadTab();
 }
 
 function renderLogin(msg){
-  app.innerHTML = `<div class="login">
-    <div class="mark">Shop<span>Desk</span></div>
-    <p>StageMax — sign in to work your leads.</p>
-    ${msg?`<div class="err">${esc(msg)}</div>`:''}
-    <label for="em">Email</label><input id="em" type="email" autocomplete="username">
-    <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
-    <button class="btn" id="go">Sign in</button>
-  </div>`;
-  const go = async () => {
-    const b=document.getElementById('go'); b.disabled=true; b.textContent='Signing in…';
-    const { error } = await sb.auth.signInWithPassword({
-      email: document.getElementById('em').value.trim(),
-      password: document.getElementById('pw').value
-    });
-    if(error) return renderLogin(error.message);
-    boot();
-  };
-  document.getElementById('go').onclick = go;
-  document.getElementById('pw').onkeydown = e => { if(e.key==='Enter') go(); };
+app.innerHTML = `<div class="login">
+<div class="mark">StageMax<span> CRM</span></div>
+<p>StageMax CRM — sign in to work your leads.</p>
+${msg?`<div class="err">${esc(msg)}</div>`:''}
+<label for="em">Email</label><input id="em" type="email" autocomplete="username">
+<label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+<button class="btn" id="go">Sign in</button>
+</div>`;
+const go = async () => {
+const b=document.getElementById('go'); b.disabled=true; b.textContent='Signing in…';
+const { error } = await sb.auth.signInWithPassword({
+email: document.getElementById('em').value.trim(),
+password: document.getElementById('pw').value
+});
+if(error) return renderLogin(error.message);
+boot();
+};
+document.getElementById('go').onclick = go;
+document.getElementById('pw').onkeydown = e => { if(e.key==='Enter') go(); };
 }
 
 /* ── data ── */
 async function loadRefs(){
-  const [p,st,pr,pf] = await Promise.all([
-    sb.from('pipelines').select('*').eq('is_active',true).order('sort_order'),
-    sb.from('stages').select('*').order('sort_order'),
-    sb.from('products').select('*').eq('is_active',true).order('name'),
-    sb.from('profiles').select('*').eq('is_active',true)
-  ]);
-  S.pipelines=p.data||[]; S.stages=st.data||[]; S.products=pr.data||[]; S.profiles=pf.data||[];
+const [p,st,pr,pf] = await Promise.all([
+sb.from('pipelines').select('*').eq('is_active',true).order('sort_order'),
+sb.from('stages').select('*').order('sort_order'),
+sb.from('products').select('*').eq('is_active',true).order('name'),
+sb.from('profiles').select('*').eq('is_active',true)
+]);
+S.pipelines=p.data||[]; S.stages=st.data||[]; S.products=pr.data||[]; S.profiles=pf.data||[];
 }
 
 async function loadTab(){
-  S.err='';
-  try{
-    if(S.tab==='pipeline'){
-      const { data, error } = await sb.from('deals')
-        .select('*, customers(name,phone,district), stages(name,is_delivered,is_lost)')
-        .eq('pipeline_id', S.pipeline).order('created_at',{ascending:false}).limit(200);
-      if(error) throw error; S.deals = data||[];
-    }
-    if(S.tab==='money'){
-      const { data, error } = await sb.from('payments_pending').select('*');
-      if(error) throw error; S.pending = data||[];
-    }
-    if(S.tab==='moving'){
-      const { data, error } = await sb.from('product_movement').select('*');
-      if(error) throw error; S.movement = data||[];
-    }
-  }catch(e){ S.err = e.message || String(e); }
-  render();
+S.err='';
+try{
+if(S.tab==='pipeline'){
+const { data, error } = await sb.from('deals')
+.select('*, customers(name,phone,district), stages(name,is_delivered,is_lost)')
+.eq('pipeline_id', S.pipeline).order('created_at',{ascending:false}).limit(200);
+if(error) throw error; S.deals = data||[];
+}
+if(S.tab==='money'){
+const { data, error } = await sb.from('payments_pending').select('*');
+if(error) throw error; S.pending = data||[];
+}
+if(S.tab==='moving'){
+const { data, error } = await sb.from('product_movement').select('*');
+if(error) throw error; S.movement = data||[];
+}
+}catch(e){ S.err = e.message || String(e); }
+render();
 }
 
 /* ── shell ── */
 function render(){
-  if(S.deal) return renderDeal();
-  app.innerHTML = shell(
-    S.tab==='pipeline' ? viewPipeline() :
-    S.tab==='money'    ? viewMoney()    :
-    S.tab==='moving'   ? viewMoving()   : viewNew()
-  );
-  wire();
+if(S.deal) return renderDeal();
+app.innerHTML = shell(
+S.tab==='pipeline' ? viewPipeline() :
+S.tab==='money' ? viewMoney() :
+S.tab==='moving' ? viewMoving() : viewNew()
+);
+wire();
 }
 
 function shell(inner){
-  const t=(k,l)=>`<button data-tab="${k}" class="${S.tab===k?'on':''}">${l}</button>`;
-  return `<header><div class="hbar">
-      <div class="mark">Shop<span>Desk</span></div>
-      <div class="who">${esc(S.me?.full_name||'')}<button id="out">Sign out</button></div>
-    </div></header>
-    <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
-    ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-    <nav>${t('pipeline','Deals')}${t('money','Money in')}${t('moving','Moving')}${t('new','Add')}</nav>`;
+const t=(k,l)=>`<button data-tab="${k}" class="${S.tab===k?'on':''}">${l}</button>`;
+return `<header><div class="hbar">
+<div class="mark">StageMax<span> CRM</span></div>
+<div class="who">${esc(S.me?.full_name||'')}<button id="out">Sign out</button></div>
+</div></header>
+<div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
+${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
+<nav>${t('pipeline','Deals')}${t('money','Money in')}${t('moving','Moving')}${t('new','Add')}</nav>`;
 }
 
 /* ── deals ── */
 function viewPipeline(){
-  const stages = S.stages.filter(s=>s.pipeline_id===S.pipeline);
-  const shown  = S.stage ? S.deals.filter(d=>d.stage_id===S.stage) : S.deals;
-  const pipes = S.pipelines.map(p=>
-    `<button class="chip ${S.pipeline===p.id?'on':''}" data-pipe="${p.id}">${esc(p.name)}</button>`).join('');
-  const chips = [`<button class="chip ${!S.stage?'on':''}" data-stage="">All<b>${S.deals.length}</b></button>`]
-    .concat(stages.map(s=>{
-      const n=S.deals.filter(d=>d.stage_id===s.id).length;
-      return `<button class="chip ${S.stage===s.id?'on':''}" data-stage="${s.id}">${esc(s.name)}<b>${n}</b></button>`;
-    })).join('');
+const stages = S.stages.filter(s=>s.pipeline_id===S.pipeline);
+const shown = S.stage ? S.deals.filter(d=>d.stage_id===S.stage) : S.deals;
+const pipes = S.pipelines.map(p=>
+`<button class="chip ${S.pipeline===p.id?'on':''}" data-pipe="${p.id}">${esc(p.name)}</button>`).join('');
+const chips = [`<button class="chip ${!S.stage?'on':''}" data-stage="">All<b>${S.deals.length}</b></button>`]
+.concat(stages.map(s=>{
+const n=S.deals.filter(d=>d.stage_id===s.id).length;
+return `<button class="chip ${S.stage===s.id?'on':''}" data-stage="${s.id}">${esc(s.name)}<b>${n}</b></button>`;
+})).join('');
 
-  const cards = shown.length ? shown.map(d=>{
-    const bal = Number(d.value||0)-Number(d.amount_collected||0);
-    const paid = bal<=0 && Number(d.value)>0;
-    return `<div class="card" data-deal="${d.id}">
-      <div class="row">
-        <div class="grow">
-          <div class="name">${esc(d.customers?.name||'No customer')}</div>
-          <div class="sub">${esc(d.title||'')}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="amt">${rs(d.value)}</div>
-          <div class="sub">${esc(d.stages?.name||'')}</div>
-        </div>
-      </div>
-      <div class="row" style="margin-top:9px;gap:7px">
-        ${paid?'<span class="tag paid">Paid</span>':(Number(d.value)>0?`<span class="tag due">${rs(bal)} due</span>`:'')}
-        ${d.customers?.district?`<span class="tag">${esc(d.customers.district)}</span>`:''}
-        ${d.invoice_no?`<span class="tag">${esc(d.invoice_no)}</span>`:''}
-        <span class="sub" style="margin-left:auto">${day(d.delivered_at||d.created_at)}</span>
-      </div>
-    </div>`;
-  }).join('') : `<div class="empty">No deals here yet.<br>Tap + to add the first one.</div>`;
+const cards = shown.length ? shown.map(d=>{
+const bal = Number(d.value||0)-Number(d.amount_collected||0);
+const paid = bal<=0 && Number(d.value)>0;
+return `<div class="card" data-deal="${d.id}">
+<div class="row">
+<div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.title||'')}</div>
+</div>
+<div style="text-align:right">
+<div class="amt">${rs(d.value)}</div>
+<div class="sub">${esc(d.stages?.name||'')}</div>
+</div>
+</div>
+<div class="row" style="margin-top:9px;gap:7px">
+${paid?'<span class="tag paid">Paid</span>':(Number(d.value)>0?`<span class="tag due">${rs(bal)} due</span>`:'')}
+${d.customers?.district?`<span class="tag">${esc(d.customers.district)}</span>`:''}
+${d.invoice_no?`<span class="tag">${esc(d.invoice_no)}</span>`:''}
+<span class="sub" style="margin-left:auto">${day(d.delivered_at||d.created_at)}</span>
+</div>
+</div>`;
+}).join('') : `<div class="empty">No deals here yet.<br>Tap + to add the first one.</div>`;
 
-  return `<div class="chips">${pipes}</div><div class="chips">${chips}</div>${cards}`;
+return `<div class="chips">${pipes}</div><div class="chips">${chips}</div>${cards}`;
 }
 
 /* ── deal detail ── */
 async function openDeal(id){
-  const [{data:d},{data:items}] = await Promise.all([
-    sb.from('deals').select('*, customers(*), stages(*), pipelines(name)').eq('id',id).single(),
-    sb.from('deal_items').select('*, products(name,model_code)').eq('deal_id',id).order('sort_order')
-  ]);
-  S.deal = { ...d, items: items||[] }; render();
+const [{data:d},{data:items}] = await Promise.all([
+sb.from('deals').select('*, customers(*), stages(*), pipelines(name)').eq('id',id).single(),
+sb.from('deal_items').select('*, products(name,model_code)').eq('deal_id',id).order('sort_order')
+]);
+S.deal = { ...d, items: items||[] }; render();
 }
 
 function renderDeal(){
-  const d=S.deal, bal=Number(d.value||0)-Number(d.amount_collected||0);
-  const stages=S.stages.filter(s=>s.pipeline_id===d.pipeline_id);
-  app.innerHTML = shell(`
-    <button class="back" id="back">← Back to deals</button>
-    <div class="card">
-      <div class="row"><div class="grow">
-        <div class="name" style="font-size:18px">${esc(d.customers?.name||'No customer')}</div>
-        <div class="sub">${esc(d.customers?.phone||'')} ${d.customers?.district?'· '+esc(d.customers.district):''}</div>
-      </div><div class="amt" style="font-size:20px">${rs(d.value)}</div></div>
-      ${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none"
-         href="https://wa.me/91${esc(String(d.customers.phone).replace(/\D/g,'').slice(-10))}">Message on WhatsApp</a>`:''}
-    </div>
+const d=S.deal, bal=Number(d.value||0)-Number(d.amount_collected||0);
+const stages=S.stages.filter(s=>s.pipeline_id===d.pipeline_id);
+app.innerHTML = shell(`
+<button class="back" id="back">← Back to deals</button>
+<div class="card">
+<div class="row"><div class="grow">
+<div class="name" style="font-size:18px">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.customers?.phone||'')} ${d.customers?.district?'· '+esc(d.customers.district):''}</div>
+</div><div class="amt" style="font-size:20px">${rs(d.value)}</div></div>
+${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none"
+href="https://wa.me/91${esc(String(d.customers.phone).replace(/\D/g,'').slice(-10))}">Message on WhatsApp</a>`:''}
+</div>
 
-    <h2>Items</h2>
-    <div class="card">${
-      d.items.length ? d.items.map(i=>`<div class="item">
-        <div class="grow">${esc(i.products?.name || i.product_other || 'Item')}
-          ${i.products?.model_code?`<span class="sub"> · ${esc(i.products.model_code)}</span>`:''}</div>
-        <div class="qty">${Number(i.qty)} × ${rs(i.rate)}</div>
-        <div class="amt" style="font-size:14px">${rs(i.amount)}</div>
-      </div>`).join('') : '<div class="sub">No items recorded.</div>'}</div>
+<h2>Items</h2>
+<div class="card">${
+d.items.length ? d.items.map(i=>`<div class="item">
+<div class="grow">${esc(i.products?.name || i.product_other || 'Item')}
+${i.products?.model_code?`<span class="sub"> · ${esc(i.products.model_code)}</span>`:''}</div>
+<div class="qty">${Number(i.qty)} × ${rs(i.rate)}</div>
+<div class="amt" style="font-size:14px">${rs(i.amount)}</div>
+</div>`).join('') : '<div class="sub">No items recorded.</div>'}</div>
 
-    <h2>Money</h2>
-    <div class="card">
-      <div class="row"><div class="grow sub">Invoice total</div><div class="amt" style="font-size:14px">${rs(d.value)}</div></div>
-      <div class="row" style="margin-top:6px"><div class="grow sub">Received</div><div class="amt" style="font-size:14px">${rs(d.amount_collected)}</div></div>
-      <div class="row" style="margin-top:6px"><div class="grow sub">Balance</div>
-        <div class="amt" style="font-size:14px;color:${bal>0?'#E8899E':'#9BC489'}">${rs(bal)}</div></div>
-      <label for="col">Update amount received</label>
-      <input id="col" type="number" inputmode="decimal" value="${Number(d.amount_collected||0)}">
-      <button class="btn" id="savecol">Save payment</button>
-    </div>
+<h2>Money</h2>
+<div class="card">
+<div class="row"><div class="grow sub">Invoice total</div><div class="amt" style="font-size:14px">${rs(d.value)}</div></div>
+<div class="row" style="margin-top:6px"><div class="grow sub">Received</div><div class="amt" style="font-size:14px">${rs(d.amount_collected)}</div></div>
+<div class="row" style="margin-top:6px"><div class="grow sub">Balance</div>
+<div class="amt" style="font-size:14px;color:${bal>0?'#E8899E':'#9BC489'}">${rs(bal)}</div></div>
+<label for="col">Update amount received</label>
+<input id="col" type="number" inputmode="decimal" value="${Number(d.amount_collected||0)}">
+<button class="btn" id="savecol">Save payment</button>
+</div>
 
-    <h2>Stage</h2>
-    <div class="card">
-      <select id="stg">${stages.map(s=>`<option value="${s.id}" ${s.id===d.stage_id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
-      <button class="btn ghost" id="savestg">Move stage</button>
-    </div>`);
-  wire();
+<h2>Stage</h2>
+<div class="card">
+<select id="stg">${stages.map(s=>`<option value="${s.id}" ${s.id===d.stage_id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+<button class="btn ghost" id="savestg">Move stage</button>
+</div>`);
+wire();
 
-  document.getElementById('back').onclick = ()=>{ S.deal=null; loadTab(); };
-  document.getElementById('savecol').onclick = async e=>{
-    e.target.disabled=true;
-    const v=Number(document.getElementById('col').value||0);
-    await sb.from('deals').update({amount_collected:v}).eq('id',d.id);
-    openDeal(d.id);
-  };
-  document.getElementById('savestg').onclick = async e=>{
-    e.target.disabled=true;
-    const to=Number(document.getElementById('stg').value);
-    await sb.from('deals').update({stage_id:to}).eq('id',d.id);
-    await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:to,changed_by:S.me.id});
-    openDeal(d.id);
-  };
+document.getElementById('back').onclick = ()=>{ S.deal=null; loadTab(); };
+document.getElementById('savecol').onclick = async e=>{
+e.target.disabled=true;
+const v=Number(document.getElementById('col').value||0);
+await sb.from('deals').update({amount_collected:v}).eq('id',d.id);
+openDeal(d.id);
+};
+document.getElementById('savestg').onclick = async e=>{
+e.target.disabled=true;
+const to=Number(document.getElementById('stg').value);
+await sb.from('deals').update({stage_id:to}).eq('id',d.id);
+await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:to,changed_by:S.me.id});
+openDeal(d.id);
+};
 }
 
 /* ── money in ── */
 function viewMoney(){
-  if(!S.pending.length) return `<div class="empty">Nothing outstanding.<br>Every delivered deal is paid.</div>`;
-  const total=S.pending.reduce((a,b)=>a+Number(b.balance||0),0);
-  return `<h2>Outstanding · ${rs(total)}</h2>` + S.pending.map(p=>`
-    <div class="card">
-      <div class="row"><div class="grow">
-        <div class="name">${esc(p.customer_name)}</div>
-        <div class="sub">${esc(p.title||'')} ${p.invoice_no?'· '+esc(p.invoice_no):''}</div>
-      </div><div style="text-align:right">
-        <div class="amt" style="color:#E8899E">${rs(p.balance)}</div>
-        <div class="sub">${p.days_since_delivery} days</div>
-      </div></div>
-      ${p.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none"
-        href="https://wa.me/91${esc(String(p.phone).replace(/\D/g,'').slice(-10))}">Ask for payment</a>`:''}
-    </div>`).join('');
+if(!S.pending.length) return `<div class="empty">Nothing outstanding.<br>Every delivered deal is paid.</div>`;
+const total=S.pending.reduce((a,b)=>a+Number(b.balance||0),0);
+return `<h2>Outstanding · ${rs(total)}</h2>` + S.pending.map(p=>`
+<div class="card">
+<div class="row"><div class="grow">
+<div class="name">${esc(p.customer_name)}</div>
+<div class="sub">${esc(p.title||'')} ${p.invoice_no?'· '+esc(p.invoice_no):''}</div>
+</div><div style="text-align:right">
+<div class="amt" style="color:#E8899E">${rs(p.balance)}</div>
+<div class="sub">${p.days_since_delivery} days</div>
+</div></div>
+${p.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none"
+href="https://wa.me/91${esc(String(p.phone).replace(/\D/g,'').slice(-10))}">Ask for payment</a>`:''}
+</div>`).join('');
 }
 
 /* ── moving ── */
 function viewMoving(){
-  if(!S.movement.length) return `<div class="empty">No sales recorded yet.</div>`;
-  const max=Math.max(...S.movement.map(m=>Number(m.units_sold||0)));
-  return `<h2>What is moving</h2>` + S.movement.map(m=>`
-    <div class="card">
-      <div class="row"><div class="grow">
-        <div class="name">${esc(m.product)}</div>
-        <div class="sub">${esc(m.brand||'Unassigned')}${m.category?' · '+esc(m.category):''}</div>
-      </div><div style="text-align:right">
-        <div class="amt">${Number(m.units_sold)}</div>
-        <div class="sub">${rs(m.revenue)}</div>
-      </div></div>
-      <div class="bar"><i style="width:${Math.round(Number(m.units_sold)/max*100)}%"></i></div>
-    </div>`).join('');
+if(!S.movement.length) return `<div class="empty">No sales recorded yet.</div>`;
+const max=Math.max(...S.movement.map(m=>Number(m.units_sold||0)));
+return `<h2>What is moving</h2>` + S.movement.map(m=>`
+<div class="card">
+<div class="row"><div class="grow">
+<div class="name">${esc(m.product)}</div>
+<div class="sub">${esc(m.brand||'Unassigned')}${m.category?' · '+esc(m.category):''}</div>
+</div><div style="text-align:right">
+<div class="amt">${Number(m.units_sold)}</div>
+<div class="sub">${rs(m.revenue)}</div>
+</div></div>
+<div class="bar"><i style="width:${Math.round(Number(m.units_sold)/max*100)}%"></i></div>
+</div>`).join('');
 }
 
 /* ── new deal ── */
 function viewNew(){
-  const pipes=S.pipelines.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
-  return `<h2>New deal</h2>
-  <div class="card">
-    <label for="cname">Customer name</label><input id="cname" placeholder="Name on the bill">
-    <div class="two">
-      <div><label for="cphone">Phone</label><input id="cphone" inputmode="numeric" placeholder="10 digits"></div>
-      <div><label for="cdist">District</label><input id="cdist" placeholder="Malappuram"></div>
-    </div>
-    <label for="npipe">Pipeline</label><select id="npipe">${pipes}</select>
-    <label for="nstage">Stage</label><select id="nstage"></select>
-    <label for="ntitle">What is it for</label><input id="ntitle" placeholder="Tiger 400 + laser enquiry">
-    <label>Items</label><div id="items"></div>
-    <button class="btn ghost" id="addrow">Add another item</button>
-    <label for="nval">Deal value including GST</label><input id="nval" type="number" inputmode="decimal" placeholder="0">
-    <button class="btn" id="save">Save deal</button>
-  </div>`;
+const pipes=S.pipelines.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+return `<h2>New deal</h2>
+<div class="card">
+<label for="cname">Customer name</label><input id="cname" placeholder="Name on the bill">
+<div class="two">
+<div><label for="cphone">Phone</label><input id="cphone" inputmode="numeric" placeholder="10 digits"></div>
+<div><label for="cdist">District</label><input id="cdist" placeholder="Malappuram"></div>
+</div>
+<label for="npipe">Pipeline</label><select id="npipe">${pipes}</select>
+<label for="nstage">Stage</label><select id="nstage"></select>
+<label for="ntitle">What is it for</label><input id="ntitle" placeholder="Tiger 400 + laser enquiry">
+<label>Items</label><div id="items"></div>
+<button class="btn ghost" id="addrow">Add another item</button>
+<label for="nval">Deal value including GST</label><input id="nval" type="number" inputmode="decimal" placeholder="0">
+<button class="btn" id="save">Save deal</button>
+</div>`;
 }
 
 function itemRow(){
-  const opts = S.products.map(p=>`<option value="${p.id}">${esc(p.model_code?p.model_code+' — ':'')}${esc(p.name)}</option>`).join('');
-  const d=document.createElement('div'); d.className='three';
-  d.innerHTML=`<select class="p"><option value="">Select item</option>${opts}</select>
-    <input class="q" type="number" inputmode="decimal" value="1" placeholder="Qty">
-    <input class="r" type="number" inputmode="decimal" placeholder="Rate">`;
-  return d;
+const opts = S.products.map(p=>`<option value="${p.id}">${esc(p.model_code?p.model_code+' — ':'')}${esc(p.name)}</option>`).join('');
+const d=document.createElement('div'); d.className='three';
+d.innerHTML=`<select class="p"><option value="">Select item</option>${opts}</select>
+<input class="q" type="number" inputmode="decimal" value="1" placeholder="Qty">
+<input class="r" type="number" inputmode="decimal" placeholder="Rate">`;
+return d;
 }
 
 /* ── wiring ── */
 function wire(){
-  const out=document.getElementById('out'); if(out) out.onclick=async()=>{ await sb.auth.signOut(); S={...S,me:null,deal:null}; renderLogin(); };
-  document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; loadTab(); });
-  const fab=document.getElementById('fab'); if(fab) fab.onclick=()=>{ S.tab='new'; loadTab(); };
-  document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.pipe); S.stage=null; loadTab(); });
-  document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
-  document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
+const out=document.getElementById('out'); if(out) out.onclick=async()=>{ await sb.auth.signOut(); S={...S,me:null,deal:null}; renderLogin(); };
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; loadTab(); });
+const fab=document.getElementById('fab'); if(fab) fab.onclick=()=>{ S.tab='new'; loadTab(); };
+document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.pipe); S.stage=null; loadTab(); });
+document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
+document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
 
-  const items=document.getElementById('items');
-  if(items){
-    items.appendChild(itemRow());
-    document.getElementById('addrow').onclick=()=>items.appendChild(itemRow());
-    const pipeSel=document.getElementById('npipe'), stgSel=document.getElementById('nstage');
-    const fill=()=>{ const pid=Number(pipeSel.value);
-      stgSel.innerHTML=S.stages.filter(s=>s.pipeline_id===pid)
-        .map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join(''); };
-    pipeSel.onchange=fill; fill();
-    document.getElementById('save').onclick=saveDeal;
-  }
+const items=document.getElementById('items');
+if(items){
+items.appendChild(itemRow());
+document.getElementById('addrow').onclick=()=>items.appendChild(itemRow());
+const pipeSel=document.getElementById('npipe'), stgSel=document.getElementById('nstage');
+const fill=()=>{ const pid=Number(pipeSel.value);
+stgSel.innerHTML=S.stages.filter(s=>s.pipeline_id===pid)
+.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join(''); };
+pipeSel.onchange=fill; fill();
+document.getElementById('save').onclick=saveDeal;
+}
 }
 
 async function saveDeal(e){
-  const btn=e.target; btn.disabled=true; btn.textContent='Saving…';
-  try{
-    const name=document.getElementById('cname').value.trim();
-    if(!name) throw new Error('Customer name is needed.');
-    const phone=document.getElementById('cphone').value.trim();
+const btn=e.target; btn.disabled=true; btn.textContent='Saving…';
+try{
+const name=document.getElementById('cname').value.trim();
+if(!name) throw new Error('Customer name is needed.');
+const phone=document.getElementById('cphone').value.trim();
 
-    let cid=null;
-    if(phone){
-      const { data:found } = await sb.from('customers').select('id').eq('phone',phone).limit(1);
-      if(found?.length) cid=found[0].id;
-    }
-    if(!cid){
-      const { data:c, error } = await sb.from('customers')
-        .insert({ name, phone:phone||null, customer_type:'retail',
-                  district:document.getElementById('cdist').value.trim()||null, state:'Kerala' })
-        .select('id').single();
-      if(error) throw error; cid=c.id;
-    }
+let cid=null;
+if(phone){
+const { data:found } = await sb.from('customers').select('id').eq('phone',phone).limit(1);
+if(found?.length) cid=found[0].id;
+}
+if(!cid){
+const { data:c, error } = await sb.from('customers')
+.insert({ name, phone:phone||null, customer_type:'retail',
+district:document.getElementById('cdist').value.trim()||null, state:'Kerala' })
+.select('id').single();
+if(error) throw error; cid=c.id;
+}
 
-    const { data:deal, error:de } = await sb.from('deals').insert({
-      pipeline_id:Number(document.getElementById('npipe').value),
-      stage_id:Number(document.getElementById('nstage').value),
-      customer_id:cid,
-      title:document.getElementById('ntitle').value.trim()||name,
-      value:Number(document.getElementById('nval').value||0),
-      amount_collected:0,
-      assigned_to:S.me.id
-    }).select('id').single();
-    if(de) throw de;
+const { data:deal, error:de } = await sb.from('deals').insert({
+pipeline_id:Number(document.getElementById('npipe').value),
+stage_id:Number(document.getElementById('nstage').value),
+customer_id:cid,
+title:document.getElementById('ntitle').value.trim()||name,
+value:Number(document.getElementById('nval').value||0),
+amount_collected:0,
+assigned_to:S.me.id
+}).select('id').single();
+if(de) throw de;
 
-    const rows=[...document.querySelectorAll('#items .three')].map((r,i)=>({
-      deal_id:deal.id,
-      product_id:r.querySelector('.p').value?Number(r.querySelector('.p').value):null,
-      qty:Number(r.querySelector('.q').value||1),
-      rate:Number(r.querySelector('.r').value||0),
-      sort_order:i+1
-    })).filter(r=>r.product_id);
-    if(rows.length) await sb.from('deal_items').insert(rows);
+const rows=[...document.querySelectorAll('#items .three')].map((r,i)=>({
+deal_id:deal.id,
+product_id:r.querySelector('.p').value?Number(r.querySelector('.p').value):null,
+qty:Number(r.querySelector('.q').value||1),
+rate:Number(r.querySelector('.r').value||0),
+sort_order:i+1
+})).filter(r=>r.product_id);
+if(rows.length) await sb.from('deal_items').insert(rows);
 
-    S.tab='pipeline'; S.pipeline=Number(document.getElementById('npipe').value); loadTab();
-  }catch(err){
-    S.err=err.message||String(err); btn.disabled=false; btn.textContent='Save deal'; render();
-  }
+S.tab='pipeline'; S.pipeline=Number(document.getElementById('npipe').value); loadTab();
+}catch(err){
+S.err=err.message||String(err); btn.disabled=false; btn.textContent='Save deal'; render();
+}
 }
 
 boot();
