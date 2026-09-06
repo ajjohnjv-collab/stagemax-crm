@@ -109,8 +109,10 @@ const rs = n => '₹' + Number(n||0).toLocaleString('en-IN');
 const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const day = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
 
-let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null,
-pipelines:[], stages:[], products:[], profiles:[], deals:[], pending:[], movement:[], err:'' };
+let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30,
+pipelines:[], stages:[], products:[], profiles:[], deals:[], pending:[], movement:[], team:[], err:'' };
+
+function isOwner(){ return S.me?.role==='owner'; }
 
 /* ── auth ── */
 async function boot(){
@@ -172,6 +174,11 @@ if(S.tab==='moving'){
 const { data, error } = await sb.from('product_movement').select('*');
 if(error) throw error; S.movement = data||[];
 }
+if(S.tab==='team'){
+const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
+const { data, error } = await sb.from('cre_performance_daily').select('*').gte('day', since);
+if(error) throw error; S.team = data||[];
+}
 }catch(e){ S.err = e.message || String(e); }
 render();
 }
@@ -182,7 +189,8 @@ if(S.deal) return renderDeal();
 app.innerHTML = shell(
 S.tab==='pipeline' ? viewPipeline() :
 S.tab==='money' ? viewMoney() :
-S.tab==='moving' ? viewMoving() : viewNew()
+S.tab==='moving' ? viewMoving() :
+S.tab==='team' ? viewTeam() : viewNew()
 );
 wire();
 }
@@ -195,7 +203,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('pipeline','Deals')}${t('money','Money in')}${t('moving','Moving')}${t('new','Add')}</nav>`;
+<nav>${t('pipeline','Deals')}${t('money','Money in')}${t('moving','Moving')}${isOwner()?t('team','Team'):''}${t('new','Add')}</nav>`;
 }
 
 /* ── deals ── */
@@ -283,7 +291,12 @@ ${i.products?.model_code?`<span class="sub"> · ${esc(i.products.model_code)}</s
 <div class="card">
 <select id="stg">${stages.map(s=>`<option value="${s.id}" ${s.id===d.stage_id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
 <button class="btn ghost" id="savestg">Move stage</button>
-</div>`);
+</div>
+${isOwner() ? `<h2>Assigned to</h2>
+<div class="card">
+<select id="assignsel">${S.profiles.map(p=>`<option value="${p.id}" ${p.id===d.assigned_to?'selected':''}>${esc(p.full_name)}</option>`).join('')}</select>
+<button class="btn ghost" id="saveassign">Reassign</button>
+</div>` : ''}`);
 wire();
 
 document.getElementById('back').onclick = ()=>{ S.deal=null; loadTab(); };
@@ -298,6 +311,12 @@ e.target.disabled=true;
 const to=Number(document.getElementById('stg').value);
 await sb.from('deals').update({stage_id:to}).eq('id',d.id);
 await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:to,changed_by:S.me.id});
+openDeal(d.id);
+};
+const sa=document.getElementById('saveassign');
+if(sa) sa.onclick = async e=>{
+e.target.disabled=true;
+await sb.from('deals').update({assigned_to:document.getElementById('assignsel').value}).eq('id',d.id);
 openDeal(d.id);
 };
 }
@@ -337,9 +356,45 @@ return `<h2>What is moving</h2>` + S.movement.map(m=>`
 </div>`).join('');
 }
 
+/* ── team performance (owner only) ── */
+function viewTeam(){
+const ranges=[{d:1,l:'Today'},{d:7,l:'7 days'},{d:30,l:'30 days'}];
+const chips = ranges.map(r=>`<button class="chip ${S.teamRange===r.d?'on':''}" data-range="${r.d}">${r.l}<b></b></button>`).join('');
+const byCre = {};
+S.team.forEach(row=>{
+const k=row.cre_id; if(!k) return;
+if(!byCre[k]) byCre[k]={name:row.full_name, leads:0, value:0, money:0, replySum:0, replyN:0};
+byCre[k].leads += Number(row.leads_handled||0);
+byCre[k].value += Number(row.value_delivered||0);
+byCre[k].money += Number(row.money_collected||0);
+const reply = row.avg_reply_minutes ?? row.avg_reply_min;
+if(reply!=null){ byCre[k].replySum += Number(reply); byCre[k].replyN++; }
+});
+const rows = Object.values(byCre).sort((a,b)=>b.money-a.money);
+const totalMoney = rows.reduce((s,r)=>s+r.money,0);
+const totalValue = rows.reduce((s,r)=>s+r.value,0);
+const cards = rows.length ? rows.map(r=>`<div class="card">
+<div class="row"><div class="grow name">${esc(r.name)}</div><div class="amt">${rs(r.money)}</div></div>
+<div class="row" style="margin-top:9px;gap:7px">
+<span class="tag">${r.leads} leads</span>
+<span class="tag">${rs(r.value)} value</span>
+${r.replyN?`<span class="tag">${Math.round(r.replySum/r.replyN)}m reply</span>`:''}
+</div>
+</div>`).join('') : `<div class="empty">No activity in this period.</div>`;
+return `<h2>Team performance</h2><div class="chips">${chips}</div>
+<div class="card">
+<div class="row"><div class="grow sub">Team collected</div><div class="amt">${rs(totalMoney)}</div></div>
+<div class="row" style="margin-top:6px"><div class="grow sub">Team value delivered</div><div class="amt" style="font-size:14px">${rs(totalValue)}</div></div>
+</div>
+${cards}`;
+}
+
 /* ── new deal ── */
 function viewNew(){
 const pipes=S.pipelines.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+const assign = isOwner() ? `<label for="nassign">Assign to</label><select id="nassign">
+${S.profiles.map(p=>`<option value="${p.id}" ${p.id===S.me.id?'selected':''}>${esc(p.full_name)}</option>`).join('')}
+</select>` : '';
 return `<h2>New deal</h2>
 <div class="card">
 <label for="cname">Customer name</label><input id="cname" placeholder="Name on the bill">
@@ -353,6 +408,7 @@ return `<h2>New deal</h2>
 <label>Items</label><div id="items"></div>
 <button class="btn ghost" id="addrow">Add another item</button>
 <label for="nval">Deal value including GST</label><input id="nval" type="number" inputmode="decimal" placeholder="0">
+${assign}
 <button class="btn" id="save">Save deal</button>
 </div>`;
 }
@@ -374,6 +430,7 @@ const fab=document.getElementById('fab'); if(fab) fab.onclick=()=>{ S.tab='new';
 document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.pipe); S.stage=null; loadTab(); });
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
 document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
+document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
 
 const items=document.getElementById('items');
 if(items){
@@ -415,7 +472,7 @@ customer_id:cid,
 title:document.getElementById('ntitle').value.trim()||name,
 value:Number(document.getElementById('nval').value||0),
 amount_collected:0,
-assigned_to:S.me.id
+assigned_to:(isOwner() && document.getElementById('nassign')) ? document.getElementById('nassign').value : S.me.id
 }).select('id').single();
 if(de) throw de;
 
