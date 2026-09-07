@@ -130,7 +130,8 @@ const day = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30,
 pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[],
-dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0, err:'' };
+dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
+myPerf:[], myRevivals:[], myPromises:[], err:'' };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -140,7 +141,7 @@ const { data:{ session } } = await sb.auth.getSession();
 if(!session) return renderLogin();
 const { data:prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
 S.me = prof || { full_name: session.user.email, role:'cre', id: session.user.id };
-if(isOwner()) S.tab='dashboard';
+S.tab = isOwner() ? 'dashboard' : 'mydash';
 await loadRefs();
 await loadTab();
 }
@@ -228,6 +229,21 @@ S.dashDuesTotal = (duesR.data||[]).reduce((a,b)=>a+Number(b.total_balance||0),0)
 if(pipeR.error) throw pipeR.error;
 S.dashPipelineValue = (pipeR.data||[]).reduce((a,b)=>a+Number(b.value||0),0);
 }
+if(S.tab==='mydash'){
+const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
+const today = new Date().toISOString().slice(0,10);
+const [perfR,revR,promR] = await Promise.all([
+sb.from('cre_performance_daily').select('*').gte('day', since),
+sb.from('deals').select('*, customers(name,phone,district), stages(name,is_lost)')
+.not('revival_date','is',null).lte('revival_date', today).order('revival_date',{ascending:true}),
+sb.from('deals').select('*, customers(name,phone,district), stages(name,is_delivered)')
+.not('balance_promised_date','is',null).lte('balance_promised_date', today).order('balance_promised_date',{ascending:true})
+]);
+if(perfR.error) throw perfR.error; S.myPerf = perfR.data||[];
+if(revR.error) throw revR.error; S.myRevivals = (revR.data||[]).filter(d=>d.stages?.is_lost);
+if(promR.error) throw promR.error;
+S.myPromises = (promR.data||[]).filter(d=>(Number(d.value||0)-Number(d.amount_collected||0))>0);
+}
 if(S.tab==='dues'){
 const { data, error } = await sb.from('customer_balance_summary').select('*');
 if(error) throw error; S.dues = data||[]; S.duesOpen=null; S.duesDeals=[];
@@ -256,7 +272,8 @@ S.tab==='money' ? viewMoney() :
 S.tab==='dues' ? viewDues() :
 S.tab==='dispatch' ? viewDispatch() :
 S.tab==='moving' ? viewMoving() :
-S.tab==='dashboard' ? viewDashboard() : viewNew()
+S.tab==='dashboard' ? viewDashboard() :
+S.tab==='mydash' ? viewMyDashboard() : viewNew()
 );
 wire();
 }
@@ -269,7 +286,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${isOwner()?t('dashboard','Dashboard'):''}${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${t('new','Add')}</nav>`;
+<nav>${isOwner()?t('dashboard','Dashboard'):t('mydash','My Dashboard')}${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${t('new','Add')}</nav>`;
 }
 
 /* ── deals ── */
@@ -461,6 +478,57 @@ const legend = data.map((d,i)=>`<div class="row" style="gap:7px;margin-top:6px">
 return `<div class="row" style="align-items:center;gap:16px">
 <svg width="104" height="104" viewBox="0 0 104 104" style="flex:none">${circles}</svg>
 <div class="grow">${legend}</div>
+</div>`;
+}
+
+/* ── my dashboard (cre) ── */
+function viewMyDashboard(){
+const ranges=[{d:1,l:'Today'},{d:7,l:'7 days'},{d:30,l:'30 days'}];
+const rangeLabel = ranges.find(r=>r.d===S.teamRange)?.l || '';
+const chips = ranges.map(r=>`<button class="chip ${S.teamRange===r.d?'on':''}" data-range="${r.d}">${r.l}<b></b></button>`).join('');
+
+const perf = S.myPerf.reduce((a,r)=>{
+a.leads += Number(r.leads_handled||0);
+a.value += Number(r.value_delivered||0);
+a.money += Number(r.money_collected||0);
+const reply = r.avg_reply_minutes ?? r.avg_reply_min;
+if(reply!=null){ a.replySum += Number(reply); a.replyN++; }
+return a;
+}, {leads:0,value:0,money:0,replySum:0,replyN:0});
+
+const today = new Date().toISOString().slice(0,10);
+const wa = p => p ? `https://wa.me/91${esc(String(p).replace(/\D/g,'').slice(-10))}` : '';
+const items = [];
+S.myRevivals.forEach(d=>items.push({date:d.revival_date, node:`<div class="card" data-deal="${d.id}" style="cursor:pointer">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub"><span class="tag">${d.revival_date<today?'Follow-up overdue':'Follow-up due'}</span> ${day(d.revival_date)}</div>
+</div></div>
+${d.lost_reason?`<div class="sub" style="margin-top:6px">${esc(d.lost_reason)}</div>`:''}
+${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:9px" href="${wa(d.customers.phone)}">Message on WhatsApp</a>`:''}
+</div>`}));
+S.myPromises.forEach(d=>{
+const bal = Number(d.value||0)-Number(d.amount_collected||0);
+items.push({date:d.balance_promised_date, node:`<div class="card" data-deal="${d.id}" style="cursor:pointer">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub"><span class="tag">${d.balance_promised_date<today?'Payment overdue':'Payment due'}</span> ${day(d.balance_promised_date)}</div>
+</div><div class="amt" style="color:#E8899E">${rs(bal)}</div></div>
+${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:9px" href="${wa(d.customers.phone)}">Ask for payment</a>`:''}
+</div>`});
+});
+items.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+
+return `<h2>Today</h2>
+${items.length ? items.map(i=>i.node).join('') : `<div class="empty">Nothing overdue.<br>You're all caught up.</div>`}
+
+<h2>My performance · ${esc(rangeLabel)}</h2>
+<div class="chips">${chips}</div>
+<div class="stats">
+<div class="stat"><div class="v">${perf.leads}</div><div class="l">Leads handled</div></div>
+<div class="stat"><div class="v">${rs(perf.value)}</div><div class="l">Value delivered</div></div>
+<div class="stat"><div class="v">${rs(perf.money)}</div><div class="l">Collected</div></div>
+<div class="stat"><div class="v">${perf.replyN?Math.round(perf.replySum/perf.replyN)+'m':'—'}</div><div class="l">Avg reply time</div></div>
 </div>`;
 }
 
