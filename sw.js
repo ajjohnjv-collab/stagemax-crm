@@ -1,4 +1,4 @@
-const CACHE = 'stagemax-crm-v1';
+const CACHE = 'stagemax-crm-v2';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -18,6 +18,6 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
+    fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
   );
 });
