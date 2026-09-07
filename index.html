@@ -70,6 +70,14 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .three{display:grid;grid-template-columns:1fr 76px 1fr;gap:8px;align-items:end;margin-bottom:8px}
 
+/* dashboard */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.stat .v{font:700 20px Archivo Narrow;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.legend{display:flex;align-items:center;gap:5px}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none}
+
 /* bars */
 .bar{height:7px;border-radius:4px;background:var(--panel-2);overflow:hidden;margin-top:7px}
 .bar i{display:block;height:100%;background:var(--amber)}
@@ -110,8 +118,9 @@ const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;',
 const day = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
 
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30,
-pipelines:[], stages:[], products:[], profiles:[], deals:[], pending:[], movement:[], team:[],
-dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[], err:'' };
+pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
+dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[],
+dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0, err:'' };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -149,13 +158,14 @@ document.getElementById('pw').onkeydown = e => { if(e.key==='Enter') go(); };
 
 /* ── data ── */
 async function loadRefs(){
-const [p,st,pr,pf] = await Promise.all([
+const [p,st,pr,pf,sr] = await Promise.all([
 sb.from('pipelines').select('*').eq('is_active',true).order('sort_order'),
 sb.from('stages').select('*').order('sort_order'),
 sb.from('products').select('*').eq('is_active',true).order('name'),
-sb.from('profiles').select('*').eq('is_active',true)
+sb.from('profiles').select('*').eq('is_active',true),
+sb.from('sources').select('*').eq('is_active',true)
 ]);
-S.pipelines=p.data||[]; S.stages=st.data||[]; S.products=pr.data||[]; S.profiles=pf.data||[];
+S.pipelines=p.data||[]; S.stages=st.data||[]; S.products=pr.data||[]; S.profiles=pf.data||[]; S.sources=sr.data||[];
 }
 
 async function loadTab(){
@@ -175,10 +185,37 @@ if(S.tab==='moving'){
 const { data, error } = await sb.from('product_movement').select('*');
 if(error) throw error; S.movement = data||[];
 }
-if(S.tab==='team'){
+if(S.tab==='dashboard'){
 const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
-const { data, error } = await sb.from('cre_performance_daily').select('*').gte('day', since);
-if(error) throw error; S.team = data||[];
+const trendSince = new Date(Date.now() - 13*86400000).toISOString().slice(0,10);
+const openIds = S.stages.filter(s=>!s.is_lost && !s.is_delivered).map(s=>s.id);
+const [teamR,trendR,srcR,prodR,duesR,pipeR] = await Promise.all([
+sb.from('cre_performance_daily').select('*').gte('day', since),
+sb.from('cre_performance_daily').select('day,value_delivered,money_collected').gte('day', trendSince),
+sb.from('deals').select('source_id').gte('created_at', since),
+sb.from('product_movement').select('*').limit(5),
+sb.from('customer_balance_summary').select('total_balance'),
+sb.from('deals').select('value').in('stage_id', openIds.length?openIds:[-1])
+]);
+if(teamR.error) throw teamR.error; S.team = teamR.data||[];
+if(trendR.error) throw trendR.error;
+const byDay={};
+(trendR.data||[]).forEach(r=>{
+const k=r.day; if(!byDay[k]) byDay[k]={day:k,value:0,money:0};
+byDay[k].value += Number(r.value_delivered||0); byDay[k].money += Number(r.money_collected||0);
+});
+S.dashTrend = Object.values(byDay).sort((a,b)=>a.day.localeCompare(b.day));
+if(srcR.error) throw srcR.error;
+const bySrc={};
+(srcR.data||[]).forEach(r=>{ const k=r.source_id??'none'; bySrc[k]=(bySrc[k]||0)+1; });
+S.dashSources = Object.entries(bySrc).map(([sid,count])=>({
+name: sid==='none' ? 'Unknown' : (S.sources.find(s=>s.id===Number(sid))?.name || 'Unknown'), count
+})).sort((a,b)=>b.count-a.count);
+if(prodR.error) throw prodR.error; S.dashProducts = prodR.data||[];
+if(duesR.error) throw duesR.error;
+S.dashDuesTotal = (duesR.data||[]).reduce((a,b)=>a+Number(b.total_balance||0),0);
+if(pipeR.error) throw pipeR.error;
+S.dashPipelineValue = (pipeR.data||[]).reduce((a,b)=>a+Number(b.value||0),0);
 }
 if(S.tab==='dues'){
 const { data, error } = await sb.from('customer_balance_summary').select('*');
@@ -208,7 +245,7 @@ S.tab==='money' ? viewMoney() :
 S.tab==='dues' ? viewDues() :
 S.tab==='dispatch' ? viewDispatch() :
 S.tab==='moving' ? viewMoving() :
-S.tab==='team' ? viewTeam() : viewNew()
+S.tab==='dashboard' ? viewDashboard() : viewNew()
 );
 wire();
 }
@@ -221,7 +258,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${isOwner()?t('team','Team'):''}${t('new','Add')}</nav>`;
+<nav>${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${isOwner()?t('dashboard','Dashboard'):''}${t('new','Add')}</nav>`;
 }
 
 /* ── deals ── */
@@ -378,9 +415,47 @@ return `<h2>What is moving</h2>` + S.movement.map(m=>`
 </div>`).join('');
 }
 
-/* ── team performance (owner only) ── */
-function viewTeam(){
+/* ── dashboard (owner only) ── */
+function trendChart(data){
+if(!data.length) return '<div class="empty">No activity yet.</div>';
+const w=320, h=104, pad=2, top=6;
+const max = Math.max(1, ...data.map(d=>Math.max(d.value,d.money)));
+const bw = (w-pad*2)/data.length;
+const barW = Math.max(1.5,(bw-3)/2);
+const bars = data.map((d,i)=>{
+const x = pad + i*bw;
+const vh = Math.round((d.value/max)*(h-top));
+const mh = Math.round((d.money/max)*(h-top));
+return `<rect x="${x.toFixed(1)}" y="${h-vh}" width="${barW.toFixed(1)}" height="${vh}" fill="var(--amber)"/>`+
+`<rect x="${(x+barW+1.5).toFixed(1)}" y="${h-mh}" width="${barW.toFixed(1)}" height="${mh}" fill="var(--cyan)"/>`;
+}).join('');
+return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:104px;display:block" preserveAspectRatio="none">${bars}</svg>`;
+}
+
+function donutChart(data){
+const total = data.reduce((a,b)=>a+b.count,0);
+if(!total) return '<div class="empty">No leads in this period.</div>';
+const colors=['var(--amber)','var(--rose)','var(--cyan)','var(--green)','var(--violet)','var(--muted)'];
+const r=40, c=2*Math.PI*r, cx=52, cy=52;
+let offset=0;
+const circles = data.map((d,i)=>{
+const len = (d.count/total)*c;
+const seg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="15" stroke-dasharray="${len.toFixed(1)} ${(c-len).toFixed(1)}" stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+offset += len; return seg;
+}).join('');
+const legend = data.map((d,i)=>`<div class="row" style="gap:7px;margin-top:6px">
+<span class="dot" style="background:${colors[i%colors.length]}"></span>
+<span class="sub grow">${esc(d.name)}</span><span class="sub">${d.count}</span>
+</div>`).join('');
+return `<div class="row" style="align-items:center;gap:16px">
+<svg width="104" height="104" viewBox="0 0 104 104" style="flex:none">${circles}</svg>
+<div class="grow">${legend}</div>
+</div>`;
+}
+
+function viewDashboard(){
 const ranges=[{d:1,l:'Today'},{d:7,l:'7 days'},{d:30,l:'30 days'}];
+const rangeLabel = ranges.find(r=>r.d===S.teamRange)?.l || '';
 const chips = ranges.map(r=>`<button class="chip ${S.teamRange===r.d?'on':''}" data-range="${r.d}">${r.l}<b></b></button>`).join('');
 const byCre = {};
 S.team.forEach(row=>{
@@ -395,7 +470,7 @@ if(reply!=null){ byCre[k].replySum += Number(reply); byCre[k].replyN++; }
 const rows = Object.values(byCre).sort((a,b)=>b.money-a.money);
 const totalMoney = rows.reduce((s,r)=>s+r.money,0);
 const totalValue = rows.reduce((s,r)=>s+r.value,0);
-const cards = rows.length ? rows.map(r=>`<div class="card">
+const teamCards = rows.length ? rows.map(r=>`<div class="card">
 <div class="row"><div class="grow name">${esc(r.name)}</div><div class="amt">${rs(r.money)}</div></div>
 <div class="row" style="margin-top:9px;gap:7px">
 <span class="tag">${r.leads} leads</span>
@@ -403,12 +478,40 @@ const cards = rows.length ? rows.map(r=>`<div class="card">
 ${r.replyN?`<span class="tag">${Math.round(r.replySum/r.replyN)}m reply</span>`:''}
 </div>
 </div>`).join('') : `<div class="empty">No activity in this period.</div>`;
-return `<h2>Team performance</h2><div class="chips">${chips}</div>
-<div class="card">
-<div class="row"><div class="grow sub">Team collected</div><div class="amt">${rs(totalMoney)}</div></div>
-<div class="row" style="margin-top:6px"><div class="grow sub">Team value delivered</div><div class="amt" style="font-size:14px">${rs(totalValue)}</div></div>
+
+const maxRev = Math.max(1, ...S.dashProducts.map(m=>Number(m.revenue||0)));
+const products = S.dashProducts.length ? S.dashProducts.map(m=>`<div class="card">
+<div class="row"><div class="grow">
+<div class="name">${esc(m.product)}</div>
+<div class="sub">${esc(m.brand||'Unassigned')}</div>
+</div><div class="amt" style="font-size:14px">${rs(m.revenue)}</div></div>
+<div class="bar"><i style="width:${Math.round(Number(m.revenue||0)/maxRev*100)}%"></i></div>
+</div>`).join('') : `<div class="empty">No sales recorded yet.</div>`;
+
+return `<h2>Overview</h2><div class="chips">${chips}</div>
+<div class="stats">
+<div class="stat"><div class="v">${rs(S.dashPipelineValue)}</div><div class="l">Open pipeline</div></div>
+<div class="stat"><div class="v" style="color:#E8899E">${rs(S.dashDuesTotal)}</div><div class="l">Outstanding dues</div></div>
+<div class="stat"><div class="v">${rs(totalMoney)}</div><div class="l">Collected · ${esc(rangeLabel)}</div></div>
+<div class="stat"><div class="v">${rs(totalValue)}</div><div class="l">Delivered · ${esc(rangeLabel)}</div></div>
 </div>
-${cards}`;
+
+<h2>Sales &amp; collections · last 14 days</h2>
+<div class="card">${trendChart(S.dashTrend)}
+<div class="row" style="margin-top:10px;gap:16px">
+<div class="legend"><span class="dot" style="background:var(--amber)"></span><span class="sub">Value delivered</span></div>
+<div class="legend"><span class="dot" style="background:var(--cyan)"></span><span class="sub">Collected</span></div>
+</div>
+</div>
+
+<h2>Leads by source · ${esc(rangeLabel)}</h2>
+<div class="card">${donutChart(S.dashSources)}</div>
+
+<h2>Top products · all time</h2>
+${products}
+
+<h2>Team performance · ${esc(rangeLabel)}</h2>
+${teamCards}`;
 }
 
 /* ── dues (owner only) ── */
