@@ -110,7 +110,8 @@ const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;',
 const day = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
 
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30,
-pipelines:[], stages:[], products:[], profiles:[], deals:[], pending:[], movement:[], team:[], err:'' };
+pipelines:[], stages:[], products:[], profiles:[], deals:[], pending:[], movement:[], team:[],
+dues:[], duesOpen:null, duesDeals:[], err:'' };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -179,6 +180,10 @@ const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,
 const { data, error } = await sb.from('cre_performance_daily').select('*').gte('day', since);
 if(error) throw error; S.team = data||[];
 }
+if(S.tab==='dues'){
+const { data, error } = await sb.from('customer_balance_summary').select('*');
+if(error) throw error; S.dues = data||[]; S.duesOpen=null; S.duesDeals=[];
+}
 }catch(e){ S.err = e.message || String(e); }
 render();
 }
@@ -189,6 +194,7 @@ if(S.deal) return renderDeal();
 app.innerHTML = shell(
 S.tab==='pipeline' ? viewPipeline() :
 S.tab==='money' ? viewMoney() :
+S.tab==='dues' ? viewDues() :
 S.tab==='moving' ? viewMoving() :
 S.tab==='team' ? viewTeam() : viewNew()
 );
@@ -203,7 +209,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('pipeline','Deals')}${t('money','Money in')}${t('moving','Moving')}${isOwner()?t('team','Team'):''}${t('new','Add')}</nav>`;
+<nav>${t('pipeline','Deals')}${t('money','Money in')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${isOwner()?t('team','Team'):''}${t('new','Add')}</nav>`;
 }
 
 /* ── deals ── */
@@ -389,6 +395,53 @@ return `<h2>Team performance</h2><div class="chips">${chips}</div>
 ${cards}`;
 }
 
+/* ── dues (owner only) ── */
+function viewDues(){
+if(!S.dues.length) return `<div class="empty">Nothing pending.<br>Every dealer and customer is settled up.</div>`;
+const total = S.dues.reduce((a,b)=>a+Number(b.total_balance||0),0);
+return `<h2>Dues · ${rs(total)}</h2>` + S.dues.map(c=>{
+const open = S.duesOpen===c.customer_id;
+const dealerTag = c.customer_type==='dealer' ? '<span class="tag">Dealer</span>' : '';
+return `<div class="card">
+<div class="row" data-due="${c.customer_id}" style="cursor:pointer">
+<div class="grow">
+<div class="name">${esc(c.customer_name)}</div>
+<div class="sub">${dealerTag}${c.district?' '+esc(c.district):''} · ${c.pending_deals} deal${Number(c.pending_deals)===1?'':'s'} pending</div>
+</div>
+<div style="text-align:right">
+<div class="amt" style="color:#E8899E">${rs(c.total_balance)}</div>
+<div class="sub">${open?'Hide ↑':'View ↓'}</div>
+</div>
+</div>
+${c.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:9px"
+href="https://wa.me/91${esc(String(c.phone).replace(/\D/g,'').slice(-10))}">Ask for payment</a>`:''}
+${open ? `<div style="margin-top:4px">${
+S.duesDeals.length ? S.duesDeals.map(d=>{
+const bal=Number(d.value||0)-Number(d.amount_collected||0);
+return `<div class="item" data-deal="${d.id}" style="cursor:pointer">
+<div class="grow">${esc(d.title||'')}${d.invoice_no?' · '+esc(d.invoice_no):''}
+<span class="sub" style="display:block">${day(d.delivered_at)}</span></div>
+<div class="amt" style="font-size:14px;color:#E8899E">${rs(bal)}</div>
+</div>`;
+}).join('') : '<div class="sub" style="padding:9px 0">Loading…</div>'
+}</div>` : ''}
+</div>`;
+}).join('');
+}
+
+async function toggleDue(cid){
+if(S.duesOpen===cid){ S.duesOpen=null; S.duesDeals=[]; render(); return; }
+S.duesOpen=cid; S.duesDeals=[]; render();
+const { data, error } = await sb.from('deals')
+.select('*, stages(is_delivered)')
+.eq('customer_id', cid);
+if(error){ S.err=error.message; render(); return; }
+S.duesDeals = (data||[])
+.filter(d=>d.stages?.is_delivered && (Number(d.value||0)-Number(d.amount_collected||0))>0)
+.sort((a,b)=> new Date(a.delivered_at||0) - new Date(b.delivered_at||0));
+render();
+}
+
 /* ── new deal ── */
 function viewNew(){
 const pipes=S.pipelines.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
@@ -431,6 +484,7 @@ document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=N
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
 document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
+document.querySelectorAll('[data-due]').forEach(el=>el.onclick=()=>toggleDue(el.dataset.due));
 
 const items=document.getElementById('items');
 if(items){
