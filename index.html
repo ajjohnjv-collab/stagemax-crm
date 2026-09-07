@@ -39,6 +39,16 @@ nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--panel);bo
 nav button{flex:1;padding:11px 4px 13px;font:600 11px Archivo;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;border-top:2px solid transparent}
 nav button.on{color:var(--paper);border-top-color:var(--amber)}
 
+/* side nav on wider screens (desktop / computer use) */
+@media (min-width:860px){
+.hbar{max-width:none;padding-left:224px}
+nav{top:53px;left:0;right:auto;bottom:0;width:200px;flex-direction:column;border-top:none;border-right:1px solid var(--line);padding-bottom:16px}
+nav button{flex:none;text-align:left;padding:13px 20px;border-top:none;border-left:3px solid transparent}
+nav button.on{border-top-color:transparent;border-left-color:var(--amber)}
+.wrap{max-width:900px;margin:0 auto 0 224px;padding:20px 24px 40px}
+.fab{left:216px;right:auto}
+}
+
 /* generic */
 h2{font:700 13px Archivo;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px;margin-bottom:9px}
