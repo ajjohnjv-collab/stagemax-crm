@@ -269,7 +269,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${isOwner()?t('dashboard','Dashboard'):''}${t('new','Add')}</nav>`;
+<nav>${isOwner()?t('dashboard','Dashboard'):''}${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${t('new','Add')}</nav>`;
 }
 
 /* ── deals ── */
