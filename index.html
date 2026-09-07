@@ -140,6 +140,7 @@ const { data:{ session } } = await sb.auth.getSession();
 if(!session) return renderLogin();
 const { data:prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
 S.me = prof || { full_name: session.user.email, role:'cre', id: session.user.id };
+if(isOwner()) S.tab='dashboard';
 await loadRefs();
 await loadTab();
 }
