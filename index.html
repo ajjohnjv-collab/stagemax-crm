@@ -1043,6 +1043,7 @@ loadTab();
 /* ── new deal ── */
 function viewNew(){
 const pipes=S.pipelines.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+const sources=S.sources.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
 const assign = isOwner() ? `<label for="nassign">Assign to</label><select id="nassign">
 ${S.profiles.map(p=>`<option value="${p.id}" ${p.id===S.me.id?'selected':''}>${esc(p.full_name)}</option>`).join('')}
 </select>` : '';
@@ -1056,6 +1057,7 @@ return `<h2>New deal</h2>
 <label for="npipe">Pipeline</label><select id="npipe">${pipes}</select>
 <label for="nstage">Stage</label><select id="nstage"></select>
 <label for="ntitle">What is it for</label><input id="ntitle" placeholder="Tiger 400 + laser enquiry">
+<label for="nsource">Lead source</label><select id="nsource"><option value="">Not specified</option>${sources}</select>
 <label>Items</label><div id="items"></div>
 <button class="btn ghost" id="addrow">Add another item</button>
 <label for="nval">Deal value including GST</label><input id="nval" type="number" inputmode="decimal" placeholder="0">
@@ -1162,6 +1164,7 @@ customer_id:cid,
 title:document.getElementById('ntitle').value.trim()||name,
 value:Number(document.getElementById('nval').value||0),
 amount_collected:0,
+source_id:document.getElementById('nsource').value ? Number(document.getElementById('nsource').value) : null,
 assigned_to:(isOwner() && document.getElementById('nassign')) ? document.getElementById('nassign').value : S.me.id
 }).select('id').single();
 if(de) throw de;
