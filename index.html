@@ -92,6 +92,51 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .bar{height:7px;border-radius:4px;background:var(--panel-2);overflow:hidden;margin-top:7px}
 .bar i{display:block;height:100%;background:var(--amber)}
 
+/* dashboard v2 */
+.dash-hero{display:flex;align-items:center;gap:12px;margin:14px 0 2px}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--amber);color:#1A1206;font:700 15px Archivo Narrow;display:flex;align-items:center;justify-content:center;flex:none}
+.greet{flex:1;min-width:0}
+.greet h1{font:700 19px Archivo Narrow;letter-spacing:.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.greet p{font-size:12px;color:var(--muted);margin-top:1px}
+.iconbtn{position:relative;width:36px;height:36px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none;color:var(--muted)}
+.iconbtn .dot{position:absolute;top:5px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:2px solid var(--ink)}
+.search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:10px 0 2px;color:var(--muted)}
+.search input{background:none;border:none;padding:0;flex:1;font-size:14px;color:var(--paper)}
+.search input:focus{outline:none}
+.search-results{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);margin-top:6px;overflow:hidden}
+.search-results .item{padding:10px 13px;cursor:pointer}
+.search-results .item:hover{background:var(--panel-2)}
+
+.stats4{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+@media (min-width:640px){.stats4{grid-template-columns:repeat(4,1fr)}}
+.stat2{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:9px}
+.stat2 .isq{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+.stat2 .v{font:700 21px Archivo Narrow;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat2 .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+
+.qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:9px}
+@media (min-width:640px){.qa-grid{grid-template-columns:repeat(4,1fr)}}
+.qa{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;font:600 11.5px Archivo;text-align:center;color:var(--paper)}
+.qa .isq{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+
+.cols3{display:grid;gap:12px;grid-template-columns:1fr;margin-bottom:6px}
+@media (min-width:860px){.cols3{grid-template-columns:1fr 1fr 1fr;align-items:start}}
+.plrow{display:flex;align-items:center;gap:8px;padding:7px 0}
+.plrow:not(:last-child){border-bottom:1px solid var(--line)}
+.thead{display:none;padding:0 13px;font:600 10.5px Archivo;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+@media (min-width:700px){.thead{display:flex;gap:12px}}
+.thead span{flex:none}
+.trow{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;margin-bottom:7px}
+.actrow{display:flex;gap:5px;flex:none}
+.iact{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;text-decoration:none}
+.iact.call{background:rgba(110,158,92,.16);color:#9BC489}
+.iact.wa{background:rgba(74,163,184,.16);color:#8FD0E2}
+.iact.done{background:rgba(232,163,61,.16);color:var(--amber)}
+.pav{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (min-width:640px){.pav{grid-template-columns:repeat(4,1fr)}}
+.pav .card{margin-bottom:0}
+.pav .n{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 /* login */
 .login{max-width:340px;margin:16vh auto;padding:0 18px}
 .login .mark{font-size:26px;margin-bottom:6px}
@@ -126,12 +171,34 @@ const app = document.getElementById('app');
 const rs = n => '₹' + Number(n||0).toLocaleString('en-IN');
 const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const day = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
+const waLink = p => p ? `https://wa.me/91${esc(String(p).replace(/\D/g,'').slice(-10))}` : '';
+const telLink = p => p ? `tel:${esc(String(p).replace(/\D/g,''))}` : '';
+const monthStart = () => new Date().toISOString().slice(0,7)+'-01';
 
-let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30,
+const ICONS = {
+call:'<path d="M4 3h3l1.4 3.8L7 8.3a9 9 0 0 0 4.6 4.6l1.5-1.4L17 13v3a1 1 0 0 1-1.1 1A13 13 0 0 1 3 4.1 1 1 0 0 1 4 3Z"/>',
+wa:'<path d="M3 17l1.2-3.5A6.5 6.5 0 1 1 7.5 16L3 17Z"/><path d="M7 8.5c.3 2 2 3.7 4 4"/>',
+pin:'<path d="M10 18s6-5.6 6-10.2A6 6 0 1 0 4 7.8C4 12.4 10 18 10 18Z"/><circle cx="10" cy="7.6" r="2"/>',
+plus:'<path d="M10 4v12M4 10h12"/>',
+list:'<path d="M4 5.5h12M4 10h12M4 14.5h12"/>',
+cart:'<path d="M4 4h2l1.4 9h8L17 7H7"/><circle cx="9" cy="16.3" r="1.2"/><circle cx="15" cy="16.3" r="1.2"/>',
+truck:'<path d="M3 6.5h8v6.5H3zM11 9.5h3l3 3v.5h-6z"/><circle cx="6.3" cy="16" r="1.3"/><circle cx="14.3" cy="16" r="1.3"/>',
+wallet:'<path d="M4 6h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><circle cx="14" cy="11" r="1"/>',
+bell:'<path d="M10 3a4 4 0 0 0-4 4v3l-1.4 2.7h10.8L14 10V7a4 4 0 0 0-4-4z"/><path d="M8.3 15.7a1.7 1.7 0 0 0 3.4 0"/>',
+search:'<circle cx="8.5" cy="8.5" r="5"/><path d="M16 16l-3.6-3.6"/>',
+flame:'<path d="M10 2.3s3.7 3.8 3.7 7.7a3.7 3.7 0 1 1-7.4 0c0-.9.4-1.8.9-2.6.3.9 1 1.3 1.4.9.5-.6 0-1.8-.5-2.7C7.3 3.4 8.6 2.8 10 2.3z"/>',
+check:'<path d="M4 10.3l3.6 3.6L16 5.5"/>',
+doc:'<path d="M6 3h6l3 3v11H6z"/><path d="M12 3v3h3"/>',
+users:'<circle cx="7" cy="7" r="2.4"/><path d="M2.5 16.5c0-2.6 2-4.2 4.5-4.2s4.5 1.6 4.5 4.2"/><circle cx="14.5" cy="7.5" r="2"/><path d="M13 12.6c1.8.2 3.5 1.5 3.5 3.9"/>'
+};
+const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;
+
+let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30, chaseTab:'all', search:'', searchResults:null,
 pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[],
 dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
-myPerf:[], myRevivals:[], myPromises:[], err:'' };
+myPerf:[], myRevivals:[], myPromises:[],
+openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], err:'' };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -178,6 +245,39 @@ sb.from('profiles').select('*').eq('is_active',true),
 sb.from('sources').select('*').eq('is_active',true)
 ]);
 S.pipelines=p.data||[]; S.stages=st.data||[]; S.products=pr.data||[]; S.profiles=pf.data||[]; S.sources=sr.data||[];
+}
+
+async function loadChaseSources(){
+const today = new Date().toISOString().slice(0,10);
+const [revR,promR] = await Promise.all([
+sb.from('deals').select('*, customers(name,phone,district), stages(name,is_lost)')
+.not('revival_date','is',null).lte('revival_date', today).order('revival_date',{ascending:true}),
+sb.from('deals').select('*, customers(name,phone,district), stages(name,is_delivered)')
+.not('balance_promised_date','is',null).lte('balance_promised_date', today).order('balance_promised_date',{ascending:true})
+]);
+if(revR.error) throw revR.error; S.myRevivals = (revR.data||[]).filter(d=>d.stages?.is_lost);
+if(promR.error) throw promR.error;
+S.myPromises = (promR.data||[]).filter(d=>(Number(d.value||0)-Number(d.amount_collected||0))>0);
+}
+
+async function loadDashboardShared(){
+const today = new Date().toISOString().slice(0,10);
+const mStart = monthStart();
+const [openR,fuR,actR,mpR,weR] = await Promise.all([
+sb.from('deals').select('*, customers(name,phone,district), stages(name,is_won,is_lost,is_delivered,pipeline_id,sort_order), pipelines(name,sort_order)')
+.order('created_at',{ascending:false}).limit(300),
+sb.from('follow_ups').select('*, deals(title, customers(name,phone))').eq('done',false).lte('due_date', today).order('due_date',{ascending:true}),
+sb.from('activity_log').select('*, deals(title, customers(name))').order('created_at',{ascending:false}).limit(10),
+sb.from('cre_performance_daily').select('*').gte('day', mStart),
+sb.from('stage_events').select('deal_id,to_stage_id,changed_at').gte('changed_at', mStart)
+]);
+if(openR.error) throw openR.error; S.openDeals = openR.data||[];
+if(fuR.error) throw fuR.error; S.followUps = fuR.data||[];
+if(actR.error) throw actR.error; S.activity = actR.data||[];
+if(mpR.error) throw mpR.error; S.monthPerf = mpR.data||[];
+if(weR.error) throw weR.error;
+const wonStageIds = new Set(S.stages.filter(s=>s.is_won).map(s=>s.id));
+S.monthWonIds = [...new Set((weR.data||[]).filter(r=>wonStageIds.has(r.to_stage_id)).map(r=>r.deal_id))];
 }
 
 async function loadTab(){
@@ -228,21 +328,15 @@ if(duesR.error) throw duesR.error;
 S.dashDuesTotal = (duesR.data||[]).reduce((a,b)=>a+Number(b.total_balance||0),0);
 if(pipeR.error) throw pipeR.error;
 S.dashPipelineValue = (pipeR.data||[]).reduce((a,b)=>a+Number(b.value||0),0);
+await loadChaseSources();
+await loadDashboardShared();
 }
 if(S.tab==='mydash'){
 const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
-const today = new Date().toISOString().slice(0,10);
-const [perfR,revR,promR] = await Promise.all([
-sb.from('cre_performance_daily').select('*').gte('day', since),
-sb.from('deals').select('*, customers(name,phone,district), stages(name,is_lost)')
-.not('revival_date','is',null).lte('revival_date', today).order('revival_date',{ascending:true}),
-sb.from('deals').select('*, customers(name,phone,district), stages(name,is_delivered)')
-.not('balance_promised_date','is',null).lte('balance_promised_date', today).order('balance_promised_date',{ascending:true})
-]);
-if(perfR.error) throw perfR.error; S.myPerf = perfR.data||[];
-if(revR.error) throw revR.error; S.myRevivals = (revR.data||[]).filter(d=>d.stages?.is_lost);
-if(promR.error) throw promR.error;
-S.myPromises = (promR.data||[]).filter(d=>(Number(d.value||0)-Number(d.amount_collected||0))>0);
+const { data:perfData, error:perfErr } = await sb.from('cre_performance_daily').select('*').gte('day', since);
+if(perfErr) throw perfErr; S.myPerf = perfData||[];
+await loadChaseSources();
+await loadDashboardShared();
 }
 if(S.tab==='dues'){
 const { data, error } = await sb.from('customer_balance_summary').select('*');
@@ -329,11 +423,16 @@ return `<div class="chips">${pipes}</div><div class="chips">${chips}</div>${card
 
 /* ── deal detail ── */
 async function openDeal(id){
-const [{data:d},{data:items}] = await Promise.all([
+const [{data:d},{data:items},{data:fups}] = await Promise.all([
 sb.from('deals').select('*, customers(*), stages(*), pipelines(name)').eq('id',id).single(),
-sb.from('deal_items').select('*, products(name,model_code)').eq('deal_id',id).order('sort_order')
+sb.from('deal_items').select('*, products(name,model_code)').eq('deal_id',id).order('sort_order'),
+sb.from('follow_ups').select('*').eq('deal_id',id).order('due_date')
 ]);
-S.deal = { ...d, items: items||[] }; render();
+S.deal = { ...d, items: items||[] }; S.dealFollowUps = fups||[]; render();
+}
+
+async function logActivity(verb, dealId, detail){
+try{ await sb.from('activity_log').insert({actor_id:S.me.id, deal_id:dealId||null, verb, detail:detail||null}); }catch(e){}
 }
 
 function renderDeal(){
@@ -348,6 +447,7 @@ app.innerHTML = shell(`
 </div><div class="amt" style="font-size:20px">${rs(d.value)}</div></div>
 ${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none"
 href="https://wa.me/91${esc(String(d.customers.phone).replace(/\D/g,'').slice(-10))}">Message on WhatsApp</a>`:''}
+<button class="btn ${d.is_hot?'':'ghost'}" id="hottoggle" style="display:flex;align-items:center;justify-content:center;gap:7px">${ic('flame')}${d.is_hot?'Hot lead — tap to remove':'Mark as hot lead'}</button>
 </div>
 
 <h2>Items</h2>
@@ -379,14 +479,25 @@ ${isOwner() ? `<h2>Assigned to</h2>
 <div class="card">
 <select id="assignsel">${S.profiles.map(p=>`<option value="${p.id}" ${p.id===d.assigned_to?'selected':''}>${esc(p.full_name)}</option>`).join('')}</select>
 <button class="btn ghost" id="saveassign">Reassign</button>
-</div>` : ''}`);
+</div>` : ''}
+
+<h2>Follow-up</h2>
+<div class="card">
+<label for="fdate">Date</label><input id="fdate" type="date" value="${new Date().toISOString().slice(0,10)}">
+<label for="ftype">How</label><select id="ftype"><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="visit">Visit</option></select>
+<label for="fnote">Note (optional)</label><input id="fnote" placeholder="What to follow up about">
+<button class="btn ghost" id="savefollow">Add follow-up</button>
+${S.dealFollowUps.length ? '<div style="margin-top:12px">'+S.dealFollowUps.map(f=>`<div class="item"><div class="grow">${esc(f.contact_type)} · ${day(f.due_date)}${f.note?' — '+esc(f.note):''}${f.done?' <span class="tag paid">Done</span>':''}</div></div>`).join('')+'</div>' : ''}
+</div>`);
 wire();
 
 document.getElementById('back').onclick = ()=>{ S.deal=null; loadTab(); };
 document.getElementById('savecol').onclick = async e=>{
 e.target.disabled=true;
 const v=Number(document.getElementById('col').value||0);
+const prev=Number(d.amount_collected||0);
 await sb.from('deals').update({amount_collected:v}).eq('id',d.id);
+if(v>prev) await logActivity('payment_received', d.id, rs(v-prev)+' from '+(d.customers?.name||'customer'));
 openDeal(d.id);
 };
 document.getElementById('savestg').onclick = async e=>{
@@ -398,12 +509,33 @@ if(target?.is_delivered && !d.delivered_at) upd.delivered_at=new Date().toISOStr
 if(!target?.is_delivered && d.delivered_at) upd.delivered_at=null;
 await sb.from('deals').update(upd).eq('id',d.id);
 await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:to,changed_by:S.me.id});
+const verb = target?.name==='Quoted' ? 'quotation_sent' : 'stage_moved';
+await logActivity(verb, d.id, (d.customers?.name?d.customers.name+' → ':'')+(target?.name||''));
 openDeal(d.id);
 };
 const sa=document.getElementById('saveassign');
 if(sa) sa.onclick = async e=>{
 e.target.disabled=true;
-await sb.from('deals').update({assigned_to:document.getElementById('assignsel').value}).eq('id',d.id);
+const newId=document.getElementById('assignsel').value;
+await sb.from('deals').update({assigned_to:newId}).eq('id',d.id);
+const p=S.profiles.find(x=>x.id===newId);
+await logActivity('lead_assigned', d.id, (d.customers?.name?d.customers.name+' → ':'')+(p?.full_name||''));
+openDeal(d.id);
+};
+const hb=document.getElementById('hottoggle');
+if(hb) hb.onclick = async ()=>{
+hb.disabled=true;
+await sb.from('deals').update({is_hot:!d.is_hot}).eq('id',d.id);
+openDeal(d.id);
+};
+const sf=document.getElementById('savefollow');
+if(sf) sf.onclick = async e=>{
+e.target.disabled=true;
+const due=document.getElementById('fdate').value;
+const type=document.getElementById('ftype').value;
+const note=document.getElementById('fnote').value.trim();
+if(!due){ e.target.disabled=false; return; }
+await sb.from('follow_ups').insert({deal_id:d.id, assigned_to:d.assigned_to||S.me.id, due_date:due, contact_type:type, note:note||null});
 openDeal(d.id);
 };
 }
@@ -481,55 +613,267 @@ return `<div class="row" style="align-items:center;gap:16px">
 </div>`;
 }
 
-/* ── my dashboard (cre) ── */
-function viewMyDashboard(){
-const ranges=[{d:1,l:'Today'},{d:7,l:'7 days'},{d:30,l:'30 days'}];
-const rangeLabel = ranges.find(r=>r.d===S.teamRange)?.l || '';
-const chips = ranges.map(r=>`<button class="chip ${S.teamRange===r.d?'on':''}" data-range="${r.d}">${r.l}<b></b></button>`).join('');
-
-const perf = S.myPerf.reduce((a,r)=>{
-a.leads += Number(r.leads_handled||0);
-a.value += Number(r.value_delivered||0);
-a.money += Number(r.money_collected||0);
-const reply = r.avg_reply_minutes ?? r.avg_reply_min;
-if(reply!=null){ a.replySum += Number(reply); a.replyN++; }
-return a;
-}, {leads:0,value:0,money:0,replySum:0,replyN:0});
-
-const today = new Date().toISOString().slice(0,10);
-const wa = p => p ? `https://wa.me/91${esc(String(p).replace(/\D/g,'').slice(-10))}` : '';
+/* ── dashboard v2 shared helpers ── */
+function chaseList(){
 const items = [];
-S.myRevivals.forEach(d=>items.push({date:d.revival_date, node:`<div class="card" data-deal="${d.id}" style="cursor:pointer">
-<div class="row"><div class="grow">
-<div class="name">${esc(d.customers?.name||'No customer')}</div>
-<div class="sub"><span class="tag">${d.revival_date<today?'Follow-up overdue':'Follow-up due'}</span> ${day(d.revival_date)}</div>
-</div></div>
-${d.lost_reason?`<div class="sub" style="margin-top:6px">${esc(d.lost_reason)}</div>`:''}
-${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:9px" href="${wa(d.customers.phone)}">Message on WhatsApp</a>`:''}
-</div>`}));
+S.followUps.forEach(f=>items.push({
+type:f.contact_type, date:f.due_date, dealId:f.deal_id,
+name:f.deals?.customers?.name||'No customer', phone:f.deals?.customers?.phone,
+detail:f.note || f.deals?.title || 'Scheduled follow-up', isFu:true, fuId:f.id
+}));
+S.myRevivals.forEach(d=>items.push({
+type:'call', date:d.revival_date, dealId:d.id,
+name:d.customers?.name||'No customer', phone:d.customers?.phone,
+detail:d.lost_reason||'Follow up on lost lead'
+}));
 S.myPromises.forEach(d=>{
-const bal = Number(d.value||0)-Number(d.amount_collected||0);
-items.push({date:d.balance_promised_date, node:`<div class="card" data-deal="${d.id}" style="cursor:pointer">
-<div class="row"><div class="grow">
-<div class="name">${esc(d.customers?.name||'No customer')}</div>
-<div class="sub"><span class="tag">${d.balance_promised_date<today?'Payment overdue':'Payment due'}</span> ${day(d.balance_promised_date)}</div>
-</div><div class="amt" style="color:#E8899E">${rs(bal)}</div></div>
-${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:9px" href="${wa(d.customers.phone)}">Ask for payment</a>`:''}
-</div>`});
+const bal=Number(d.value||0)-Number(d.amount_collected||0);
+items.push({type:'whatsapp', date:d.balance_promised_date, dealId:d.id,
+name:d.customers?.name||'No customer', phone:d.customers?.phone,
+detail:`Payment promised · ${rs(bal)}`});
 });
 items.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+return items;
+}
 
-return `<h2>Today</h2>
-${items.length ? items.map(i=>i.node).join('') : `<div class="empty">Nothing overdue.<br>You're all caught up.</div>`}
+function pipelineBreakdown(rows){
+const by={};
+rows.forEach(d=>{
+const st=d.stages; if(!st) return;
+const k=d.pipeline_id+'-'+d.stage_id;
+if(!by[k]) by[k]={pName:d.pipelines?.name||'', stage:st.name, sort:(d.pipelines?.sort_order||0)*100+(st.sort_order||0), isLost:st.is_lost, isWon:st.is_won, isDelivered:st.is_delivered, count:0};
+by[k].count++;
+});
+return Object.values(by).sort((a,b)=>a.sort-b.sort);
+}
+function stageColor(row){
+if(row.isLost) return 'var(--rose)';
+if(row.isDelivered) return 'var(--green)';
+if(row.isWon) return 'var(--amber)';
+return 'var(--cyan)';
+}
 
-<h2>My performance · ${esc(rangeLabel)}</h2>
-<div class="chips">${chips}</div>
-<div class="stats">
-<div class="stat"><div class="v">${perf.leads}</div><div class="l">Leads handled</div></div>
-<div class="stat"><div class="v">${rs(perf.value)}</div><div class="l">Value delivered</div></div>
-<div class="stat"><div class="v">${rs(perf.money)}</div><div class="l">Collected</div></div>
-<div class="stat"><div class="v">${perf.replyN?Math.round(perf.replySum/perf.replyN)+'m':'—'}</div><div class="l">Avg reply time</div></div>
+function sumMonthPerf(){
+return S.monthPerf.reduce((a,r)=>{ a.value+=Number(r.value_delivered||0); a.money+=Number(r.money_collected||0); return a; }, {value:0,money:0});
+}
+
+function statRow(){
+const chase = chaseList();
+const callsDue = chase.filter(i=>i.type==='call').length;
+const hot = S.openDeals.filter(d=>d.is_hot && !d.stages?.is_lost && !d.stages?.is_delivered).length;
+const quoted = S.openDeals.filter(d=>d.stages?.name==='Quoted').length;
+const inProcess = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_delivered).length;
+return `<div class="stats4">
+<div class="stat2"><div class="isq" style="background:rgba(110,158,92,.16);color:#9BC489">${ic('call')}</div><div class="v">${callsDue}</div><div class="l">Calls due today</div></div>
+<div class="stat2"><div class="isq" style="background:rgba(194,80,107,.16);color:#E8899E">${ic('flame')}</div><div class="v">${hot}</div><div class="l">Hot leads</div></div>
+<div class="stat2"><div class="isq" style="background:rgba(74,163,184,.16);color:#8FD0E2">${ic('doc')}</div><div class="v">${quoted}</div><div class="l">Quotations waiting</div></div>
+<div class="stat2"><div class="isq" style="background:rgba(138,107,168,.18);color:#C4A9DE">${ic('truck')}</div><div class="v">${inProcess}</div><div class="l">Orders in process</div></div>
 </div>`;
+}
+
+function followupsTable(){
+const all = chaseList();
+const tabs=[['all','All'],['call','Calls'],['whatsapp','WhatsApp'],['visit','Visit']];
+const counts = {all:all.length,call:0,whatsapp:0,visit:0};
+all.forEach(i=>{ counts[i.type]=(counts[i.type]||0)+1; });
+const tabRow = tabs.map(([k,l])=>`<button class="chip ${S.chaseTab===k?'on':''}" data-chase="${k}">${l}<b>${counts[k]||0}</b></button>`).join('');
+const shown = S.chaseTab==='all' ? all : all.filter(i=>i.type===S.chaseTab);
+const today = new Date().toISOString().slice(0,10);
+const rows = shown.length ? shown.map(i=>`
+<div class="trow" data-deal="${i.dealId}" style="cursor:pointer">
+<div class="row">
+<div class="isq" style="width:30px;height:30px;border-radius:8px;background:rgba(232,163,61,.14);color:var(--amber);display:flex;align-items:center;justify-content:center;flex:none;margin-right:9px">${ic(i.type==='call'?'call':i.type==='whatsapp'?'wa':'pin')}</div>
+<div class="grow">
+<div class="name">${esc(i.name)}</div>
+<div class="sub">${esc(i.detail)}</div>
+</div>
+<div style="text-align:right">
+<span class="tag ${i.date<today?'due':''}">${i.date<today?'Overdue':'Due today'}</span>
+<div class="sub" style="margin-top:4px">${day(i.date)}</div>
+</div>
+</div>
+<div class="row" style="margin-top:9px;gap:6px">
+${i.phone?`<a class="iact call" href="${telLink(i.phone)}" title="Call">${ic('call')}</a>`:''}
+${i.phone?`<a class="iact wa" href="${waLink(i.phone)}" title="WhatsApp" target="_blank" rel="noopener">${ic('wa')}</a>`:''}
+${i.isFu?`<button class="iact done" data-donefu="${i.fuId}" title="Mark done">${ic('check')}</button>`:''}
+</div>
+</div>`).join('') : `<div class="empty">Nothing due.<br>You're all caught up.</div>`;
+return `<div class="chips">${tabRow}</div>${rows}`;
+}
+
+function salesColumn(title){
+const sums = sumMonthPerf();
+const quoted = S.openDeals.filter(d=>d.stages?.name==='Quoted').length;
+return `<div class="card"><h2 style="margin-top:0">${esc(title)}</h2>
+<div class="stats">
+<div class="stat"><div class="v">${rs(sums.value)}</div><div class="l">Sales value</div></div>
+<div class="stat"><div class="v">${S.monthWonIds.length}</div><div class="l">Deals won</div></div>
+<div class="stat"><div class="v">${rs(sums.money)}</div><div class="l">Amount collected</div></div>
+<div class="stat"><div class="v">${quoted}</div><div class="l">Active quotations</div></div>
+</div></div>`;
+}
+
+function pipelineColumn(title){
+const rows = pipelineBreakdown(S.openDeals);
+const body = rows.length ? rows.map(r=>`
+<div class="plrow">
+<span class="dot" style="background:${stageColor(r)}"></span>
+<span class="grow sub" style="color:var(--paper)">${esc(r.pName)} · ${esc(r.stage)}</span>
+<span class="amt" style="font-size:14px">${r.count}</span>
+</div>`).join('') : `<div class="empty">No deals yet.</div>`;
+return `<div class="card"><h2 style="margin-top:0">${esc(title)}</h2>${body}</div>`;
+}
+
+function activeDealsColumn(title, showAssignee){
+const rows = S.openDeals.filter(d=>!d.stages?.is_lost && !d.stages?.is_delivered).slice(0,8);
+const body = rows.length ? rows.map(d=>{
+const assignee = showAssignee ? (S.profiles.find(p=>p.id===d.assigned_to)?.full_name || '—') : '';
+return `<div class="trow" data-deal="${d.id}" style="cursor:pointer">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.title||'')}${assignee?' · '+esc(assignee):''}</div>
+</div><div style="text-align:right">
+<div class="amt" style="font-size:14px">${rs(d.value)}</div>
+<span class="tag" style="margin-top:3px;display:inline-block">${esc(d.stages?.name||'')}</span>
+</div></div>
+${d.is_hot?`<span class="tag due" style="margin-top:7px;display:inline-block">Hot lead</span>`:''}
+</div>`;
+}).join('') : `<div class="empty">Nothing active right now.</div>`;
+return `<div class="card"><h2 style="margin-top:0">${esc(title)}</h2>${body}</div>`;
+}
+
+function quickActions(){
+return `<div class="qa-grid">
+<button class="qa" data-tab="new"><span class="isq" style="background:rgba(232,163,61,.18);color:var(--amber)">${ic('plus')}</span>Add Lead</button>
+<button class="qa" data-tab="pipeline"><span class="isq" style="background:rgba(74,163,184,.16);color:#8FD0E2">${ic('list')}</span>My Deals</button>
+<button class="qa" data-tab="money"><span class="isq" style="background:rgba(110,158,92,.16);color:#9BC489">${ic('wallet')}</span>Money In</button>
+<button class="qa" data-tab="dispatch"><span class="isq" style="background:rgba(138,107,168,.18);color:#C4A9DE">${ic('truck')}</span>Dispatch</button>
+</div>`;
+}
+
+const VERB_LABEL = {
+lead_created:'New lead added', lead_assigned:'Lead reassigned', stage_moved:'Stage updated',
+quotation_sent:'Quotation sent', payment_received:'Payment received', dispatched:'Order dispatched',
+followup_completed:'Follow-up completed', hot_marked:'Marked as hot lead'
+};
+function timeAgo(ts){
+const s = Math.max(1, Math.round((Date.now()-new Date(ts).getTime())/1000));
+if(s<60) return s+'s ago';
+const m=Math.round(s/60); if(m<60) return m+'m ago';
+const h=Math.round(m/60); if(h<24) return h+'h ago';
+const d=Math.round(h/24); return d+'d ago';
+}
+function recentUpdates(){
+if(!S.activity.length) return `<div class="card"><h2 style="margin-top:0">Recent updates</h2><div class="empty">Nothing logged yet.</div></div>`;
+const rows = S.activity.map(a=>{
+const who = S.profiles.find(p=>p.id===a.actor_id)?.full_name || '';
+const label = VERB_LABEL[a.verb] || a.verb;
+const name = a.deals?.customers?.name || a.detail || '';
+const whoTxt = isOwner() && who ? who+' · ' : '';
+return `<div class="item" ${a.deal_id?`data-deal="${a.deal_id}" style="cursor:pointer"`:''}>
+<div class="grow">${esc(label)}${name?' — '+esc(name):''}<span class="sub" style="display:block">${esc(whoTxt)}${timeAgo(a.created_at)}</span></div>
+</div>`;
+}).join('');
+return `<div class="card"><h2 style="margin-top:0">Recent updates</h2>${rows}</div>`;
+}
+
+function productAvailability(){
+const cats = {};
+S.products.forEach(p=>{
+const k=p.category||'Other';
+if(!cats[k]) cats[k]={name:k,total:0,inStock:0};
+cats[k].total++; if(p.in_stock) cats[k].inStock++;
+});
+const list = Object.values(cats).sort((a,b)=>b.total-a.total).slice(0,8);
+if(!list.length) return '';
+const body = list.map(c=>`<div class="card">
+<div class="n">${esc(c.name)}</div>
+<div class="sub" style="margin-top:3px">${c.total} product${c.total===1?'':'s'}</div>
+<span class="tag ${c.inStock?'paid':'due'}" style="margin-top:7px;display:inline-block">${c.inStock} in stock</span>
+</div>`).join('');
+return `<h2>Product availability</h2><div class="pav">${body}</div>`;
+}
+
+function targetsCard(){
+const t1 = Number(S.me?.monthly_sales_target||0), t2=Number(S.me?.monthly_collection_target||0);
+if(!t1 && !t2) return '';
+const sums = sumMonthPerf();
+const pct1 = t1>0 ? Math.min(100,Math.round(sums.value/t1*100)) : 0;
+const pct2 = t2>0 ? Math.min(100,Math.round(sums.money/t2*100)) : 0;
+return `<div class="card"><h2 style="margin-top:0">My targets · this month</h2>
+${t1?`<div style="margin-bottom:14px">
+<div class="row"><span class="sub grow">Sales</span><span class="sub">${rs(sums.value)} / ${rs(t1)}</span></div>
+<div class="bar"><i style="width:${pct1}%"></i></div>
+</div>`:''}
+${t2?`<div>
+<div class="row"><span class="sub grow">Collections</span><span class="sub">${rs(sums.money)} / ${rs(t2)}</span></div>
+<div class="bar"><i style="width:${pct2}%;background:var(--cyan)"></i></div>
+</div>`:''}
+</div>`;
+}
+
+function teamTargets(){
+const crew = S.profiles.filter(p=>p.role==='cre' && p.is_active);
+if(!crew.length) return '';
+const byCre={};
+S.monthPerf.forEach(r=>{ const k=r.cre_id; if(!k) return; if(!byCre[k]) byCre[k]={value:0,money:0}; byCre[k].value+=Number(r.value_delivered||0); byCre[k].money+=Number(r.money_collected||0); });
+const rows = crew.map(p=>{
+const sums = byCre[p.id]||{value:0,money:0};
+const t1=Number(p.monthly_sales_target||0);
+const pct = t1>0 ? Math.min(100,Math.round(sums.value/t1*100)) : 0;
+return `<div style="margin-bottom:14px">
+<div class="row"><span class="grow name">${esc(p.full_name)}</span><span class="sub">${rs(sums.value)}${t1?' / '+rs(t1):''}</span></div>
+<div class="bar"><i style="width:${pct}%"></i></div>
+<div class="row" style="margin-top:7px;gap:6px">
+<input data-targetinput="${p.id}" type="number" inputmode="decimal" placeholder="Set monthly sales target" value="${t1||''}" style="flex:1">
+<button class="btn ghost" style="margin-top:0;width:auto;padding:9px 14px" data-savetarget="${p.id}">Save</button>
+</div>
+</div>`;
+}).join('');
+return `<div class="card"><h2 style="margin-top:0">Team targets · this month</h2>${rows}</div>`;
+}
+
+function searchResultsBlock(){
+const r=S.searchResults;
+if(!r) return '';
+const total=(r.deals?.length||0)+(r.customers?.length||0)+(r.products?.length||0);
+if(!total) return `<div class="search-results"><div class="item sub">No matches for "${esc(S.search)}".</div></div>`;
+const dealRows=(r.deals||[]).map(d=>`<div class="item" data-deal="${d.id}">${esc(d.customers?.name||'No customer')} — ${esc(d.title||'')} <span class="sub">${rs(d.value)}</span></div>`).join('');
+const custRows=(r.customers||[]).map(c=>`<div class="item">${esc(c.name)} <span class="sub">${esc(c.phone||'')}${c.district?' · '+esc(c.district):''}</span></div>`).join('');
+const prodRows=(r.products||[]).map(p=>`<div class="item">${esc(p.name)} <span class="sub">${esc(p.category||'')}${p.model_code?' · '+esc(p.model_code):''}</span></div>`).join('');
+return `<div class="search-results">${dealRows}${custRows}${prodRows}</div>`;
+}
+
+function dashHero(){
+const name = S.me?.full_name || '';
+const initials = name.split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase() || '?';
+const hr = new Date().getHours();
+const greeting = hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+const dueCount = chaseList().length;
+return `<div class="dash-hero">
+<div class="avatar">${esc(initials)}</div>
+<div class="greet"><h1>${greeting}, ${esc(name.split(' ')[0]||name)}!</h1><p>${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</p></div>
+<div class="iconbtn" id="bellbtn" title="${dueCount} due today">${ic('bell')}${dueCount?'<span class="dot"></span>':''}</div>
+</div>
+<div class="search"><span class="ic">${ic('search')}</span><input id="gsearch" placeholder="Search customers, products, deals…" value="${esc(S.search)}"></div>
+${S.searchResults ? searchResultsBlock() : ''}`;
+}
+
+/* ── my dashboard (cre) ── */
+function viewMyDashboard(){
+return `${dashHero()}
+${statRow()}
+${quickActions()}
+<h2 id="followups-anchor">Today's follow-ups</h2>
+${followupsTable()}
+<div class="cols3">
+${salesColumn('My sales · this month')}
+${pipelineColumn('My pipeline')}
+${activeDealsColumn('My active deals', false)}
+</div>
+${targetsCard()}
+${recentUpdates()}
+${productAvailability()}`;
 }
 
 function viewDashboard(){
@@ -547,8 +891,6 @@ const reply = row.avg_reply_minutes ?? row.avg_reply_min;
 if(reply!=null){ byCre[k].replySum += Number(reply); byCre[k].replyN++; }
 });
 const rows = Object.values(byCre).sort((a,b)=>b.money-a.money);
-const totalMoney = rows.reduce((s,r)=>s+r.money,0);
-const totalValue = rows.reduce((s,r)=>s+r.value,0);
 const teamCards = rows.length ? rows.map(r=>`<div class="card">
 <div class="row"><div class="grow name">${esc(r.name)}</div><div class="amt">${rs(r.money)}</div></div>
 <div class="row" style="margin-top:9px;gap:7px">
@@ -567,15 +909,28 @@ const products = S.dashProducts.length ? S.dashProducts.map(m=>`<div class="card
 <div class="bar"><i style="width:${Math.round(Number(m.revenue||0)/maxRev*100)}%"></i></div>
 </div>`).join('') : `<div class="empty">No sales recorded yet.</div>`;
 
-return `<h2>Overview</h2><div class="chips">${chips}</div>
+return `${dashHero()}
+${statRow()}
+${quickActions()}
+<h2 id="followups-anchor">Today's follow-ups · whole team</h2>
+${followupsTable()}
+<div class="cols3">
+${salesColumn('Team sales · this month')}
+${pipelineColumn('Team pipeline')}
+${activeDealsColumn('Active deals', true)}
+</div>
+${teamTargets()}
+${recentUpdates()}
+${productAvailability()}
+
+<h2>Outstanding &amp; open pipeline</h2>
 <div class="stats">
-<div class="stat"><div class="v">${rs(S.dashPipelineValue)}</div><div class="l">Open pipeline</div></div>
+<div class="stat"><div class="v">${rs(S.dashPipelineValue)}</div><div class="l">Open pipeline value</div></div>
 <div class="stat"><div class="v" style="color:#E8899E">${rs(S.dashDuesTotal)}</div><div class="l">Outstanding dues</div></div>
-<div class="stat"><div class="v">${rs(totalMoney)}</div><div class="l">Collected · ${esc(rangeLabel)}</div></div>
-<div class="stat"><div class="v">${rs(totalValue)}</div><div class="l">Delivered · ${esc(rangeLabel)}</div></div>
 </div>
 
 <h2>Sales &amp; collections · last 14 days</h2>
+<div class="chips">${chips}</div>
 <div class="card">${trendChart(S.dashTrend)}
 <div class="row" style="margin-top:10px;gap:16px">
 <div class="legend"><span class="dot" style="background:var(--amber)"></span><span class="sub">Value delivered</span></div>
@@ -680,6 +1035,7 @@ const upd={ courier_name:courier||null, awb_number:awb||null, dispatch_date:new 
 if(target){ upd.stage_id=target.id; upd.delivered_at=new Date().toISOString(); }
 await sb.from('deals').update(upd).eq('id',id);
 if(target) await sb.from('stage_events').insert({deal_id:id,from_stage_id:deal.stage_id,to_stage_id:target.id,changed_by:S.me.id});
+await logActivity('dispatched', id, [courier,awb].filter(Boolean).join(' · ') || (deal.customers?.name||''));
 loadTab();
 }catch(err){ S.err=err.message||String(err); render(); }
 }
@@ -717,6 +1073,36 @@ d.innerHTML=`<select class="p"><option value="">Select item</option>${opts}</sel
 return d;
 }
 
+async function markFollowupDone(id){
+const f = S.followUps.find(x=>x.id===id);
+await sb.from('follow_ups').update({done:true, done_at:new Date().toISOString()}).eq('id',id);
+if(f) await logActivity('followup_completed', f.deal_id, f.deals?.customers?.name || '');
+loadTab();
+}
+
+async function saveTarget(id,btn){
+btn.disabled=true;
+const input=document.querySelector(`[data-targetinput="${id}"]`);
+const v=Number(input.value||0);
+await sb.from('profiles').update({monthly_sales_target:v}).eq('id',id);
+const p=S.profiles.find(x=>x.id===id); if(p) p.monthly_sales_target=v;
+loadTab();
+}
+
+async function runSearch(q){
+q=q.trim();
+if(!q){ S.search=''; S.searchResults=null; render(); return; }
+S.search=q;
+const like=`%${q}%`;
+const [dR,cR,pR] = await Promise.all([
+sb.from('deals').select('id,title,value,customers(name,phone)').ilike('title', like).limit(5),
+sb.from('customers').select('id,name,phone,district').ilike('name', like).limit(5),
+sb.from('products').select('id,name,model_code,category').ilike('name', like).limit(5)
+]);
+S.searchResults = { deals:dR.data||[], customers:cR.data||[], products:pR.data||[] };
+render();
+}
+
 /* ── wiring ── */
 function wire(){
 const out=document.getElementById('out'); if(out) out.onclick=async()=>{ await sb.auth.signOut(); S={...S,me:null,deal:null}; renderLogin(); };
@@ -728,6 +1114,13 @@ document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dat
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
 document.querySelectorAll('[data-due]').forEach(el=>el.onclick=()=>toggleDue(el.dataset.due));
 document.querySelectorAll('[data-dispatch]').forEach(b=>b.onclick=()=>markDispatched(b.dataset.dispatch,b));
+document.querySelectorAll('.qa[data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; loadTab(); });
+document.querySelectorAll('[data-chase]').forEach(b=>b.onclick=()=>{ S.chaseTab=b.dataset.chase; render(); });
+document.querySelectorAll('[data-donefu]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); markFollowupDone(b.dataset.donefu); });
+document.querySelectorAll('[data-savetarget]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); saveTarget(b.dataset.savetarget,b); });
+const bell=document.getElementById('bellbtn'); if(bell) bell.onclick=()=>{ document.getElementById('followups-anchor')?.scrollIntoView({behavior:'smooth'}); };
+const gs=document.getElementById('gsearch');
+if(gs){ gs.onkeydown=e=>{ if(e.key==='Enter') runSearch(gs.value); }; }
 
 const items=document.getElementById('items');
 if(items){
@@ -781,6 +1174,7 @@ rate:Number(r.querySelector('.r').value||0),
 sort_order:i+1
 })).filter(r=>r.product_id);
 if(rows.length) await sb.from('deal_items').insert(rows);
+await logActivity('lead_created', deal.id, name);
 
 S.tab='pipeline'; S.pipeline=Number(document.getElementById('npipe').value); loadTab();
 }catch(err){
