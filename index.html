@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="StageMax">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
 --ink:#12100E; --panel:#1B1815; --panel-2:#241F1B; --line:#332C26;
@@ -148,79 +148,139 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .item:last-child{border-bottom:none}
 .qty{color:var(--muted);font-size:13px;white-space:nowrap}
 
-/* ── CRE dashboard v3 (STAGEMAX reference redesign) ── */
+/* ── CRE dashboard v4 (STAGEMAX approved reference — prominent icons, premium KPIs) ── */
 :root{
---cd-bg:#0E1013; --cd-side:#14161C; --cd-surface:#181B22; --cd-surface2:#1F232C;
+--cd-bg:#0B0D10; --cd-side:#12141A; --cd-surface:#171A21; --cd-surface2:#1E222B;
 --cd-line:#262B36; --cd-text:#F2F1EE; --cd-muted:#8A93A6; --cd-accent:#FF7A29; --cd-accent-ink:#2A1200;
+--cd-accent2:#FFB35C;
 }
 .cd-app{display:flex;min-height:100vh;background:var(--cd-bg);color:var(--cd-text);font-family:Archivo,system-ui,sans-serif}
-.cd-side{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--cd-side);border-right:1px solid var(--cd-line);display:flex;flex-direction:column;padding:16px 0;z-index:40;transition:transform .2s}
-.cd-side .cd-logo{display:flex;flex-direction:column;padding:0 18px 16px;border-bottom:1px solid var(--cd-line);margin-bottom:10px}
-.cd-side .cd-logo b{font:800 16px Archivo Narrow;letter-spacing:.06em;text-transform:uppercase}
+.cd-side{position:fixed;top:0;left:0;bottom:0;width:232px;background:var(--cd-side);border-right:1px solid var(--cd-line);display:flex;flex-direction:column;padding:18px 0 0;z-index:40;transition:transform .2s}
+.cd-side .cd-logo{display:flex;flex-direction:column;padding:0 20px 16px;border-bottom:1px solid var(--cd-line);margin-bottom:12px}
+.cd-side .cd-logo b{font:800 17px Archivo Narrow;letter-spacing:.06em;text-transform:uppercase}
 .cd-side .cd-logo b span{color:var(--cd-accent)}
-.cd-side .cd-logo small{display:block;font-size:9px;letter-spacing:.12em;color:var(--cd-muted);text-transform:uppercase;margin-top:2px}
-.cd-nav{flex:1;overflow-y:auto;padding:4px 10px}
-.cd-nav button{width:100%;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font:600 13.5px Archivo;color:var(--cd-muted);text-align:left;margin-bottom:2px}
-.cd-nav button svg{flex:none;opacity:.85}
-.cd-nav button.on{background:var(--cd-accent);color:var(--cd-accent-ink)}
-.cd-nav button.on svg{opacity:1}
+.cd-side .cd-logo small{display:block;font-size:9.5px;letter-spacing:.12em;color:var(--cd-muted);text-transform:uppercase;margin-top:3px}
+.cd-nav{flex:1;overflow-y:auto;padding:6px 12px}
+.cd-nav button{width:100%;display:flex;align-items:center;gap:13px;padding:11px 13px;border-radius:10px;font:600 13.5px Archivo;color:#B7BFCF;text-align:left;margin-bottom:3px;transition:background .15s,color .15s}
+.cd-nav button svg{flex:none;width:21px;height:21px;stroke-width:1.85;opacity:.95}
+.cd-nav button.on{background:linear-gradient(135deg,var(--cd-accent),#FF6A17);color:var(--cd-accent-ink);box-shadow:0 4px 14px -4px rgba(255,122,41,.55)}
+.cd-nav button.on svg{opacity:1;stroke-width:2}
 .cd-nav button:not(.on):hover{background:var(--cd-surface2);color:var(--cd-text)}
-.cd-nav button.soon{opacity:.6}
-.cd-nav .cd-soon-tag{margin-left:auto;font:600 8.5px Archivo;letter-spacing:.06em;text-transform:uppercase;background:var(--cd-surface2);color:var(--cd-muted);padding:2px 5px;border-radius:4px}
-.cd-main{flex:1;margin-left:220px;min-width:0}
-.cd-top{position:sticky;top:0;z-index:35;display:flex;align-items:center;gap:14px;padding:12px 22px;background:rgba(14,16,19,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--cd-line)}
+.cd-nav button.soon{opacity:.55}
+.cd-nav .cd-soon-tag{margin-left:auto;font:600 8.5px Archivo;letter-spacing:.06em;text-transform:uppercase;background:var(--cd-surface2);color:var(--cd-muted);padding:2px 5px;border-radius:4px;flex:none}
+.cd-side-foot{margin:auto 16px 18px;padding-top:14px;border-top:1px solid var(--cd-line);display:flex;align-items:center;gap:10px}
+.cd-side-foot .isq{width:34px;height:34px;border-radius:9px;background:rgba(255,122,41,.14);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
+.cd-side-foot .isq svg{width:18px;height:18px;stroke-width:1.8}
+.cd-side-foot b{display:block;font:800 10px Archivo;letter-spacing:.04em;text-transform:uppercase;line-height:1.35}
+.cd-side-foot i{display:block;width:26px;height:2px;background:var(--cd-accent);border-radius:2px;margin-top:5px}
+.cd-main{flex:1;margin-left:232px;min-width:0}
+.cd-top{position:sticky;top:0;z-index:35;display:flex;align-items:center;gap:14px;padding:13px 24px;background:rgba(11,13,16,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--cd-line)}
 .cd-burger{display:none;flex:none;width:34px;height:34px;border-radius:8px;background:var(--cd-surface);align-items:center;justify-content:center;color:var(--cd-muted)}
-.cd-search{flex:1;max-width:520px;display:flex;align-items:center;gap:9px;background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:10px;padding:9px 13px;color:var(--cd-muted)}
+.cd-burger svg{width:19px;height:19px;stroke-width:1.9}
+.cd-search{flex:1;max-width:520px;display:flex;align-items:center;gap:9px;background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:10px;padding:9px 14px;color:var(--cd-muted);transition:border-color .15s}
+.cd-search:focus-within{border-color:var(--cd-accent)}
+.cd-search svg{width:16px;height:16px;stroke-width:1.8;flex:none}
 .cd-search input{background:none;border:none;flex:1;color:var(--cd-text);font-size:13.5px}
 .cd-search input:focus{outline:none}
-.cd-top-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-.cd-bell{position:relative;width:36px;height:36px;border-radius:50%;background:var(--cd-surface);border:1px solid var(--cd-line);display:flex;align-items:center;justify-content:center;color:var(--cd-muted);flex:none}
-.cd-bell .dot{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--rose);color:#fff;font:700 9px Archivo;display:flex;align-items:center;justify-content:center}
-.cd-who{display:flex;align-items:center;gap:9px}
-.cd-who .av{width:34px;height:34px;border-radius:50%;background:var(--cd-accent);color:var(--cd-accent-ink);font:700 13px Archivo Narrow;display:flex;align-items:center;justify-content:center;flex:none}
+.cd-top-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.cd-bell{position:relative;width:38px;height:38px;border-radius:50%;background:var(--cd-surface);border:1px solid var(--cd-line);display:flex;align-items:center;justify-content:center;color:var(--cd-muted);flex:none;cursor:pointer;transition:border-color .15s}
+.cd-bell:hover{border-color:var(--cd-accent);color:var(--cd-text)}
+.cd-bell svg{width:18px;height:18px;stroke-width:1.85}
+.cd-bell .dot{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 3px;border-radius:8px;background:var(--rose);color:#fff;font:700 9.5px Archivo;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--cd-bg)}
+.cd-who{display:flex;align-items:center;gap:10px}
+.cd-who .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--cd-accent),#FF6A17);color:var(--cd-accent-ink);font:800 13.5px Archivo Narrow;display:flex;align-items:center;justify-content:center;flex:none}
 .cd-who .meta{line-height:1.25}
 .cd-who .meta b{display:block;font-size:13px}
 .cd-who .meta span{display:block;font-size:10.5px;color:var(--cd-muted);text-transform:uppercase;letter-spacing:.05em}
-.cd-signout{color:var(--cd-muted);font-size:10.5px;text-decoration:underline;margin-left:9px}
-.cd-body{padding:22px;max-width:1180px}
-.cd-greet{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
-.cd-greet h1{font:800 24px Archivo Narrow;letter-spacing:.01em}
-.cd-greet p{color:var(--cd-muted);font-size:13px;margin-top:3px}
-.cd-target{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:14px 16px;min-width:230px}
-.cd-target h4{font:700 10.5px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--cd-muted);margin-bottom:10px}
-.cd-target .row2{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
-.cd-target .row2 b{font-size:13px}
-.cd-target .bar2{height:6px;border-radius:4px;background:var(--cd-surface2);overflow:hidden}
-.cd-target .bar2 i{display:block;height:100%;background:var(--cd-accent)}
-.cd-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
-.cd-kpi{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:14px}
-.cd-kpi .isq{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
-.cd-kpi .v{font:800 22px Archivo Narrow}
+.cd-signout{color:var(--cd-muted);font-size:10.5px;text-decoration:underline;margin-left:10px}
+.cd-body{padding:24px;max-width:1220px}
+
+/* hero: greeting + sales target, one unified card with subtle brand flourish */
+.cd-hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#181B22 0%,#14161C 62%,#1B140F 100%);border:1px solid var(--cd-line);border-radius:16px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.cd-hero::before{content:'';position:absolute;top:-60px;right:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,122,41,.24),transparent 70%);pointer-events:none}
+.cd-hero::after{content:'More Events, Brighter Stories';position:absolute;left:28px;bottom:8px;font:600 15px 'Caveat',cursive;color:rgba(255,179,92,.3);transform:rotate(-2deg);pointer-events:none}
+.cd-greet{position:relative;z-index:1}
+.cd-greet h1{font:800 25px Archivo Narrow;letter-spacing:.01em}
+.cd-greet h1 b{color:var(--cd-accent);font-weight:800}
+.cd-greet p{color:var(--cd-muted);font-size:13px;margin-top:4px}
+.cd-target{position:relative;z-index:1;background:rgba(23,26,33,.7);border:1px solid var(--cd-line);border-radius:13px;padding:15px 18px;min-width:250px;backdrop-filter:blur(2px)}
+.cd-target h4{display:flex;align-items:center;gap:8px;font:700 10.5px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--cd-muted);margin-bottom:11px}
+.cd-target h4 .isq{width:26px;height:26px;border-radius:8px;background:rgba(255,122,41,.16);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
+.cd-target h4 .isq svg{width:14px;height:14px;stroke-width:2}
+.cd-target .row2{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;color:var(--cd-text)}
+.cd-target .row2 b{font-size:13.5px;color:var(--cd-accent2)}
+.cd-target .bar2{height:7px;border-radius:5px;background:var(--cd-surface2);overflow:hidden}
+.cd-target .bar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--cd-accent),var(--cd-accent2));border-radius:5px}
+
+.cd-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin-bottom:20px}
+.cd-kpi{position:relative;background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:13px;padding:15px;transition:border-color .15s,transform .15s}
+.cd-kpi.clickable{cursor:pointer}
+.cd-kpi.clickable:hover{border-color:var(--cd-accent);transform:translateY(-2px)}
+.cd-kpi .isq{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 0 18px -5px currentColor}
+.cd-kpi .isq svg{width:20px;height:20px;stroke-width:1.9}
+.cd-kpi .chev{position:absolute;top:14px;right:13px;color:var(--cd-muted);opacity:.55}
+.cd-kpi .chev svg{width:14px;height:14px;stroke-width:2}
+.cd-kpi .v{font:800 23px Archivo Narrow}
 .cd-kpi .v.dim{color:var(--cd-muted);font-weight:600}
-.cd-kpi .l{font-size:10.5px;color:var(--cd-muted);margin-top:3px;line-height:1.4}
-.cd-grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start}
-.cd-panel{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:16px;margin-bottom:16px}
-.cd-panel h3{font:700 14px Archivo;display:flex;align-items:center;margin-bottom:12px}
-.cd-panel h3 a,.cd-panel h3 button{margin-left:auto;font-size:11.5px;color:var(--cd-accent);font-weight:600}
-.cd-frow{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--cd-line)}
+.cd-kpi .l{font-size:10.8px;color:var(--cd-muted);margin-top:4px;line-height:1.4}
+.cd-grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start}
+.cd-panel{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:13px;padding:18px;margin-bottom:18px}
+.cd-panel h3{font:700 14.5px Archivo;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.cd-panel h3 .isq{width:26px;height:26px;border-radius:8px;background:rgba(255,122,41,.14);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
+.cd-panel h3 .isq svg{width:14px;height:14px;stroke-width:2}
+.cd-panel h3 a,.cd-panel h3 button{margin-left:auto;font-size:11.5px;color:var(--cd-accent);font-weight:600;display:flex;align-items:center;gap:3px}
+.cd-frow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--cd-line)}
 .cd-frow:last-child{border-bottom:none}
-.cd-frow .isq{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+.cd-frow .isq{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 14px -6px currentColor}
+.cd-frow .isq svg{width:16px;height:16px;stroke-width:1.9}
 .cd-frow .grow{min-width:0;flex:1}
 .cd-frow .name{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cd-frow .sub{font-size:11.5px;color:var(--cd-muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cd-pill{display:inline-block;font:700 10px Archivo;letter-spacing:.02em;padding:3px 8px;border-radius:6px;white-space:nowrap;flex:none}
-.cd-frow .acts{display:flex;gap:5px;flex:none}
-.cd-frow .acts a,.cd-frow .acts button{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.cd-qa{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
-.cd-qa button{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:15px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;font:600 12px Archivo;color:var(--cd-text)}
-.cd-qa button .isq{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-.cd-qa button:hover{border-color:var(--cd-accent)}
-.cd-activity .item{padding:9px 0;border-bottom:1px solid var(--cd-line);font-size:12.5px;color:var(--cd-text)}
-.cd-activity .item:last-child{border-bottom:none}
-.cd-activity .item span{display:block;color:var(--cd-muted);font-size:11px;margin-top:2px}
+.cd-frow .acts{display:flex;gap:6px;flex:none}
+.cd-frow .acts a,.cd-frow .acts button{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.cd-frow .acts a:hover,.cd-frow .acts button:hover{transform:scale(1.08)}
+.cd-frow .acts svg{width:14px;height:14px;stroke-width:1.9}
+
+.cd-empty{padding:38px 20px 26px;text-align:center;color:var(--cd-muted)}
+.cd-empty .isq{width:58px;height:58px;border-radius:16px;background:var(--cd-surface2);color:var(--cd-muted);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.cd-empty .isq svg{width:28px;height:28px;stroke-width:1.6}
+.cd-empty b{display:block;color:var(--cd-text);font:700 14.5px Archivo;margin-bottom:4px}
+.cd-empty p{font-size:12.5px;margin-bottom:14px}
+.cd-empty button{background:var(--cd-surface2);border:1px solid var(--cd-line);color:var(--cd-text);font:600 12px Archivo;padding:9px 16px;border-radius:9px}
+.cd-empty button:hover{border-color:var(--cd-accent)}
+
+.cd-qa{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.cd-qa button{background:var(--cd-surface2);border:1px solid var(--cd-line);border-radius:13px;padding:15px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;transition:border-color .15s,transform .15s}
+.cd-qa button:hover{border-color:var(--cd-accent);transform:translateY(-2px)}
+.cd-qa button .isq{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px -5px currentColor}
+.cd-qa button .isq svg{width:19px;height:19px;stroke-width:1.9}
+.cd-qa button b{font:700 13px Archivo;display:block;color:var(--cd-text)}
+.cd-qa button small{display:block;font-size:11px;color:var(--cd-muted);font-weight:500;margin-top:2px}
+
+.cd-arow{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--cd-line)}
+.cd-arow:last-child{border-bottom:none}
+.cd-arow .av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11.5px Archivo Narrow;flex:none}
+.cd-arow .grow{min-width:0;flex:1;font-size:12.5px;color:var(--cd-text)}
+.cd-arow .grow b{font-weight:600}
+.cd-arow .grow span{display:block;color:var(--cd-muted);font-size:11px;margin-top:2px}
+.cd-arow .time{font-size:10.5px;color:var(--cd-muted);flex:none;white-space:nowrap}
+
+.cd-admsg{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:13px;padding:14px 16px;margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;transition:box-shadow .3s,border-color .3s}
+.cd-admsg.unread{border-color:rgba(255,122,41,.55);box-shadow:0 0 0 1px rgba(255,122,41,.18),0 0 22px -6px rgba(255,122,41,.45);animation:cdPulse 3.2s ease-in-out infinite}
+@keyframes cdPulse{0%,100%{box-shadow:0 0 0 1px rgba(255,122,41,.18),0 0 22px -6px rgba(255,122,41,.45)}50%{box-shadow:0 0 0 1px rgba(255,122,41,.3),0 0 30px -4px rgba(255,122,41,.6)}}
+.cd-admsg .isq{width:34px;height:34px;border-radius:10px;background:rgba(255,122,41,.15);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
+.cd-admsg .isq svg{width:17px;height:17px;stroke-width:1.9}
+.cd-admsg .grow{min-width:0;flex:1}
+.cd-admsg .grow .row2{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.cd-admsg .grow b{font:700 12.5px Archivo}
+.cd-admsg .new-badge{font:700 8.5px Archivo;letter-spacing:.05em;text-transform:uppercase;background:var(--cd-accent);color:var(--cd-accent-ink);padding:2px 6px;border-radius:5px}
+.cd-admsg p{font-size:12px;color:var(--cd-muted);line-height:1.45}
+.cd-admsg .when{font-size:10.5px;color:var(--cd-muted);margin-top:4px;display:block}
+
 .cd-soon{padding:60px 20px;text-align:center;color:var(--cd-muted)}
 .cd-soon b{display:block;color:var(--cd-text);font-size:16px;margin-bottom:6px}
-@media (max-width:1000px){ .cd-kpis{grid-template-columns:repeat(3,1fr)} .cd-grid2{grid-template-columns:1fr} }
+@media (max-width:1000px){ .cd-kpis{grid-template-columns:repeat(3,1fr)} .cd-grid2{grid-template-columns:1fr} .cd-hero::after{display:none} }
 @media (max-width:860px){
 .cd-side{transform:translateX(-100%)}
 .cd-side.open{transform:translateX(0)}
@@ -280,7 +340,12 @@ menu:'<path d="M3 5.5h14M3 10h14M3 14.5h14"/>',
 box:'<path d="M3 6.2l7-3 7 3-7 3-7-3z"/><path d="M3 6.2v7.6l7 3 7-3V6.2"/><path d="M10 9.2v7.6"/>',
 wrench:'<path d="M11.7 4.6a3.6 3.6 0 0 0-4.7 4.3L3 12.9V17h4.1l4-4a3.6 3.6 0 0 0 4.3-4.7l-2.4 2.4-2-2z"/>',
 chart:'<path d="M4 16.5V9M9.5 16.5V4M15 16.5v-6"/><path d="M3 17.5h14"/>',
-clock:'<circle cx="10" cy="10.5" r="7"/><path d="M10 6.5v4l3 2"/>'
+clock:'<circle cx="10" cy="10.5" r="7"/><path d="M10 6.5v4l3 2"/>',
+chev:'<path d="M7.5 4.5l6 5.5-6 5.5"/>',
+megaphone:'<path d="M3 8.5v3l2 .4v3.6a1.2 1.2 0 0 0 2.3.4l.5-1.7"/><path d="M5 8.9l9.5-3.4a.9.9 0 0 1 1.2.85v8.3a.9.9 0 0 1-1.2.85L5 11.9"/><path d="M15.7 8.5a2.3 2.3 0 0 1 0 4"/>',
+clipcheck:'<path d="M6 3.5h8v2.2H6z"/><path d="M5 5.2h10a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6.2a1 1 0 0 1 1-1z"/><path d="M7.3 11.2l2 2 3.4-4"/>',
+target:'<circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r=".9" fill="currentColor" stroke="none"/>',
+bolt:'<path d="M11 2.5L4.5 11.5h4L8 17.5l6.5-9h-4z"/>'
 };
 const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;
 
@@ -507,6 +572,7 @@ return `<div class="cd-app">
 <aside class="cd-side${S.sideOpen?' open':''}" id="cdSide">
 <div class="cd-logo"><b>StageMax<span> CRM</span></b><small>Stage Electronics &amp; LED</small></div>
 <div class="cd-nav">${navHtml}</div>
+<div class="cd-side-foot"><div class="isq">${ic('flame')}</div><div><b>The Light<br>Engineers Choice</b><i></i></div></div>
 </aside>
 <div class="cd-main">
 <div class="cd-top">
@@ -1004,13 +1070,14 @@ ${S.searchResults ? searchResultsBlock() : ''}`;
 /* ── my dashboard (cre) — STAGEMAX reference redesign ── */
 function cdGreetTargets(){
 const t1 = Number(S.me?.monthly_sales_target||0);
-if(!t1) return '<div class="cd-target"><h4>My targets · this month</h4><div class="sub" style="color:var(--cd-muted);font-size:12.5px">No monthly target set yet — ask your admin to set one.</div></div>';
+const head = `<h4><span class="isq">${ic('target')}</span>My Targets (This Month)</h4>`;
+if(!t1) return `<div class="cd-target">${head}<div class="sub" style="color:var(--cd-muted);font-size:12.5px">No monthly target set yet — ask your admin to set one.</div></div>`;
 const sums = sumMonthPerf();
 const pct1 = Math.min(100, Math.round(sums.value/t1*100));
-return `<div class="cd-target"><h4>My Targets (This Month)</h4>
+return `<div class="cd-target">${head}
 <div class="row2"><span>Sales Target</span><b>${pct1}%</b></div>
 <div class="bar2"><i style="width:${pct1}%"></i></div>
-<div class="row2" style="margin-top:8px;color:var(--cd-muted)"><span>${rs(sums.value)}</span><span>${rs(t1)}</span></div>
+<div class="row2" style="margin-top:8px"><span>${rs(sums.value)}</span><span>${rs(t1)}</span></div>
 </div>`;
 }
 
@@ -1022,19 +1089,22 @@ const estimatesPending = S.openDeals.filter(d=>d.stages?.name==='Quoted').length
 const paymentPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_lost && (Number(d.value||0)-Number(d.amount_collected||0))>0).length;
 const dispatchPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_delivered).length;
 const cards = [
-{v:callsDue, l:'Calls Due Today', icon:'call', col:'rgba(110,158,92,.16)', ic2:'#9BC489'},
-{v:waFollowups, l:'WhatsApp Follow-ups', icon:'wa', col:'rgba(74,163,184,.16)', ic2:'#8FD0E2'},
-{v:estimatesPending, l:'Estimates Pending', icon:'doc', col:'rgba(74,163,184,.16)', ic2:'#8FD0E2', note:'quoted-stage deals'},
-{v:null, l:'Approval Waiting', icon:'clock', col:'rgba(138,107,168,.18)', ic2:'#C4A9DE', note:'not tracked yet'},
+{v:callsDue, l:'Calls Due Today', icon:'call', col:'rgba(110,158,92,.16)', ic2:'#9BC489', tab:'followups'},
+{v:waFollowups, l:'WhatsApp Follow-ups', icon:'wa', col:'rgba(45,181,166,.18)', ic2:'#5FE0CB', tab:'followups'},
+{v:estimatesPending, l:'Estimates Pending', icon:'doc', col:'rgba(59,130,246,.18)', ic2:'#7EB6FF', pipe:1, stage:3},
+{v:null, l:'Approval Waiting', icon:'clock', col:'rgba(138,107,168,.18)', ic2:'#C4A9DE'},
 {v:paymentPending, l:'Payment Pending', icon:'wallet', col:'rgba(232,163,61,.16)', ic2:'var(--amber)'},
-{v:dispatchPending, l:'Dispatch Pending', icon:'truck', col:'rgba(194,80,107,.16)', ic2:'#E8899E'}
+{v:dispatchPending, l:'Dispatch Pending', icon:'truck', col:'rgba(194,80,107,.16)', ic2:'#E8899E', tab:'dispatch'}
 ];
-return `<div class="cd-kpis">${cards.map(c=>`
-<div class="cd-kpi">
+return `<div class="cd-kpis">${cards.map(c=>{
+const clickable = !!(c.tab || c.pipe);
+return `<div class="cd-kpi${clickable?' clickable':''}"${c.tab?` data-tab="${c.tab}"`:''}${c.pipe?` data-kpipipe="${c.pipe}" data-kpistage="${c.stage}"`:''}>
+${clickable?`<span class="chev">${ic('chev')}</span>`:''}
 <div class="isq" style="background:${c.col};color:${c.ic2}">${ic(c.icon)}</div>
 <div class="v${c.v===null?' dim':''}">${c.v===null?'—':c.v}</div>
-<div class="l">${esc(c.l)}${c.note?` · ${esc(c.note)}`:''}</div>
-</div>`).join('')}</div>`;
+<div class="l">${esc(c.l)}</div>
+</div>`;
+}).join('')}</div>`;
 }
 
 function cdStagePill(st){
@@ -1047,8 +1117,9 @@ return `<span class="cd-pill" style="background:${swatch[0]};color:${swatch[1]}"
 function cdFollowRow(i, today){
 const overdue = i.date < today;
 const st = i.stName ? {name:i.stName, is_won:i.stWon, is_lost:i.stLost, is_delivered:i.stDelivered} : null;
+const typeSwatch = i.type==='call' ? ['rgba(110,158,92,.16)','#9BC489'] : i.type==='whatsapp' ? ['rgba(45,181,166,.18)','#5FE0CB'] : ['rgba(232,163,61,.14)','var(--amber)'];
 return `<div class="cd-frow" data-deal="${i.dealId}" style="cursor:pointer">
-<div class="isq" style="background:rgba(232,163,61,.14);color:var(--amber)">${ic(i.type==='call'?'call':i.type==='whatsapp'?'wa':'pin')}</div>
+<div class="isq" style="background:${typeSwatch[0]};color:${typeSwatch[1]}">${ic(i.type==='call'?'call':i.type==='whatsapp'?'wa':'pin')}</div>
 <div class="grow">
 <div class="name">${esc(i.name)}</div>
 <div class="sub">${esc(i.detail)}</div>
@@ -1057,7 +1128,7 @@ ${cdStagePill(st)}
 <span class="cd-pill" style="background:${overdue?'rgba(194,80,107,.18)':'rgba(255,122,41,.16)'};color:${overdue?'#E8899E':'var(--cd-accent)'}">${overdue?'Overdue':day(i.date)}</span>
 <div class="acts">
 ${i.phone?`<a href="${telLink(i.phone)}" style="background:rgba(110,158,92,.16);color:#9BC489" title="Call">${ic('call')}</a>`:''}
-${i.phone?`<a href="${waLink(i.phone)}" target="_blank" rel="noopener" style="background:rgba(74,163,184,.16);color:#8FD0E2" title="WhatsApp">${ic('wa')}</a>`:''}
+${i.phone?`<a href="${waLink(i.phone)}" target="_blank" rel="noopener" style="background:rgba(45,181,166,.18);color:#5FE0CB" title="WhatsApp">${ic('wa')}</a>`:''}
 ${i.isFu?`<button data-donefu="${i.fuId}" style="background:rgba(232,163,61,.16);color:var(--amber)" title="Mark done">${ic('check')}</button>`:''}
 </div>
 </div>`;
@@ -1067,42 +1138,71 @@ function cdFollowupsPanel(limit){
 const today = new Date().toISOString().slice(0,10);
 const all = chaseList();
 const shown = limit ? all.slice(0,limit) : all;
-const rows = shown.length ? shown.map(i=>cdFollowRow(i,today)).join('') : `<div class="empty">Nothing due. You're all caught up.</div>`;
-const viewAll = limit && all.length>limit ? `<button data-tab="followups">View All</button>` : '';
-return `<div class="cd-panel"><h3>Today's Follow-ups (${all.length})${viewAll}</h3>${rows}</div>`;
+const rows = shown.length ? shown.map(i=>cdFollowRow(i,today)).join('') : `<div class="cd-empty">
+<div class="isq">${ic('clipcheck')}</div>
+<b>Nothing due today</b>
+<p>You're all caught up. Great job!</p>
+${limit?'<button data-tab="followups">View All Follow-ups</button>':''}
+</div>`;
+const viewAll = limit && all.length>limit && shown.length ? `<button data-tab="followups">View All ${ic('chev')}</button>` : '';
+return `<div class="cd-panel"><h3><span class="isq">${ic('bell')}</span>Today's Follow-ups (${all.length})${viewAll}</h3>${rows}</div>`;
 }
 
 function cdQuickActions(){
-return `<div class="cd-panel"><h3>Quick Actions</h3><div class="cd-qa">
-<button data-tab="new"><span class="isq" style="background:rgba(232,163,61,.18);color:var(--amber)">${ic('plus')}</span>Add Lead</button>
-<button id="qaEstimate"><span class="isq" style="background:rgba(74,163,184,.16);color:#8FD0E2">${ic('doc')}</span>Create Estimate</button>
-<button data-tab="pipeline"><span class="isq" style="background:rgba(110,158,92,.16);color:#9BC489">${ic('cart')}</span>View Orders</button>
-<button id="qaRepair"><span class="isq" style="background:rgba(138,107,168,.18);color:#C4A9DE">${ic('wrench')}</span>Add Repair</button>
+return `<div class="cd-panel"><h3><span class="isq">${ic('bolt')}</span>Quick Actions</h3><div class="cd-qa">
+<button data-tab="new"><span class="isq" style="background:rgba(232,163,61,.18);color:var(--amber)">${ic('plus')}</span><span><b>Add Lead</b><small>Create a new lead</small></span></button>
+<button id="qaEstimate"><span class="isq" style="background:rgba(59,130,246,.18);color:#7EB6FF">${ic('doc')}</span><span><b>Create Estimate</b><small>Prepare a quotation</small></span></button>
+<button data-tab="pipeline"><span class="isq" style="background:rgba(110,158,92,.16);color:#9BC489">${ic('cart')}</span><span><b>View Orders</b><small>Check order status</small></span></button>
+<button id="qaRepair"><span class="isq" style="background:rgba(138,107,168,.18);color:#C4A9DE">${ic('wrench')}</span><span><b>Add Repair</b><small>Create a service job</small></span></button>
 </div></div>`;
 }
 
+function initialsOf(str){
+return (str||'').trim().split(/\s+/).map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase() || '?';
+}
+function avatarHue(str){
+let h=0; for(const ch of (str||'?')) h = (h*31 + ch.charCodeAt(0)) % 360;
+return h;
+}
 function cdActivity(){
-if(!S.activity.length) return `<div class="cd-panel"><h3>Recent Activity</h3><div class="empty">Nothing logged yet.</div></div>`;
+if(!S.activity.length) return `<div class="cd-panel"><h3><span class="isq">${ic('chart')}</span>Recent Activity</h3><div class="cd-empty" style="padding:24px 12px 10px"><div class="isq">${ic('chart')}</div><b>Nothing logged yet</b><p>Activity will show up here as deals move.</p></div></div>`;
 const rows = S.activity.slice(0,6).map(a=>{
 const label = VERB_LABEL[a.verb] || a.verb;
 const name = a.deals?.customers?.name || a.detail || '';
-return `<div class="item" ${a.deal_id?`data-deal="${a.deal_id}" style="cursor:pointer"`:''}>${esc(label)}${name?' — '+esc(name):''}<span>${timeAgo(a.created_at)}</span></div>`;
+const hue = avatarHue(name||label);
+return `<div class="cd-arow" ${a.deal_id?`data-deal="${a.deal_id}" style="cursor:pointer"`:''}>
+<div class="av" style="background:hsla(${hue},55%,45%,.28);color:hsl(${hue},75%,74%)">${esc(initialsOf(name||label))}</div>
+<div class="grow"><b>${esc(label)}</b>${name?'<span>'+esc(name)+'</span>':''}</div>
+<div class="time">${timeAgo(a.created_at)}</div>
+</div>`;
 }).join('');
-return `<div class="cd-panel cd-activity"><h3>Recent Activity</h3>${rows}</div>`;
+return `<div class="cd-panel cd-activity"><h3><span class="isq">${ic('chart')}</span>Recent Activity</h3>${rows}</div>`;
+}
+
+function cdAdminMessage(){
+/* No admin_messages table exists yet in the live schema — safe empty/no-message state only.
+   Once backend support is approved and added, this renders the latest real message with
+   unread glow + NEW badge, and marks it read when opened. */
+return `<div class="cd-admsg">
+<div class="isq">${ic('megaphone')}</div>
+<div class="grow"><div class="row2"><b>Message from Admin</b></div>
+<p>No messages yet. Your admin can post announcements here once this is switched on.</p>
+</div>
+</div>`;
 }
 
 function viewMyDashboard(){
 const name = S.me?.full_name || '';
 const hr = new Date().getHours();
 const greeting = hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
-return `<div class="cd-greet">
-<div><h1>${greeting}, ${esc(name.split(' ')[0]||name)}!</h1><p>Calls. Follow-ups. Estimates. Sales. Let's make it happen.</p></div>
+return `<div class="cd-hero">
+<div class="cd-greet"><h1>${greeting}, <b>${esc(name.split(' ')[0]||name)}</b>!</h1><p>Calls. Follow-ups. Estimates. Sales. Let's make it happen.</p></div>
 ${cdGreetTargets()}
 </div>
 ${cdKpis()}
 <div class="cd-grid2">
 <div>${cdFollowupsPanel(6)}</div>
-<div>${cdQuickActions()}${cdActivity()}</div>
+<div>${cdAdminMessage()}${cdQuickActions()}${cdActivity()}</div>
 </div>`;
 }
 
@@ -1358,6 +1458,7 @@ const burger=document.getElementById('cdBurger'); if(burger) burger.onclick=()=>
 const qe=document.getElementById('qaEstimate'); if(qe) qe.onclick=()=>{ S.presetPipeline=1; S.presetStage=3; S.tab='new'; S.deal=null; loadTab(); };
 const qr=document.getElementById('qaRepair'); if(qr) qr.onclick=()=>{ S.presetPipeline=3; S.presetStage=12; S.tab='new'; S.deal=null; loadTab(); };
 document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.pipe); S.stage=null; loadTab(); });
+document.querySelectorAll('[data-kpipipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.kpipipe); S.stage=b.dataset.kpistage?Number(b.dataset.kpistage):null; S.tab='pipeline'; S.deal=null; loadTab(); });
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
 document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
