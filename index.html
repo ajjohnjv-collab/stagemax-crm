@@ -157,22 +157,22 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-app{display:flex;min-height:100vh;background:var(--cd-bg);color:var(--cd-text);font-family:Archivo,system-ui,sans-serif}
 .cd-side{position:fixed;top:0;left:0;bottom:0;width:232px;background:var(--cd-side);border-right:1px solid var(--cd-line);display:flex;flex-direction:column;padding:18px 0 0;z-index:40;transition:transform .2s}
 .cd-side .cd-logo{display:flex;flex-direction:column;padding:0 20px 16px;border-bottom:1px solid var(--cd-line);margin-bottom:12px}
-.cd-side .cd-logo b{font:800 17px Archivo Narrow;letter-spacing:.06em;text-transform:uppercase}
+.cd-side .cd-logo b{font:800 22px Archivo Narrow;letter-spacing:.03em;text-transform:uppercase;line-height:1.1}
 .cd-side .cd-logo b span{color:var(--cd-accent)}
-.cd-side .cd-logo small{display:block;font-size:9.5px;letter-spacing:.12em;color:var(--cd-muted);text-transform:uppercase;margin-top:3px}
+.cd-side .cd-logo small{display:block;font-size:9.5px;letter-spacing:.12em;color:var(--cd-muted);text-transform:uppercase;margin-top:6px}
 .cd-nav{flex:1;overflow-y:auto;padding:6px 12px}
-.cd-nav button{width:100%;display:flex;align-items:center;gap:13px;padding:11px 13px;border-radius:10px;font:600 13.5px Archivo;color:#B7BFCF;text-align:left;margin-bottom:3px;transition:background .15s,color .15s}
+.cd-nav button{width:100%;display:flex;align-items:center;gap:13px;padding:9px 13px;border-radius:10px;font:600 13.5px Archivo;color:#B7BFCF;text-align:left;margin-bottom:2px;transition:background .15s,color .15s}
 .cd-nav button svg{flex:none;width:21px;height:21px;stroke-width:1.85;opacity:.95}
 .cd-nav button.on{background:linear-gradient(135deg,var(--cd-accent),#FF6A17);color:var(--cd-accent-ink);box-shadow:0 4px 14px -4px rgba(255,122,41,.55)}
 .cd-nav button.on svg{opacity:1;stroke-width:2}
 .cd-nav button:not(.on):hover{background:var(--cd-surface2);color:var(--cd-text)}
 .cd-nav button.soon{opacity:.55}
 .cd-nav .cd-soon-tag{margin-left:auto;font:600 8.5px Archivo;letter-spacing:.06em;text-transform:uppercase;background:var(--cd-surface2);color:var(--cd-muted);padding:2px 5px;border-radius:4px;flex:none}
-.cd-side-foot{margin:auto 16px 18px;padding-top:14px;border-top:1px solid var(--cd-line);display:flex;align-items:center;gap:10px}
-.cd-side-foot .isq{width:34px;height:34px;border-radius:9px;background:rgba(255,122,41,.14);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
-.cd-side-foot .isq svg{width:18px;height:18px;stroke-width:1.8}
-.cd-side-foot b{display:block;font:800 10px Archivo;letter-spacing:.04em;text-transform:uppercase;line-height:1.35}
-.cd-side-foot i{display:block;width:26px;height:2px;background:var(--cd-accent);border-radius:2px;margin-top:5px}
+.cd-side-foot{margin:auto 12px 18px;padding-top:14px;border-top:1px solid var(--cd-line)}.cd-side-foot button{width:100%;display:flex;align-items:center;gap:13px;padding:9px 13px;border-radius:10px;font:600 13.5px Archivo;color:#B7BFCF;text-align:left;transition:background .15s,color .15s}.cd-side-foot button svg{flex:none;width:21px;height:21px;stroke-width:1.85;opacity:.95}.cd-side-foot button:hover{background:var(--cd-surface2);color:var(--cd-text)}
+
+
+
+
 .cd-main{flex:1;margin-left:232px;min-width:0}
 .cd-top{position:sticky;top:0;z-index:35;display:flex;align-items:center;gap:14px;padding:13px 24px;background:rgba(11,13,16,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--cd-line)}
 .cd-burger{display:none;flex:none;width:34px;height:34px;border-radius:8px;background:var(--cd-surface);align-items:center;justify-content:center;color:var(--cd-muted)}
@@ -192,31 +192,31 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-who .meta{line-height:1.25}
 .cd-who .meta b{display:block;font-size:13px}
 .cd-who .meta span{display:block;font-size:10.5px;color:var(--cd-muted);text-transform:uppercase;letter-spacing:.05em}
-.cd-signout{color:var(--cd-muted);font-size:10.5px;text-decoration:underline;margin-left:10px}
+
 .cd-body{padding:24px;max-width:1220px}
 
 /* hero: greeting + sales target, one unified card with subtle brand flourish */
-.cd-hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#181B22 0%,#14161C 62%,#1B140F 100%);border:1px solid var(--cd-line);border-radius:16px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.cd-hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#181B22 0%,#14161C 62%,#1B140F 100%);border:1px solid var(--cd-line);border-radius:16px;padding:20px 26px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-bottom:20px}
 .cd-hero::before{content:'';position:absolute;top:-60px;right:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,122,41,.24),transparent 70%);pointer-events:none}
-.cd-hero::after{content:'More Events, Brighter Stories';position:absolute;left:28px;bottom:8px;font:600 15px 'Caveat',cursive;color:rgba(255,179,92,.3);transform:rotate(-2deg);pointer-events:none}
-.cd-greet{position:relative;z-index:1}
+
+.cd-greet{position:relative;z-index:1;flex:none}
 .cd-greet h1{font:800 25px Archivo Narrow;letter-spacing:.01em}
 .cd-greet h1 b{color:var(--cd-accent);font-weight:800}
 .cd-greet p{color:var(--cd-muted);font-size:13px;margin-top:4px}
-.cd-target{position:relative;z-index:1;background:rgba(23,26,33,.7);border:1px solid var(--cd-line);border-radius:13px;padding:15px 18px;min-width:250px;backdrop-filter:blur(2px)}
-.cd-target h4{display:flex;align-items:center;gap:8px;font:700 10.5px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--cd-muted);margin-bottom:11px}
-.cd-target h4 .isq{width:26px;height:26px;border-radius:8px;background:rgba(255,122,41,.16);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
-.cd-target h4 .isq svg{width:14px;height:14px;stroke-width:2}
-.cd-target .row2{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;color:var(--cd-text)}
-.cd-target .row2 b{font-size:13.5px;color:var(--cd-accent2)}
-.cd-target .bar2{height:7px;border-radius:5px;background:var(--cd-surface2);overflow:hidden}
-.cd-target .bar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--cd-accent),var(--cd-accent2));border-radius:5px}
+.cd-target-divider{position:relative;z-index:1;width:1px;align-self:stretch;background:var(--cd-line);flex:none}.cd-target{position:relative;z-index:1;flex:1;min-width:300px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.cd-target .tgt-top{display:flex;align-items:center;gap:9px}
+.cd-target .tgt-top .isq{width:26px;height:26px;border-radius:8px;background:rgba(255,122,41,.16);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
+.cd-target .tgt-top .isq svg{width:14px;height:14px;stroke-width:2}.cd-target .tgt-top .ttl{font:700 10.5px Archivo;letter-spacing:.06em;text-transform:uppercase;color:var(--cd-muted);white-space:nowrap}
+.cd-target .tgt-bot{display:flex;align-items:center;gap:16px}
+.cd-target .tgt-bot .lbl{font-size:13px;color:var(--cd-text);flex:none;white-space:nowrap}
+.cd-target .bar2{flex:1;height:8px;border-radius:5px;background:var(--cd-surface2);overflow:hidden}
+.cd-target .bar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--cd-accent),var(--cd-accent2));border-radius:5px}.cd-target .tgt-bot .pct{font:800 17px Archivo Narrow;color:var(--cd-accent);flex:none}.cd-target .tgt-div{width:1px;align-self:stretch;background:var(--cd-line);flex:none}.cd-target .tgt-stat{flex:none;text-align:left;line-height:1.3;background:none;border:none;padding:0}.cd-target .tgt-stat b{display:block;font:800 15px Archivo Narrow;color:var(--cd-text)}.cd-target .tgt-stat span{display:block;font-size:9.5px;color:var(--cd-muted);text-transform:uppercase;letter-spacing:.04em;margin-top:1px}
 
 .cd-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin-bottom:20px}
 .cd-kpi{position:relative;background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:13px;padding:15px;transition:border-color .15s,transform .15s}
 .cd-kpi.clickable{cursor:pointer}
 .cd-kpi.clickable:hover{border-color:var(--cd-accent);transform:translateY(-2px)}
-.cd-kpi .isq{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 0 18px -5px currentColor}
+.cd-kpi .isq{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
 .cd-kpi .isq svg{width:20px;height:20px;stroke-width:1.9}
 .cd-kpi .chev{position:absolute;top:14px;right:13px;color:var(--cd-muted);opacity:.55}
 .cd-kpi .chev svg{width:14px;height:14px;stroke-width:2}
@@ -253,7 +253,7 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-qa{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .cd-qa button{background:var(--cd-surface2);border:1px solid var(--cd-line);border-radius:13px;padding:15px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;transition:border-color .15s,transform .15s}
 .cd-qa button:hover{border-color:var(--cd-accent);transform:translateY(-2px)}
-.cd-qa button .isq{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px -5px currentColor}
+.cd-qa button .isq{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center}
 .cd-qa button .isq svg{width:19px;height:19px;stroke-width:1.9}
 .cd-qa button b{font:700 13px Archivo;display:block;color:var(--cd-text)}
 .cd-qa button small{display:block;font-size:11px;color:var(--cd-muted);font-weight:500;margin-top:2px}
@@ -280,7 +280,7 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 
 .cd-soon{padding:60px 20px;text-align:center;color:var(--cd-muted)}
 .cd-soon b{display:block;color:var(--cd-text);font-size:16px;margin-bottom:6px}
-@media (max-width:1000px){ .cd-kpis{grid-template-columns:repeat(3,1fr)} .cd-grid2{grid-template-columns:1fr} .cd-hero::after{display:none} }
+@media (max-width:1000px){ .cd-kpis{grid-template-columns:repeat(3,1fr)} .cd-grid2{grid-template-columns:1fr} }
 @media (max-width:860px){
 .cd-side{transform:translateX(-100%)}
 .cd-side.open{transform:translateX(0)}
@@ -290,7 +290,7 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-qa{grid-template-columns:repeat(2,1fr)}
 .cd-body{padding:16px}
 .cd-who .meta{display:none}
-.cd-signout{display:none}
+
 }
 </style>
 </head>
@@ -345,9 +345,9 @@ chev:'<path d="m9 18 6-6-6-6"/>',
 megaphone:'<path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/>',
 clipcheck:'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
 target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
-bolt:'<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>'
+bolt:'<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>',logout:'<path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>'
 };
-const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;
+const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;/* Flat glyph icons for KPI + Quick Action cards: Phosphor (fill weight, ISC license, https://phosphoricons.com) + Simple Icons (WhatsApp brand mark, CC0, https://simpleicons.org) */const GLYPHS = {call:{vb:256,p:'<path d="M231.88,175.08A56.26,56.26,0,0,1,176,224C96.6,224,32,159.4,32,80A56.26,56.26,0,0,1,80.92,24.12a16,16,0,0,1,16.62,9.52l21.12,47.15,0,.12A16,16,0,0,1,117.39,96c-.18.27-.37.52-.57.77L96,121.45c7.49,15.22,23.41,31,38.83,38.51l24.34-20.71a8.12,8.12,0,0,1,.75-.56,16,16,0,0,1,15.17-1.4l.13.06,47.11,21.11A16,16,0,0,1,231.88,175.08Z"/>'},wa:{vb:24,p:'<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>'},doc:{vb:256,p:'<path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,176H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm-8-56V44l44,44Z"/>'},clock:{vb:256,p:'<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm56,112H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z"/>'},wallet:{vb:256,p:'<path d="M216,64H56a8,8,0,0,1,0-16H192a8,8,0,0,0,0-16H56A24,24,0,0,0,32,56V184a24,24,0,0,0,24,24H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm-36,80a12,12,0,1,1,12-12A12,12,0,0,1,180,144Z"/>'},truck:{vb:256,p:'<path d="M255.43,117l-14-35A15.93,15.93,0,0,0,226.58,72H192V64a8,8,0,0,0-8-8H32A16,16,0,0,0,16,72V184a16,16,0,0,0,16,16H49a32,32,0,0,0,62,0h50a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V120A8.13,8.13,0,0,0,255.43,117ZM80,208a16,16,0,1,1,16-16A16,16,0,0,1,80,208ZM32,136V72H176v64Zm160,72a16,16,0,1,1,16-16A16,16,0,0,1,192,208Zm0-96V88h34.58l9.6,24Z"/>'},userplus:{vb:256,p:'<path d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136ZM144,157.68a68,68,0,1,0-71.9,0c-20.65,6.76-39.23,19.39-54.17,37.17A8,8,0,0,0,24,208H192a8,8,0,0,0,6.13-13.15C183.18,177.07,164.6,164.44,144,157.68Z"/>'},cart:{vb:256,p:'<path d="M230.14,58.87A8,8,0,0,0,224,56H62.68L56.6,22.57A8,8,0,0,0,48.73,16H24a8,8,0,0,0,0,16h18L67.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,160,204a28,28,0,1,0,28-28H91.17a8,8,0,0,1-7.87-6.57L80.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,230.14,58.87ZM104,204a12,12,0,1,1-12-12A12,12,0,0,1,104,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,200,204Z"/>'},wrench:{vb:256,p:'<path d="M232,96a72,72,0,0,1-100.94,66L79,222.22c-.12.14-.26.29-.39.42a32,32,0,0,1-45.26-45.26c.14-.13.28-.27.43-.39L94,124.94a72.07,72.07,0,0,1,83.54-98.78,8,8,0,0,1,3.93,13.19L144,80l5.66,26.35L176,112l40.65-37.52a8,8,0,0,1,13.19,3.93A72.6,72.6,0,0,1,232,96Z"/>'}};const gi = name => { const g = GLYPHS[name]; if(!g) return ''; return `<svg viewBox="0 0 ${g.vb} ${g.vb}" fill="currentColor">${g.p}</svg>`; };
 
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30, chaseTab:'all', search:'', searchResults:null,
 pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
@@ -572,7 +572,7 @@ return `<div class="cd-app">
 <aside class="cd-side${S.sideOpen?' open':''}" id="cdSide">
 <div class="cd-logo"><b>StageMax<span> CRM</span></b><small>Stage Electronics &amp; LED</small></div>
 <div class="cd-nav">${navHtml}</div>
-<div class="cd-side-foot"><div class="isq">${ic('flame')}</div><div><b>The Light<br>Engineers Choice</b><i></i></div></div>
+<div class="cd-side-foot"><button id="out">${ic('logout')}<span>Sign Out</span></button></div>
 </aside>
 <div class="cd-main">
 <div class="cd-top">
@@ -580,7 +580,7 @@ return `<div class="cd-app">
 <div class="cd-search"><span>${ic('search')}</span><input id="gsearch" placeholder="Search customers, leads, phone number…" value="${esc(S.search)}"></div>
 <div class="cd-top-right">
 <div class="cd-bell" id="bellbtn" title="${dueCount} due today">${ic('bell')}${dueCount?`<span class="dot">${dueCount>9?'9+':dueCount}</span>`:''}</div>
-<div class="cd-who"><div class="av">${esc(initials)}</div><div class="meta"><b>${esc(name)}</b><span>CRE</span></div><button id="out" class="cd-signout">Sign out</button></div>
+<div class="cd-who"><div class="av">${esc(initials)}</div><div class="meta"><b>${esc(name)}</b><span>CRE</span></div></div>
 </div>
 </div>
 <div class="cd-body">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${S.searchResults?searchResultsBlock():''}${inner}</div>
@@ -1070,14 +1070,14 @@ ${S.searchResults ? searchResultsBlock() : ''}`;
 /* ── my dashboard (cre) — STAGEMAX reference redesign ── */
 function cdGreetTargets(){
 const t1 = Number(S.me?.monthly_sales_target||0);
-const head = `<h4><span class="isq">${ic('target')}</span>My Targets (This Month)</h4>`;
-if(!t1) return `<div class="cd-target">${head}<div class="sub" style="color:var(--cd-muted);font-size:12.5px">No monthly target set yet — ask your admin to set one.</div></div>`;
+const topRow = `<div class="tgt-top"><span class="isq">${ic('target')}</span><span class="ttl">My Targets (This Month)</span></div>`;
+if(!t1) return `<div class="cd-target-divider"></div><div class="cd-target">${topRow}<div class="sub" style="color:var(--cd-muted);font-size:12.5px">No monthly target set yet — ask your admin to set one.</div></div>`;
 const sums = sumMonthPerf();
 const pct1 = Math.min(100, Math.round(sums.value/t1*100));
-return `<div class="cd-target">${head}
-<div class="row2"><span>Sales Target</span><b>${pct1}%</b></div>
-<div class="bar2"><i style="width:${pct1}%"></i></div>
-<div class="row2" style="margin-top:8px"><span>${rs(sums.value)}</span><span>${rs(t1)}</span></div>
+return `<div class="cd-target-divider"></div><div class="cd-target">
+${topRow}
+<div class="tgt-bot"><span class="lbl">Sales Target</span><div class="bar2"><i style="width:${pct1}%"></i></div><b class="pct">${pct1}%</b><div class="tgt-div"></div><div class="tgt-stat"><b>${rs(sums.value)}</b><span>Achieved</span></div><div class="tgt-div"></div><div class="tgt-stat"><b>${rs(t1)}</b><span>Target</span></div></div>
+
 </div>`;
 }
 
@@ -1089,18 +1089,18 @@ const estimatesPending = S.openDeals.filter(d=>d.stages?.name==='Quoted').length
 const paymentPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_lost && (Number(d.value||0)-Number(d.amount_collected||0))>0).length;
 const dispatchPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_delivered).length;
 const cards = [
-{v:callsDue, l:'Calls Due Today', icon:'call', col:'rgba(110,158,92,.16)', ic2:'#9BC489', tab:'followups'},
-{v:waFollowups, l:'WhatsApp Follow-ups', icon:'wa', col:'rgba(45,181,166,.18)', ic2:'#5FE0CB', tab:'followups'},
-{v:estimatesPending, l:'Estimates Pending', icon:'doc', col:'rgba(59,130,246,.18)', ic2:'#7EB6FF', pipe:1, stage:3},
-{v:null, l:'Approval Waiting', icon:'clock', col:'rgba(138,107,168,.18)', ic2:'#C4A9DE'},
-{v:paymentPending, l:'Payment Pending', icon:'wallet', col:'rgba(232,163,61,.16)', ic2:'var(--amber)'},
-{v:dispatchPending, l:'Dispatch Pending', icon:'truck', col:'rgba(194,80,107,.16)', ic2:'#E8899E', tab:'dispatch'}
+{v:callsDue, l:'Calls Due Today', icon:'call', col:'#3F8F5F', ic2:'#fff', tab:'followups'},
+{v:waFollowups, l:'WhatsApp Follow-ups', icon:'wa', col:'#25D366', ic2:'#fff', tab:'followups'},
+{v:estimatesPending, l:'Estimates Pending', icon:'doc', col:'#3D74E6', ic2:'#fff', pipe:1, stage:3},
+{v:null, l:'Approval Waiting', icon:'clock', col:'#7A5FB0', ic2:'#fff'},
+{v:paymentPending, l:'Payment Pending', icon:'wallet', col:'#E8A33D', ic2:'#1A1206'},
+{v:dispatchPending, l:'Dispatch Pending', icon:'truck', col:'#B23A5C', ic2:'#fff', tab:'dispatch'}
 ];
 return `<div class="cd-kpis">${cards.map(c=>{
 const clickable = !!(c.tab || c.pipe);
 return `<div class="cd-kpi${clickable?' clickable':''}"${c.tab?` data-tab="${c.tab}"`:''}${c.pipe?` data-kpipipe="${c.pipe}" data-kpistage="${c.stage}"`:''}>
 ${clickable?`<span class="chev">${ic('chev')}</span>`:''}
-<div class="isq" style="background:${c.col};color:${c.ic2}">${ic(c.icon)}</div>
+<div class="isq" style="background:${c.col};color:${c.ic2}">${gi(c.icon)}</div>
 <div class="v${c.v===null?' dim':''}">${c.v===null?'—':c.v}</div>
 <div class="l">${esc(c.l)}</div>
 </div>`;
@@ -1150,10 +1150,10 @@ return `<div class="cd-panel"><h3><span class="isq">${ic('bell')}</span>Today's 
 
 function cdQuickActions(){
 return `<div class="cd-panel"><h3><span class="isq">${ic('bolt')}</span>Quick Actions</h3><div class="cd-qa">
-<button data-tab="new"><span class="isq" style="background:rgba(232,163,61,.18);color:var(--amber)">${ic('plus')}</span><span><b>Add Lead</b><small>Create a new lead</small></span></button>
-<button id="qaEstimate"><span class="isq" style="background:rgba(59,130,246,.18);color:#7EB6FF">${ic('doc')}</span><span><b>Create Estimate</b><small>Prepare a quotation</small></span></button>
-<button data-tab="pipeline"><span class="isq" style="background:rgba(110,158,92,.16);color:#9BC489">${ic('cart')}</span><span><b>View Orders</b><small>Check order status</small></span></button>
-<button id="qaRepair"><span class="isq" style="background:rgba(138,107,168,.18);color:#C4A9DE">${ic('wrench')}</span><span><b>Add Repair</b><small>Create a service job</small></span></button>
+<button data-tab="new"><span class="isq" style="background:#FF7A29;color:#fff">${gi('userplus')}</span><span><b>Add Lead</b><small>Create a new lead</small></span></button>
+<button id="qaEstimate"><span class="isq" style="background:#3D74E6;color:#fff">${gi('doc')}</span><span><b>Create Estimate</b><small>Prepare an estimate</small></span></button>
+<button data-tab="pipeline"><span class="isq" style="background:#3F8F5F;color:#fff">${gi('cart')}</span><span><b>View Orders</b><small>Check order status</small></span></button>
+<button id="qaRepair"><span class="isq" style="background:#7A5FB0;color:#fff">${gi('wrench')}</span><span><b>Add Repair</b><small>Create a service job</small></span></button>
 </div></div>`;
 }
 
@@ -1186,7 +1186,7 @@ function cdAdminMessage(){
 return `<div class="cd-admsg">
 <div class="isq">${ic('megaphone')}</div>
 <div class="grow"><div class="row2"><b>Message from Admin</b></div>
-<p>No messages yet. Your admin can post announcements here once this is switched on.</p>
+<p>No messages from Admin.</p>
 </div>
 </div>`;
 }
