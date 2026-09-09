@@ -147,6 +147,91 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
 .item:last-child{border-bottom:none}
 .qty{color:var(--muted);font-size:13px;white-space:nowrap}
+
+/* ── CRE dashboard v3 (STAGEMAX reference redesign) ── */
+:root{
+--cd-bg:#0E1013; --cd-side:#14161C; --cd-surface:#181B22; --cd-surface2:#1F232C;
+--cd-line:#262B36; --cd-text:#F2F1EE; --cd-muted:#8A93A6; --cd-accent:#FF7A29; --cd-accent-ink:#2A1200;
+}
+.cd-app{display:flex;min-height:100vh;background:var(--cd-bg);color:var(--cd-text);font-family:Archivo,system-ui,sans-serif}
+.cd-side{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--cd-side);border-right:1px solid var(--cd-line);display:flex;flex-direction:column;padding:16px 0;z-index:40;transition:transform .2s}
+.cd-side .cd-logo{display:flex;flex-direction:column;padding:0 18px 16px;border-bottom:1px solid var(--cd-line);margin-bottom:10px}
+.cd-side .cd-logo b{font:800 16px Archivo Narrow;letter-spacing:.06em;text-transform:uppercase}
+.cd-side .cd-logo b span{color:var(--cd-accent)}
+.cd-side .cd-logo small{display:block;font-size:9px;letter-spacing:.12em;color:var(--cd-muted);text-transform:uppercase;margin-top:2px}
+.cd-nav{flex:1;overflow-y:auto;padding:4px 10px}
+.cd-nav button{width:100%;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font:600 13.5px Archivo;color:var(--cd-muted);text-align:left;margin-bottom:2px}
+.cd-nav button svg{flex:none;opacity:.85}
+.cd-nav button.on{background:var(--cd-accent);color:var(--cd-accent-ink)}
+.cd-nav button.on svg{opacity:1}
+.cd-nav button:not(.on):hover{background:var(--cd-surface2);color:var(--cd-text)}
+.cd-nav button.soon{opacity:.6}
+.cd-nav .cd-soon-tag{margin-left:auto;font:600 8.5px Archivo;letter-spacing:.06em;text-transform:uppercase;background:var(--cd-surface2);color:var(--cd-muted);padding:2px 5px;border-radius:4px}
+.cd-main{flex:1;margin-left:220px;min-width:0}
+.cd-top{position:sticky;top:0;z-index:35;display:flex;align-items:center;gap:14px;padding:12px 22px;background:rgba(14,16,19,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--cd-line)}
+.cd-burger{display:none;flex:none;width:34px;height:34px;border-radius:8px;background:var(--cd-surface);align-items:center;justify-content:center;color:var(--cd-muted)}
+.cd-search{flex:1;max-width:520px;display:flex;align-items:center;gap:9px;background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:10px;padding:9px 13px;color:var(--cd-muted)}
+.cd-search input{background:none;border:none;flex:1;color:var(--cd-text);font-size:13.5px}
+.cd-search input:focus{outline:none}
+.cd-top-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.cd-bell{position:relative;width:36px;height:36px;border-radius:50%;background:var(--cd-surface);border:1px solid var(--cd-line);display:flex;align-items:center;justify-content:center;color:var(--cd-muted);flex:none}
+.cd-bell .dot{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--rose);color:#fff;font:700 9px Archivo;display:flex;align-items:center;justify-content:center}
+.cd-who{display:flex;align-items:center;gap:9px}
+.cd-who .av{width:34px;height:34px;border-radius:50%;background:var(--cd-accent);color:var(--cd-accent-ink);font:700 13px Archivo Narrow;display:flex;align-items:center;justify-content:center;flex:none}
+.cd-who .meta{line-height:1.25}
+.cd-who .meta b{display:block;font-size:13px}
+.cd-who .meta span{display:block;font-size:10.5px;color:var(--cd-muted);text-transform:uppercase;letter-spacing:.05em}
+.cd-signout{color:var(--cd-muted);font-size:10.5px;text-decoration:underline;margin-left:9px}
+.cd-body{padding:22px;max-width:1180px}
+.cd-greet{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.cd-greet h1{font:800 24px Archivo Narrow;letter-spacing:.01em}
+.cd-greet p{color:var(--cd-muted);font-size:13px;margin-top:3px}
+.cd-target{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:14px 16px;min-width:230px}
+.cd-target h4{font:700 10.5px Archivo;letter-spacing:.08em;text-transform:uppercase;color:var(--cd-muted);margin-bottom:10px}
+.cd-target .row2{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.cd-target .row2 b{font-size:13px}
+.cd-target .bar2{height:6px;border-radius:4px;background:var(--cd-surface2);overflow:hidden}
+.cd-target .bar2 i{display:block;height:100%;background:var(--cd-accent)}
+.cd-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+.cd-kpi{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:14px}
+.cd-kpi .isq{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.cd-kpi .v{font:800 22px Archivo Narrow}
+.cd-kpi .v.dim{color:var(--cd-muted);font-weight:600}
+.cd-kpi .l{font-size:10.5px;color:var(--cd-muted);margin-top:3px;line-height:1.4}
+.cd-grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start}
+.cd-panel{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:16px;margin-bottom:16px}
+.cd-panel h3{font:700 14px Archivo;display:flex;align-items:center;margin-bottom:12px}
+.cd-panel h3 a,.cd-panel h3 button{margin-left:auto;font-size:11.5px;color:var(--cd-accent);font-weight:600}
+.cd-frow{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--cd-line)}
+.cd-frow:last-child{border-bottom:none}
+.cd-frow .isq{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+.cd-frow .grow{min-width:0;flex:1}
+.cd-frow .name{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-frow .sub{font-size:11.5px;color:var(--cd-muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-pill{display:inline-block;font:700 10px Archivo;letter-spacing:.02em;padding:3px 8px;border-radius:6px;white-space:nowrap;flex:none}
+.cd-frow .acts{display:flex;gap:5px;flex:none}
+.cd-frow .acts a,.cd-frow .acts button{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.cd-qa{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.cd-qa button{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:12px;padding:15px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;font:600 12px Archivo;color:var(--cd-text)}
+.cd-qa button .isq{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.cd-qa button:hover{border-color:var(--cd-accent)}
+.cd-activity .item{padding:9px 0;border-bottom:1px solid var(--cd-line);font-size:12.5px;color:var(--cd-text)}
+.cd-activity .item:last-child{border-bottom:none}
+.cd-activity .item span{display:block;color:var(--cd-muted);font-size:11px;margin-top:2px}
+.cd-soon{padding:60px 20px;text-align:center;color:var(--cd-muted)}
+.cd-soon b{display:block;color:var(--cd-text);font-size:16px;margin-bottom:6px}
+@media (max-width:1000px){ .cd-kpis{grid-template-columns:repeat(3,1fr)} .cd-grid2{grid-template-columns:1fr} }
+@media (max-width:860px){
+.cd-side{transform:translateX(-100%)}
+.cd-side.open{transform:translateX(0)}
+.cd-main{margin-left:0}
+.cd-burger{display:flex}
+.cd-kpis{grid-template-columns:repeat(2,1fr)}
+.cd-qa{grid-template-columns:repeat(2,1fr)}
+.cd-body{padding:16px}
+.cd-who .meta{display:none}
+.cd-signout{display:none}
+}
 </style>
 </head>
 <body>
@@ -189,7 +274,13 @@ search:'<circle cx="8.5" cy="8.5" r="5"/><path d="M16 16l-3.6-3.6"/>',
 flame:'<path d="M10 2.3s3.7 3.8 3.7 7.7a3.7 3.7 0 1 1-7.4 0c0-.9.4-1.8.9-2.6.3.9 1 1.3 1.4.9.5-.6 0-1.8-.5-2.7C7.3 3.4 8.6 2.8 10 2.3z"/>',
 check:'<path d="M4 10.3l3.6 3.6L16 5.5"/>',
 doc:'<path d="M6 3h6l3 3v11H6z"/><path d="M12 3v3h3"/>',
-users:'<circle cx="7" cy="7" r="2.4"/><path d="M2.5 16.5c0-2.6 2-4.2 4.5-4.2s4.5 1.6 4.5 4.2"/><circle cx="14.5" cy="7.5" r="2"/><path d="M13 12.6c1.8.2 3.5 1.5 3.5 3.9"/>'
+users:'<circle cx="7" cy="7" r="2.4"/><path d="M2.5 16.5c0-2.6 2-4.2 4.5-4.2s4.5 1.6 4.5 4.2"/><circle cx="14.5" cy="7.5" r="2"/><path d="M13 12.6c1.8.2 3.5 1.5 3.5 3.9"/>',
+home:'<path d="M3 9.5L10 4l7 5.5V16a1 1 0 0 1-1 1h-3v-5H7v5H4a1 1 0 0 1-1-1V9.5z"/>',
+menu:'<path d="M3 5.5h14M3 10h14M3 14.5h14"/>',
+box:'<path d="M3 6.2l7-3 7 3-7 3-7-3z"/><path d="M3 6.2v7.6l7 3 7-3V6.2"/><path d="M10 9.2v7.6"/>',
+wrench:'<path d="M11.7 4.6a3.6 3.6 0 0 0-4.7 4.3L3 12.9V17h4.1l4-4a3.6 3.6 0 0 0 4.3-4.7l-2.4 2.4-2-2z"/>',
+chart:'<path d="M4 16.5V9M9.5 16.5V4M15 16.5v-6"/><path d="M3 17.5h14"/>',
+clock:'<circle cx="10" cy="10.5" r="7"/><path d="M10 6.5v4l3 2"/>'
 };
 const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;
 
@@ -198,7 +289,8 @@ pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[],
 dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
 myPerf:[], myRevivals:[], myPromises:[],
-openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], err:'' };
+openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], err:'',
+sideOpen:false, presetPipeline:null, presetStage:null };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -266,7 +358,7 @@ const mStart = monthStart();
 const [openR,fuR,actR,mpR,weR] = await Promise.all([
 sb.from('deals').select('*, customers(name,phone,district), stages(name,is_won,is_lost,is_delivered,pipeline_id,sort_order), pipelines(name,sort_order)')
 .order('created_at',{ascending:false}).limit(300),
-sb.from('follow_ups').select('*, deals(title, customers(name,phone))').eq('done',false).lte('due_date', today).order('due_date',{ascending:true}),
+sb.from('follow_ups').select('*, deals(title, customers(name,phone), stages(name,is_won,is_lost,is_delivered))').eq('done',false).lte('due_date', today).order('due_date',{ascending:true}),
 sb.from('activity_log').select('*, deals(title, customers(name))').order('created_at',{ascending:false}).limit(10),
 sb.from('cre_performance_daily').select('*').gte('day', mStart),
 sb.from('stage_events').select('deal_id,to_stage_id,changed_at').gte('changed_at', mStart)
@@ -331,7 +423,7 @@ S.dashPipelineValue = (pipeR.data||[]).reduce((a,b)=>a+Number(b.value||0),0);
 await loadChaseSources();
 await loadDashboardShared();
 }
-if(S.tab==='mydash'){
+if(S.tab==='mydash' || S.tab==='followups' || S.tab==='myperf'){
 const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
 const { data:perfData, error:perfErr } = await sb.from('cre_performance_daily').select('*').gte('day', since);
 if(perfErr) throw perfErr; S.myPerf = perfData||[];
@@ -358,6 +450,8 @@ render();
 }
 
 /* ── shell ── */
+const SOON_TABS = ['estimates','orders','customers','products','repairs'];
+
 function render(){
 if(S.deal) return renderDeal();
 app.innerHTML = shell(
@@ -367,12 +461,16 @@ S.tab==='dues' ? viewDues() :
 S.tab==='dispatch' ? viewDispatch() :
 S.tab==='moving' ? viewMoving() :
 S.tab==='dashboard' ? viewDashboard() :
-S.tab==='mydash' ? viewMyDashboard() : viewNew()
+S.tab==='mydash' ? viewMyDashboard() :
+S.tab==='followups' ? viewFollowupsTab() :
+S.tab==='myperf' ? viewMyPerformance() :
+SOON_TABS.includes(S.tab) ? viewComingSoon(S.tab) : viewNew()
 );
 wire();
 }
 
 function shell(inner){
+if(!isOwner()) return shellCRE(inner);
 const t=(k,l)=>`<button data-tab="${k}" class="${S.tab===k?'on':''}">${l}</button>`;
 return `<header><div class="hbar">
 <div class="mark">StageMax<span> CRM</span></div>
@@ -380,7 +478,48 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${isOwner()?t('dashboard','Dashboard'):t('mydash','My Dashboard')}${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${isOwner()?t('dues','Dues'):''}${t('moving','Moving')}${t('new','Add')}</nav>`;
+<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('new','Add')}</nav>`;
+}
+
+/* ── CRE app shell — STAGEMAX reference redesign (Today page + shared chrome) ── */
+const CRE_NAV = [
+{key:'mydash', label:'Today', icon:'home'},
+{key:'pipeline', label:'My Leads', icon:'users'},
+{key:'followups', label:'Follow-ups', icon:'bell'},
+{key:'estimates', label:'Estimates', icon:'doc', soon:true},
+{key:'orders', label:'Orders', icon:'cart', soon:true},
+{key:'dispatch', label:'Dispatch', icon:'truck'},
+{key:'customers', label:'Customers', icon:'users', soon:true},
+{key:'products', label:'Products', icon:'box', soon:true},
+{key:'repairs', label:'Repairs / Service', icon:'wrench', soon:true},
+{key:'myperf', label:'My Performance', icon:'chart'}
+];
+
+function shellCRE(inner){
+const name = S.me?.full_name || '';
+const initials = name.split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase() || '?';
+const dueCount = chaseList().length;
+const navHtml = CRE_NAV.map(n=>{
+const active = S.tab===n.key;
+return `<button data-tab="${n.key}" class="${active?'on':''}${n.soon?' soon':''}">${ic(n.icon)}<span>${esc(n.label)}</span>${n.soon?'<span class="cd-soon-tag">Soon</span>':''}</button>`;
+}).join('');
+return `<div class="cd-app">
+<aside class="cd-side${S.sideOpen?' open':''}" id="cdSide">
+<div class="cd-logo"><b>StageMax<span> CRM</span></b><small>Stage Electronics &amp; LED</small></div>
+<div class="cd-nav">${navHtml}</div>
+</aside>
+<div class="cd-main">
+<div class="cd-top">
+<button class="cd-burger" id="cdBurger">${ic('menu')}</button>
+<div class="cd-search"><span>${ic('search')}</span><input id="gsearch" placeholder="Search customers, leads, phone number…" value="${esc(S.search)}"></div>
+<div class="cd-top-right">
+<div class="cd-bell" id="bellbtn" title="${dueCount} due today">${ic('bell')}${dueCount?`<span class="dot">${dueCount>9?'9+':dueCount}</span>`:''}</div>
+<div class="cd-who"><div class="av">${esc(initials)}</div><div class="meta"><b>${esc(name)}</b><span>CRE</span></div><button id="out" class="cd-signout">Sign out</button></div>
+</div>
+</div>
+<div class="cd-body">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${S.searchResults?searchResultsBlock():''}${inner}</div>
+</div>
+</div>`;
 }
 
 /* ── deals ── */
@@ -619,18 +758,21 @@ const items = [];
 S.followUps.forEach(f=>items.push({
 type:f.contact_type, date:f.due_date, dealId:f.deal_id,
 name:f.deals?.customers?.name||'No customer', phone:f.deals?.customers?.phone,
-detail:f.note || f.deals?.title || 'Scheduled follow-up', isFu:true, fuId:f.id
+detail:f.note || f.deals?.title || 'Scheduled follow-up', isFu:true, fuId:f.id,
+stName:f.deals?.stages?.name, stWon:f.deals?.stages?.is_won, stLost:f.deals?.stages?.is_lost, stDelivered:f.deals?.stages?.is_delivered
 }));
 S.myRevivals.forEach(d=>items.push({
 type:'call', date:d.revival_date, dealId:d.id,
 name:d.customers?.name||'No customer', phone:d.customers?.phone,
-detail:d.lost_reason||'Follow up on lost lead'
+detail:d.lost_reason||'Follow up on lost lead',
+stName:d.stages?.name||'Lost', stWon:false, stLost:true, stDelivered:false
 }));
 S.myPromises.forEach(d=>{
 const bal=Number(d.value||0)-Number(d.amount_collected||0);
 items.push({type:'whatsapp', date:d.balance_promised_date, dealId:d.id,
 name:d.customers?.name||'No customer', phone:d.customers?.phone,
-detail:`Payment promised · ${rs(bal)}`});
+detail:`Payment promised · ${rs(bal)}`,
+stName:'Payment due', stWon:true, stLost:false, stDelivered:false});
 });
 items.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
 return items;
@@ -859,21 +1001,123 @@ return `<div class="dash-hero">
 ${S.searchResults ? searchResultsBlock() : ''}`;
 }
 
-/* ── my dashboard (cre) ── */
-function viewMyDashboard(){
-return `${dashHero()}
-${statRow()}
-${quickActions()}
-<h2 id="followups-anchor">Today's follow-ups</h2>
-${followupsTable()}
-<div class="cols3">
-${salesColumn('My sales · this month')}
-${pipelineColumn('My pipeline')}
-${activeDealsColumn('My active deals', false)}
+/* ── my dashboard (cre) — STAGEMAX reference redesign ── */
+function cdGreetTargets(){
+const t1 = Number(S.me?.monthly_sales_target||0);
+if(!t1) return '<div class="cd-target"><h4>My targets · this month</h4><div class="sub" style="color:var(--cd-muted);font-size:12.5px">No monthly target set yet — ask your admin to set one.</div></div>';
+const sums = sumMonthPerf();
+const pct1 = Math.min(100, Math.round(sums.value/t1*100));
+return `<div class="cd-target"><h4>My Targets (This Month)</h4>
+<div class="row2"><span>Sales Target</span><b>${pct1}%</b></div>
+<div class="bar2"><i style="width:${pct1}%"></i></div>
+<div class="row2" style="margin-top:8px;color:var(--cd-muted)"><span>${rs(sums.value)}</span><span>${rs(t1)}</span></div>
+</div>`;
+}
+
+function cdKpis(){
+const chase = chaseList();
+const callsDue = chase.filter(i=>i.type==='call').length;
+const waFollowups = chase.filter(i=>i.type==='whatsapp').length;
+const estimatesPending = S.openDeals.filter(d=>d.stages?.name==='Quoted').length;
+const paymentPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_lost && (Number(d.value||0)-Number(d.amount_collected||0))>0).length;
+const dispatchPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_delivered).length;
+const cards = [
+{v:callsDue, l:'Calls Due Today', icon:'call', col:'rgba(110,158,92,.16)', ic2:'#9BC489'},
+{v:waFollowups, l:'WhatsApp Follow-ups', icon:'wa', col:'rgba(74,163,184,.16)', ic2:'#8FD0E2'},
+{v:estimatesPending, l:'Estimates Pending', icon:'doc', col:'rgba(74,163,184,.16)', ic2:'#8FD0E2', note:'quoted-stage deals'},
+{v:null, l:'Approval Waiting', icon:'clock', col:'rgba(138,107,168,.18)', ic2:'#C4A9DE', note:'not tracked yet'},
+{v:paymentPending, l:'Payment Pending', icon:'wallet', col:'rgba(232,163,61,.16)', ic2:'var(--amber)'},
+{v:dispatchPending, l:'Dispatch Pending', icon:'truck', col:'rgba(194,80,107,.16)', ic2:'#E8899E'}
+];
+return `<div class="cd-kpis">${cards.map(c=>`
+<div class="cd-kpi">
+<div class="isq" style="background:${c.col};color:${c.ic2}">${ic(c.icon)}</div>
+<div class="v${c.v===null?' dim':''}">${c.v===null?'—':c.v}</div>
+<div class="l">${esc(c.l)}${c.note?` · ${esc(c.note)}`:''}</div>
+</div>`).join('')}</div>`;
+}
+
+function cdStagePill(st){
+if(!st) return '';
+const color = st.is_lost ? 'rose' : st.is_delivered ? 'green' : st.is_won ? 'amber' : 'cyan';
+const swatch = {rose:['rgba(194,80,107,.18)','#E8899E'], green:['rgba(110,158,92,.18)','#9BC489'], amber:['rgba(232,163,61,.2)','var(--amber)'], cyan:['rgba(74,163,184,.18)','#8FD0E2']}[color];
+return `<span class="cd-pill" style="background:${swatch[0]};color:${swatch[1]}">${esc(st.name)}</span>`;
+}
+
+function cdFollowRow(i, today){
+const overdue = i.date < today;
+const st = i.stName ? {name:i.stName, is_won:i.stWon, is_lost:i.stLost, is_delivered:i.stDelivered} : null;
+return `<div class="cd-frow" data-deal="${i.dealId}" style="cursor:pointer">
+<div class="isq" style="background:rgba(232,163,61,.14);color:var(--amber)">${ic(i.type==='call'?'call':i.type==='whatsapp'?'wa':'pin')}</div>
+<div class="grow">
+<div class="name">${esc(i.name)}</div>
+<div class="sub">${esc(i.detail)}</div>
 </div>
-${targetsCard()}
-${recentUpdates()}
-${productAvailability()}`;
+${cdStagePill(st)}
+<span class="cd-pill" style="background:${overdue?'rgba(194,80,107,.18)':'rgba(255,122,41,.16)'};color:${overdue?'#E8899E':'var(--cd-accent)'}">${overdue?'Overdue':day(i.date)}</span>
+<div class="acts">
+${i.phone?`<a href="${telLink(i.phone)}" style="background:rgba(110,158,92,.16);color:#9BC489" title="Call">${ic('call')}</a>`:''}
+${i.phone?`<a href="${waLink(i.phone)}" target="_blank" rel="noopener" style="background:rgba(74,163,184,.16);color:#8FD0E2" title="WhatsApp">${ic('wa')}</a>`:''}
+${i.isFu?`<button data-donefu="${i.fuId}" style="background:rgba(232,163,61,.16);color:var(--amber)" title="Mark done">${ic('check')}</button>`:''}
+</div>
+</div>`;
+}
+
+function cdFollowupsPanel(limit){
+const today = new Date().toISOString().slice(0,10);
+const all = chaseList();
+const shown = limit ? all.slice(0,limit) : all;
+const rows = shown.length ? shown.map(i=>cdFollowRow(i,today)).join('') : `<div class="empty">Nothing due. You're all caught up.</div>`;
+const viewAll = limit && all.length>limit ? `<button data-tab="followups">View All</button>` : '';
+return `<div class="cd-panel"><h3>Today's Follow-ups (${all.length})${viewAll}</h3>${rows}</div>`;
+}
+
+function cdQuickActions(){
+return `<div class="cd-panel"><h3>Quick Actions</h3><div class="cd-qa">
+<button data-tab="new"><span class="isq" style="background:rgba(232,163,61,.18);color:var(--amber)">${ic('plus')}</span>Add Lead</button>
+<button id="qaEstimate"><span class="isq" style="background:rgba(74,163,184,.16);color:#8FD0E2">${ic('doc')}</span>Create Estimate</button>
+<button data-tab="pipeline"><span class="isq" style="background:rgba(110,158,92,.16);color:#9BC489">${ic('cart')}</span>View Orders</button>
+<button id="qaRepair"><span class="isq" style="background:rgba(138,107,168,.18);color:#C4A9DE">${ic('wrench')}</span>Add Repair</button>
+</div></div>`;
+}
+
+function cdActivity(){
+if(!S.activity.length) return `<div class="cd-panel"><h3>Recent Activity</h3><div class="empty">Nothing logged yet.</div></div>`;
+const rows = S.activity.slice(0,6).map(a=>{
+const label = VERB_LABEL[a.verb] || a.verb;
+const name = a.deals?.customers?.name || a.detail || '';
+return `<div class="item" ${a.deal_id?`data-deal="${a.deal_id}" style="cursor:pointer"`:''}>${esc(label)}${name?' — '+esc(name):''}<span>${timeAgo(a.created_at)}</span></div>`;
+}).join('');
+return `<div class="cd-panel cd-activity"><h3>Recent Activity</h3>${rows}</div>`;
+}
+
+function viewMyDashboard(){
+const name = S.me?.full_name || '';
+const hr = new Date().getHours();
+const greeting = hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+return `<div class="cd-greet">
+<div><h1>${greeting}, ${esc(name.split(' ')[0]||name)}!</h1><p>Calls. Follow-ups. Estimates. Sales. Let's make it happen.</p></div>
+${cdGreetTargets()}
+</div>
+${cdKpis()}
+<div class="cd-grid2">
+<div>${cdFollowupsPanel(6)}</div>
+<div>${cdQuickActions()}${cdActivity()}</div>
+</div>`;
+}
+
+function viewFollowupsTab(){
+return `<h2 style="margin-top:0">Follow-ups</h2>${cdFollowupsPanel(null)}`;
+}
+
+function viewMyPerformance(){
+const t = targetsCard();
+return `<h2 style="margin-top:0">My performance</h2>${salesColumn('This month')}${t||'<div class="empty">No monthly target set yet — ask your admin to set one.</div>'}`;
+}
+
+const SOON_LABEL = {estimates:'Estimates', orders:'Orders', customers:'Customers', products:'Products', repairs:'Repairs / Service'};
+function viewComingSoon(tab){
+return `<div class="cd-panel cd-soon"><b>${esc(SOON_LABEL[tab]||tab)} — coming in a later phase</b>This screen is part of the approved redesign plan and will be built next, wired to real StageMax data. Nothing here is faked in the meantime.</div>`;
 }
 
 function viewDashboard(){
@@ -1108,8 +1352,11 @@ render();
 /* ── wiring ── */
 function wire(){
 const out=document.getElementById('out'); if(out) out.onclick=async()=>{ await sb.auth.signOut(); S={...S,me:null,deal:null}; renderLogin(); };
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; loadTab(); });
+document.querySelectorAll('nav button, [data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; S.sideOpen=false; loadTab(); });
 const fab=document.getElementById('fab'); if(fab) fab.onclick=()=>{ S.tab='new'; loadTab(); };
+const burger=document.getElementById('cdBurger'); if(burger) burger.onclick=()=>{ S.sideOpen=!S.sideOpen; render(); };
+const qe=document.getElementById('qaEstimate'); if(qe) qe.onclick=()=>{ S.presetPipeline=1; S.presetStage=3; S.tab='new'; S.deal=null; loadTab(); };
+const qr=document.getElementById('qaRepair'); if(qr) qr.onclick=()=>{ S.presetPipeline=3; S.presetStage=12; S.tab='new'; S.deal=null; loadTab(); };
 document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.pipe); S.stage=null; loadTab(); });
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
 document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
@@ -1120,7 +1367,7 @@ document.querySelectorAll('.qa[data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.da
 document.querySelectorAll('[data-chase]').forEach(b=>b.onclick=()=>{ S.chaseTab=b.dataset.chase; render(); });
 document.querySelectorAll('[data-donefu]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); markFollowupDone(b.dataset.donefu); });
 document.querySelectorAll('[data-savetarget]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); saveTarget(b.dataset.savetarget,b); });
-const bell=document.getElementById('bellbtn'); if(bell) bell.onclick=()=>{ document.getElementById('followups-anchor')?.scrollIntoView({behavior:'smooth'}); };
+const bell=document.getElementById('bellbtn'); if(bell) bell.onclick=()=>{ const a=document.getElementById('followups-anchor'); if(a) a.scrollIntoView({behavior:'smooth'}); else if(!isOwner()){ S.tab='followups'; S.deal=null; loadTab(); } };
 const gs=document.getElementById('gsearch');
 if(gs){ gs.onkeydown=e=>{ if(e.key==='Enter') runSearch(gs.value); }; }
 
@@ -1129,10 +1376,13 @@ if(items){
 items.appendChild(itemRow());
 document.getElementById('addrow').onclick=()=>items.appendChild(itemRow());
 const pipeSel=document.getElementById('npipe'), stgSel=document.getElementById('nstage');
+if(S.presetPipeline) pipeSel.value=String(S.presetPipeline);
 const fill=()=>{ const pid=Number(pipeSel.value);
 stgSel.innerHTML=S.stages.filter(s=>s.pipeline_id===pid)
-.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join(''); };
+.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+if(S.presetStage) stgSel.value=String(S.presetStage); };
 pipeSel.onchange=fill; fill();
+S.presetPipeline=null; S.presetStage=null;
 document.getElementById('save').onclick=saveDeal;
 }
 }
