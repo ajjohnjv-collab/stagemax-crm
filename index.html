@@ -280,6 +280,89 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 
 .cd-soon{padding:60px 20px;text-align:center;color:var(--cd-muted)}
 .cd-soon b{display:block;color:var(--cd-text);font-size:16px;margin-bottom:6px}
+
+/* ── Phase 2: My Leads / Add New Lead / Lead Detail (CRE) ── */
+.cd-leadbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.cd-leadbar h1{font:800 21px Archivo Narrow}
+.cd-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 13px Archivo;padding:10px 18px;border-radius:10px;background:linear-gradient(135deg,var(--cd-accent),#FF6A17);color:var(--cd-accent-ink);box-shadow:0 4px 14px -4px rgba(255,122,41,.5);transition:transform .15s;border:none;text-decoration:none}
+.cd-btn:hover{transform:translateY(-1px)}
+.cd-btn.ghost{background:var(--cd-surface2);color:var(--cd-text);border:1px solid var(--cd-line);box-shadow:none}
+.cd-btn.ghost:hover{border-color:var(--cd-accent)}
+.cd-btn svg{width:16px;height:16px;stroke-width:2}
+.cd-btn:disabled{opacity:.5;pointer-events:none}
+
+.cd-filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.cd-fchip{font:600 12px Archivo;padding:7px 13px;border-radius:9px;background:var(--cd-surface);border:1px solid var(--cd-line);color:var(--cd-muted);display:flex;align-items:center;gap:6px;cursor:pointer}
+.cd-fchip select{background:none;border:none;color:var(--cd-text);font:600 12px Archivo;appearance:none;-webkit-appearance:none;cursor:pointer}
+.cd-fchip select:focus{outline:none}
+.cd-fchip.active{border-color:var(--cd-accent);color:var(--cd-text)}
+
+.cd-leadlist{display:flex;flex-direction:column;gap:11px}
+.cd-lead{background:var(--cd-surface);border:1px solid var(--cd-line);border-radius:13px;padding:15px 17px;cursor:pointer;transition:border-color .15s,transform .15s}
+.cd-lead:hover{border-color:var(--cd-accent);transform:translateY(-1px)}
+.cd-lead .top{display:flex;align-items:flex-start;gap:12px}
+.cd-lead .av{width:38px;height:38px;border-radius:50%;background:var(--cd-surface2);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;font:700 12.5px Archivo Narrow;flex:none}
+.cd-lead .grow{min-width:0;flex:1}
+.cd-lead .name{font-weight:700;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-lead .sub{font-size:12px;color:var(--cd-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-lead .right{text-align:right;flex:none}
+.cd-lead .amt{font:800 15px Archivo Narrow}
+.cd-lead .meta{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:11px}
+.cd-lead .acts{display:flex;gap:8px;margin-left:auto;flex:none}
+.cd-lead .acts a{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--cd-surface2);border:1px solid var(--cd-line);transition:border-color .15s,transform .15s}
+.cd-lead .acts a:hover{transform:scale(1.08);border-color:currentColor}
+.cd-lead .acts a.call{color:#3F8F5F}
+.cd-lead .acts a.wa{color:#25D366}
+
+.cd-loadmore{display:block;margin:18px auto 0;background:var(--cd-surface2);border:1px solid var(--cd-line);color:var(--cd-text);font:600 12.5px Archivo;padding:10px 22px;border-radius:10px}
+.cd-loadmore:hover{border-color:var(--cd-accent)}
+.cd-loadmore:disabled{opacity:.5}
+
+.cd-form label{display:block;font:600 11.5px Archivo;letter-spacing:.02em;text-transform:uppercase;color:var(--cd-muted);margin:16px 0 6px}
+.cd-form label:first-child{margin-top:0}
+.cd-form input,.cd-form select,.cd-form textarea{width:100%;background:var(--cd-surface2);border:1px solid var(--cd-line);border-radius:10px;padding:11px 13px;color:var(--cd-text);font:500 13.5px Archivo;transition:border-color .15s}
+.cd-form input:focus,.cd-form select:focus,.cd-form textarea:focus{outline:none;border-color:var(--cd-accent)}
+.cd-form textarea{resize:vertical;min-height:74px;font-family:Archivo,system-ui,sans-serif}
+.cd-form .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cd-form .three{display:grid;grid-template-columns:1.6fr .7fr .9fr;gap:8px;margin-bottom:8px}
+.cd-form .hint{font-size:11px;color:var(--cd-muted);margin-top:8px}
+
+.cd-tabs{display:flex;gap:4px;border-bottom:1px solid var(--cd-line);margin-bottom:18px;overflow-x:auto}
+.cd-tabs button{font:700 12.5px Archivo;color:var(--cd-muted);padding:11px 16px;border-bottom:2px solid transparent;white-space:nowrap;flex:none}
+.cd-tabs button.on{color:var(--cd-accent);border-bottom-color:var(--cd-accent)}
+
+.cd-lead-header{background:linear-gradient(120deg,#181B22 0%,#14161C 62%,#1B140F 100%);border:1px solid var(--cd-line);border-radius:16px;padding:22px 26px;margin-bottom:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.cd-lead-header .av{width:56px;height:56px;border-radius:50%;background:var(--cd-surface2);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;font:800 19px Archivo Narrow;flex:none}
+.cd-lead-header .grow{min-width:0}
+.cd-lead-header h1{font:800 21px Archivo Narrow}
+.cd-lead-header .sub{color:var(--cd-muted);font-size:13px;margin-top:3px}
+.cd-lead-header .acts{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
+
+.cd-ovrow{display:flex;padding:10px 0;border-bottom:1px solid var(--cd-line);gap:14px}
+.cd-ovrow:last-child{border-bottom:none}
+.cd-ovrow .k{width:140px;flex:none;font-size:11.5px;color:var(--cd-muted);text-transform:uppercase;letter-spacing:.03em;padding-top:1px}
+.cd-ovrow .v{flex:1;font-size:13.5px;font-weight:600}
+
+.cd-note{background:var(--cd-surface2);border:1px solid var(--cd-line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
+.cd-note:last-child{margin-bottom:0}
+.cd-note .who{font:700 12px Archivo;color:var(--cd-text)}
+.cd-note .when{font-size:10.5px;color:var(--cd-muted);margin-left:8px}
+.cd-note p{font-size:12.5px;color:var(--cd-text);margin-top:5px;line-height:1.5;white-space:pre-wrap}
+
+.cd-backbtn{background:none;color:var(--cd-muted);font:600 12.5px Archivo;margin-bottom:16px;display:inline-flex;align-items:center;gap:6px}
+.cd-backbtn:hover{color:var(--cd-text)}
+
+.cd-actionbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.cd-btn.sm{padding:8px 15px;font-size:12.5px;gap:6px}
+.cd-btn.sm svg{width:14px;height:14px}
+.cd-btn.estimate{background:rgba(61,116,230,.16);color:#3D74E6;border:1px solid rgba(61,116,230,.35);box-shadow:none}
+.cd-btn.estimate:hover{border-color:#3D74E6}
+
+@media (max-width:700px){
+.cd-form .two,.cd-form .three{grid-template-columns:1fr}
+.cd-lead-header{padding:18px}
+}
+
 @media (max-width:1000px){ .cd-kpis{grid-template-columns:repeat(3,1fr)} .cd-grid2{grid-template-columns:1fr} }
 @media (max-width:860px){
 .cd-side{transform:translateX(-100%)}
@@ -354,8 +437,9 @@ pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[],
 dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
 myPerf:[], myRevivals:[], myPromises:[],
-openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], err:'',
-sideOpen:false, presetPipeline:null, presetStage:null };
+openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], err:'',
+sideOpen:false, presetPipeline:null, presetStage:null,
+leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview' };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -441,10 +525,15 @@ async function loadTab(){
 S.err='';
 try{
 if(S.tab==='pipeline'){
+if(isOwner()){
 const { data, error } = await sb.from('deals')
 .select('*, customers(name,phone,district), stages(name,is_delivered,is_lost)')
 .eq('pipeline_id', S.pipeline).order('created_at',{ascending:false}).limit(200);
 if(error) throw error; S.deals = data||[];
+} else {
+S.leadPage = 0; S.leadFollowMap = {};
+await fetchLeadsPage();
+}
 }
 if(S.tab==='money'){
 const { data, error } = await sb.from('payments_pending').select('*');
@@ -518,9 +607,10 @@ render();
 const SOON_TABS = ['estimates','orders','customers','products','repairs'];
 
 function render(){
-if(S.deal) return renderDeal();
+if(S.deal) return isOwner() ? renderDeal() : renderLeadDetail();
 app.innerHTML = shell(
-S.tab==='pipeline' ? viewPipeline() :
+S.tab==='pipeline' ? (isOwner() ? viewPipeline() : viewMyLeads()) :
+S.tab==='addlead' ? viewAddLead() :
 S.tab==='money' ? viewMoney() :
 S.tab==='dues' ? viewDues() :
 S.tab==='dispatch' ? viewDispatch() :
@@ -628,12 +718,15 @@ return `<div class="chips">${pipes}</div><div class="chips">${chips}</div>${card
 
 /* ── deal detail ── */
 async function openDeal(id){
-const [{data:d},{data:items},{data:fups}] = await Promise.all([
-sb.from('deals').select('*, customers(*), stages(*), pipelines(name)').eq('id',id).single(),
+const [{data:d},{data:items},{data:fups},{data:notes}] = await Promise.all([
+sb.from('deals').select('*, customers(*), stages(*), pipelines(name), sources(name)').eq('id',id).single(),
 sb.from('deal_items').select('*, products(name,model_code)').eq('deal_id',id).order('sort_order'),
-sb.from('follow_ups').select('*').eq('deal_id',id).order('due_date')
+sb.from('follow_ups').select('*').eq('deal_id',id).order('due_date'),
+sb.from('notes').select('*').eq('deal_id',id).order('created_at',{ascending:false})
 ]);
-S.deal = { ...d, items: items||[] }; S.dealFollowUps = fups||[]; render();
+S.deal = { ...d, items: items||[] }; S.dealFollowUps = fups||[]; S.dealNotes = notes||[];
+if(!S.dealTab) S.dealTab='overview';
+render();
 }
 
 async function logActivity(verb, dealId, detail){
@@ -741,6 +834,345 @@ const type=document.getElementById('ftype').value;
 const note=document.getElementById('fnote').value.trim();
 if(!due){ e.target.disabled=false; return; }
 await sb.from('follow_ups').insert({deal_id:d.id, assigned_to:d.assigned_to||S.me.id, due_date:due, contact_type:type, note:note||null});
+openDeal(d.id);
+};
+}
+
+/* ── Phase 2: My Leads (CRE) ── */
+function leadStageColor(st){
+if(!st) return 'var(--cd-muted)';
+if(st.is_lost) return 'var(--rose)';
+if(st.is_delivered) return 'var(--green)';
+if(st.is_won) return 'var(--amber)';
+return 'var(--cyan)';
+}
+
+function findQuotedStage(pipelineId){
+return S.stages.find(s=>s.pipeline_id===pipelineId && /quoted/i.test(s.name||''));
+}
+
+async function fetchLeadsPage(){
+let dealIdFilter=null;
+if(S.leadFollow!=='all'){
+const today=new Date().toISOString().slice(0,10);
+let fq=sb.from('follow_ups').select('deal_id').eq('done',false);
+fq = S.leadFollow==='today' ? fq.eq('due_date',today) : fq.lt('due_date',today);
+const {data:fus}=await fq;
+dealIdFilter=[...new Set((fus||[]).map(f=>f.deal_id))];
+if(!dealIdFilter.length){ if(S.leadPage===0) S.deals=[]; S.leadHasMore=false; return; }
+}
+let custIdFilter=null;
+if(S.leadQ.trim()){
+const like=`%${S.leadQ.trim()}%`;
+const {data:cs}=await sb.from('customers').select('id').or(`name.ilike.${like},phone.ilike.${like}`).limit(200);
+custIdFilter=(cs||[]).map(c=>c.id);
+if(!custIdFilter.length){ if(S.leadPage===0) S.deals=[]; S.leadHasMore=false; return; }
+}
+let q=sb.from('deals').select('*, customers(name,phone,district,customer_type,alt_phone), stages(name,is_won,is_lost,is_delivered), sources(name)')
+.order('created_at',{ascending:false})
+.range(S.leadPage*S.leadPageSize, S.leadPage*S.leadPageSize+S.leadPageSize-1);
+if(S.leadStage) q=q.eq('stage_id',S.leadStage);
+if(S.leadSource) q=q.eq('source_id',S.leadSource);
+if(dealIdFilter) q=q.in('id',dealIdFilter);
+if(custIdFilter) q=q.in('customer_id',custIdFilter);
+const {data,error}=await q;
+if(error) throw error;
+S.deals = S.leadPage===0 ? (data||[]) : S.deals.concat(data||[]);
+S.leadHasMore = (data||[]).length===S.leadPageSize;
+const pageIds=(data||[]).map(x=>x.id);
+if(pageIds.length){
+const {data:fus2}=await sb.from('follow_ups').select('deal_id,due_date,contact_type').eq('done',false).in('deal_id',pageIds).order('due_date',{ascending:true});
+const map={};
+(fus2||[]).forEach(f=>{ if(!map[f.deal_id]) map[f.deal_id]=f; });
+S.leadFollowMap = {...S.leadFollowMap, ...map};
+}
+}
+
+async function loadMoreLeads(){
+S.leadPage++; S.leadsLoading=true; render();
+try{ await fetchLeadsPage(); }catch(e){ S.err=e.message||String(e); }
+S.leadsLoading=false; render();
+}
+
+async function applyLeadFilters(){
+S.leadPage=0; S.leadFollowMap={}; S.leadsLoading=true; render();
+try{ await fetchLeadsPage(); }catch(e){ S.err=e.message||String(e); }
+S.leadsLoading=false; render();
+}
+
+function viewMyLeads(){
+const stageOpts = S.stages.map(s=>{
+const p=S.pipelines.find(pp=>pp.id===s.pipeline_id);
+return `<option value="${s.id}" ${S.leadStage===s.id?'selected':''}>${esc(p?.name||'')} · ${esc(s.name)}</option>`;
+}).join('');
+const sourceOpts = S.sources.map(s=>`<option value="${s.id}" ${S.leadSource===s.id?'selected':''}>${esc(s.name)}</option>`).join('');
+const followChips = [['all','All'],['today','Due Today'],['missed','Missed Follow-ups']].map(([k,l])=>
+`<button class="cd-fchip${S.leadFollow===k?' active':''}" data-followf="${k}">${l}</button>`).join('');
+
+const cards = S.deals.length ? S.deals.map(d=>{
+const initials=(d.customers?.name||'?').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';
+const fu = S.leadFollowMap[d.id];
+return `<div class="cd-lead" data-lead="${d.id}">
+<div class="top">
+<div class="av">${esc(initials)}</div>
+<div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.customers?.phone||'')}${d.customers?.district?' · '+esc(d.customers.district):''}${d.sources?.name?' · '+esc(d.sources.name):''}</div>
+</div>
+<div class="right">
+<div class="amt">${rs(d.value)}</div>
+<span class="cd-pill" style="background:var(--cd-surface2);color:${leadStageColor(d.stages)}">${esc(d.stages?.name||'')}</span>
+</div>
+</div>
+<div class="meta">
+<span class="cd-pill" style="background:var(--cd-surface2);color:var(--cd-muted)">${esc(d.title||'')}</span>
+${fu?`<span class="cd-pill" style="background:var(--cd-surface2);color:var(--cd-accent)">Next: ${day(fu.due_date)} · ${esc(fu.contact_type)}</span>`:''}
+<div class="acts">
+${d.customers?.phone?`<a class="call" href="${telLink(d.customers.phone)}" title="Call" onclick="event.stopPropagation()">${ic('call')}</a>`:''}
+${d.customers?.phone?`<a class="wa" href="${waLink(d.customers.phone)}" target="_blank" rel="noopener" title="WhatsApp" onclick="event.stopPropagation()">${ic('wa')}</a>`:''}
+</div>
+</div>
+</div>`;
+}).join('') : (S.leadsLoading ? '' : `<div class="cd-empty"><div class="isq">${ic('users')}</div><b>No leads found</b><p>Try clearing filters, or add your first lead.</p></div>`);
+
+return `<div class="cd-leadbar"><h1>My Leads</h1><button class="cd-btn" id="addLeadBtn">${ic('plus')}Add Lead</button></div>
+<div class="cd-search" style="margin-bottom:16px;max-width:420px">${ic('search')}<input id="leadsearch" placeholder="Search name or phone…" value="${esc(S.leadQ)}"></div>
+<div class="cd-filters">
+<label class="cd-fchip">Stage <select id="leadstagesel"><option value="">All stages</option>${stageOpts}</select></label>
+<label class="cd-fchip">Source <select id="leadsourcesel"><option value="">All sources</option>${sourceOpts}</select></label>
+${followChips}
+</div>
+<div class="cd-leadlist">${cards}</div>
+${S.leadHasMore?`<button class="cd-loadmore" id="leadLoadMore" ${S.leadsLoading?'disabled':''}>${S.leadsLoading?'Loading…':'Load more'}</button>`:''}`;
+}
+
+/* ── Phase 2: Add New Lead (CRE) ── */
+function viewAddLead(){
+const sourceOpts=S.sources.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+return `<div class="cd-leadbar"><h1>Add New Lead</h1><button class="cd-btn ghost" id="cancelAddLead">Cancel</button></div>
+<div class="cd-grid2">
+<div>
+<div class="cd-panel"><h3>Customer</h3>
+<div class="cd-form">
+<label for="alname">Customer Name</label><input id="alname" placeholder="Full name">
+<div class="two">
+<div><label for="alphone">Phone</label><input id="alphone" inputmode="numeric" placeholder="10 digits"></div>
+<div><label for="alalt">Alternate Number</label><input id="alalt" inputmode="numeric" placeholder="Optional"></div>
+</div>
+<div class="two">
+<div><label for="aldist">Location / City</label><input id="aldist" placeholder="e.g. Malappuram"></div>
+<div><label for="altype">Customer Type</label><select id="altype"><option value="retail">Retail</option><option value="dealer">Dealer</option></select></div>
+</div>
+</div></div>
+
+<div class="cd-panel"><h3>Enquiry</h3>
+<div class="cd-form">
+<label for="alreq">Requirement / Message</label><textarea id="alreq" placeholder="What is the customer looking for?"></textarea>
+<label>Product / Service Interest</label><div id="alitems"></div>
+<button class="cd-btn ghost" id="aladdrow" style="margin-top:8px;width:auto;padding:8px 14px;font-size:12px">Add another item</button>
+<div class="two" style="margin-top:16px">
+<div><label for="alval">Estimated Value / Budget</label><input id="alval" type="number" inputmode="decimal" placeholder="0"></div>
+<div><label for="alsource">Lead Source</label><select id="alsource"><option value="">Not specified</option>${sourceOpts}</select></div>
+</div>
+</div></div>
+</div>
+<div>
+<div class="cd-panel"><h3>Assignment</h3>
+<div class="cd-ovrow"><div class="k">Assigned CRE</div><div class="v">${esc(S.me?.full_name||'')} (you)</div></div>
+<p class="hint">New leads are assigned to you by default. Ask your admin to reassign if needed.</p>
+</div>
+<button class="cd-btn" id="saveLead" style="width:100%">Save Lead</button>
+</div>
+</div>`;
+}
+
+async function saveLead(e){
+const btn=e.target; btn.disabled=true; btn.textContent='Saving…';
+try{
+const name=document.getElementById('alname').value.trim();
+if(!name) throw new Error('Customer name is needed.');
+const phone=document.getElementById('alphone').value.trim();
+const alt=document.getElementById('alalt').value.trim();
+const dist=document.getElementById('aldist').value.trim();
+const ctype=document.getElementById('altype').value;
+
+let cid=null;
+if(phone){
+const { data:found } = await sb.from('customers').select('id').eq('phone',phone).limit(1);
+if(found?.length) cid=found[0].id;
+}
+if(!cid){
+const { data:c, error } = await sb.from('customers')
+.insert({ name, phone:phone||null, alt_phone:alt||null, customer_type:ctype||'retail', district:dist||null, state:'Kerala' })
+.select('id').single();
+if(error) throw error; cid=c.id;
+} else {
+const patch={};
+if(alt) patch.alt_phone=alt;
+if(dist) patch.district=dist;
+if(Object.keys(patch).length) await sb.from('customers').update(patch).eq('id',cid);
+}
+
+const retailPipe = S.pipelines.find(p=>/retail/i.test(p.name)) || S.pipelines[0];
+const firstStage = S.stages.filter(s=>s.pipeline_id===retailPipe.id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))[0];
+
+const { data:deal, error:de } = await sb.from('deals').insert({
+pipeline_id:retailPipe.id,
+stage_id:firstStage.id,
+customer_id:cid,
+title:document.getElementById('alreq').value.trim()||name,
+value:Number(document.getElementById('alval').value||0),
+amount_collected:0,
+source_id:document.getElementById('alsource').value?Number(document.getElementById('alsource').value):null,
+assigned_to:S.me.id
+}).select('id').single();
+if(de) throw de;
+
+const rows=[...document.querySelectorAll('#alitems .three')].map((r,i)=>({
+deal_id:deal.id,
+product_id:r.querySelector('.p').value?Number(r.querySelector('.p').value):null,
+qty:Number(r.querySelector('.q').value||1),
+rate:Number(r.querySelector('.r').value||0),
+sort_order:i+1
+})).filter(r=>r.product_id);
+if(rows.length) await sb.from('deal_items').insert(rows);
+await logActivity('lead_created', deal.id, name);
+
+S.tab='pipeline';
+await openDeal(deal.id);
+}catch(err){
+S.err=err.message||String(err); btn.disabled=false; btn.textContent='Save Lead'; render();
+}
+}
+
+/* ── Phase 2: Lead / Customer Detail (CRE) ── */
+function leadOverview(d,bal){
+const rows=[
+['Customer', esc(d.customers?.name||'—')],
+['Phone', esc(d.customers?.phone||'—')],
+['Alt. Phone', esc(d.customers?.alt_phone||'—')],
+['Location', esc(d.customers?.district||'—')],
+['Customer Type', d.customers?.customer_type==='dealer'?'Dealer':'Retail'],
+['Source', esc(d.sources?.name||'Not specified')],
+['Assigned CRE', esc(S.profiles.find(p=>p.id===d.assigned_to)?.full_name||'—')],
+['Requirement', esc(d.title||'—')],
+['Pipeline / Stage', esc(S.pipelines.find(p=>p.id===d.pipeline_id)?.name||'')+' · '+esc(d.stages?.name||'')],
+['Deal Value', rs(d.value)],
+['Balance Due', bal>0?rs(bal):'Settled'],
+['Created', day(d.created_at)]
+];
+const items = (d.items&&d.items.length) ? d.items.map(i=>`<div class="cd-frow">
+<div class="isq" style="background:rgba(255,122,41,.14);color:var(--cd-accent)">${ic('box')}</div>
+<div class="grow"><div class="name">${esc(i.products?.name||i.product_other||'Item')}</div><div class="sub">${Number(i.qty)} × ${rs(i.rate)}</div></div>
+<div style="font-weight:700;font-size:13px">${rs(i.amount)}</div>
+</div>`).join('') : `<div class="cd-empty"><b>No items yet</b></div>`;
+return `<div class="cd-grid2">
+<div><div class="cd-panel"><h3>Overview</h3>${rows.map(([k,v])=>`<div class="cd-ovrow"><div class="k">${esc(k)}</div><div class="v">${v}</div></div>`).join('')}</div></div>
+<div><div class="cd-panel"><h3>Items</h3>${items}</div></div>
+</div>`;
+}
+
+function leadFollowups(d){
+const list = S.dealFollowUps.length ? S.dealFollowUps.map(f=>`
+<div class="cd-frow">
+<div class="isq" style="background:${f.done?'rgba(110,158,92,.16)':'rgba(255,122,41,.14)'};color:${f.done?'var(--green)':'var(--cd-accent)'}">${ic(f.contact_type==='call'?'call':f.contact_type==='whatsapp'?'wa':'pin')}</div>
+<div class="grow"><div class="name">${esc(f.contact_type)} · ${day(f.due_date)}</div>${f.note?`<div class="sub">${esc(f.note)}</div>`:''}</div>
+${f.done?`<span class="cd-pill" style="background:rgba(110,158,92,.16);color:var(--green)">Done</span>`:`<button class="cd-btn ghost" data-donefu2="${f.id}" style="padding:6px 12px;font-size:11px;width:auto">Mark done</button>`}
+</div>`).join('') : `<div class="cd-empty"><b>No follow-ups yet</b></div>`;
+return `<div class="cd-panel"><h3>Schedule next follow-up</h3>
+<div class="cd-form">
+<div class="two"><div><label for="fdate2">Date</label><input id="fdate2" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+<div><label for="ftype2">Type</label><select id="ftype2"><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="visit">Visit</option></select></div></div>
+<label for="fnote2">Note (optional)</label><input id="fnote2" placeholder="What to follow up about">
+<button class="cd-btn" id="savefollow2" style="margin-top:16px;width:auto">Add Follow-up</button>
+</div>
+</div>
+<div class="cd-panel"><h3>History</h3>${list}</div>`;
+}
+
+function leadNotes(d){
+const list = S.dealNotes.length ? S.dealNotes.map(n=>`
+<div class="cd-note"><span class="who">${esc(S.profiles.find(p=>p.id===n.author_id)?.full_name||'Team')}</span><span class="when">${day(n.created_at)}</span><p>${esc(n.body)}</p></div>`).join('') : `<div class="cd-empty"><b>No notes yet</b></div>`;
+return `<div class="cd-panel"><h3>Add a note</h3>
+<div class="cd-form"><textarea id="notebody" placeholder="Write a note about this lead…"></textarea>
+<button class="cd-btn" id="savenote" style="margin-top:12px;width:auto">Save Note</button></div>
+</div>
+<div class="cd-panel"><h3>Notes</h3>${list}</div>`;
+}
+
+function renderLeadDetail(){
+const d=S.deal, bal=Number(d.value||0)-Number(d.amount_collected||0);
+const initials=(d.customers?.name||'?').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';
+const tabs=[['overview','Overview'],['followups','Follow-ups'],['estimates','Estimates'],['orders','Orders'],['notes','Notes']];
+const tabBtns=tabs.map(([k,l])=>`<button class="${S.dealTab===k?'on':''}" data-dealtab="${k}">${esc(l)}</button>`).join('');
+let body='';
+if(S.dealTab==='overview') body=leadOverview(d,bal);
+else if(S.dealTab==='followups') body=leadFollowups(d);
+else if(S.dealTab==='notes') body=leadNotes(d);
+else body=`<div class="cd-soon"><b>${S.dealTab==='estimates'?'Estimates':'Orders'} — coming soon</b><p>This module isn't built yet. Use Create Estimate below to move this lead forward in the meantime.</p></div>`;
+const qStage = findQuotedStage(d.pipeline_id);
+const canEstimate = qStage && d.stage_id!==qStage.id;
+
+app.innerHTML = shell(`
+<button class="cd-backbtn" id="back">← Back to My Leads</button>
+<div class="cd-lead-header">
+<div class="av">${esc(initials)}</div>
+<div class="grow">
+<h1>${esc(d.customers?.name||'No customer')}</h1>
+<div class="sub">${esc(d.customers?.phone||'')}${d.customers?.district?' · '+esc(d.customers.district):''} · ${esc(d.stages?.name||'')}</div>
+</div>
+<div class="acts">
+${d.customers?.phone?`<a class="cd-btn ghost" href="${telLink(d.customers.phone)}">${ic('call')}Call</a>`:''}
+${d.customers?.phone?`<a class="cd-btn" href="${waLink(d.customers.phone)}" target="_blank" rel="noopener">${ic('wa')}WhatsApp</a>`:''}
+</div>
+</div>
+<div class="cd-actionbar">
+${canEstimate?`<button id="qaMakeEstimate" class="cd-btn sm estimate">${ic('doc')}Create Estimate</button>`:''}
+<button id="qaHot" class="cd-btn sm ghost">${ic('flame')}${d.is_hot?'Hot Lead':'Mark Hot'}</button>
+</div>
+<div class="cd-tabs">${tabBtns}</div>
+${body}
+`);
+wire();
+document.getElementById('back').onclick=()=>{ S.deal=null; S.tab='pipeline'; loadTab(); };
+document.querySelectorAll('[data-dealtab]').forEach(b=>b.onclick=()=>{ S.dealTab=b.dataset.dealtab; render(); });
+const qe=document.getElementById('qaMakeEstimate');
+if(qe) qe.onclick=async()=>{
+qe.disabled=true;
+const target=findQuotedStage(d.pipeline_id);
+if(!target) return;
+await sb.from('deals').update({stage_id:target.id}).eq('id',d.id);
+await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:target.id,changed_by:S.me.id});
+await logActivity('quotation_sent', d.id, (d.customers?.name?d.customers.name+' → ':'')+target.name);
+openDeal(d.id);
+};
+const qh=document.getElementById('qaHot');
+if(qh) qh.onclick=async()=>{
+qh.disabled=true;
+await sb.from('deals').update({is_hot:!d.is_hot}).eq('id',d.id);
+openDeal(d.id);
+};
+const sf2=document.getElementById('savefollow2');
+if(sf2) sf2.onclick=async e=>{
+e.target.disabled=true;
+const due=document.getElementById('fdate2').value;
+const type=document.getElementById('ftype2').value;
+const note=document.getElementById('fnote2').value.trim();
+if(!due){ e.target.disabled=false; return; }
+await sb.from('follow_ups').insert({deal_id:d.id, assigned_to:d.assigned_to||S.me.id, due_date:due, contact_type:type, note:note||null});
+await logActivity('followup_scheduled', d.id, (d.customers?.name?d.customers.name+' — ':'')+type+' on '+due);
+openDeal(d.id);
+};
+document.querySelectorAll('[data-donefu2]').forEach(b=>b.onclick=async()=>{
+await sb.from('follow_ups').update({done:true,done_at:new Date().toISOString()}).eq('id',b.dataset.donefu2);
+openDeal(d.id);
+});
+const sn=document.getElementById('savenote');
+if(sn) sn.onclick=async e=>{
+const body=document.getElementById('notebody').value.trim();
+if(!body) return;
+e.target.disabled=true;
+await sb.from('notes').insert({deal_id:d.id, author_id:S.me.id, body});
 openDeal(d.id);
 };
 }
@@ -1485,6 +1917,28 @@ if(S.presetStage) stgSel.value=String(S.presetStage); };
 pipeSel.onchange=fill; fill();
 S.presetPipeline=null; S.presetStage=null;
 document.getElementById('save').onclick=saveDeal;
+}
+
+/* ── Phase 2 wiring: My Leads / Add New Lead ── */
+document.querySelectorAll('[data-lead]').forEach(c=>c.onclick=()=>openDeal(c.dataset.lead));
+const addLeadBtn=document.getElementById('addLeadBtn');
+if(addLeadBtn) addLeadBtn.onclick=()=>{ S.tab='addlead'; S.deal=null; render(); };
+const cancelAddLead=document.getElementById('cancelAddLead');
+if(cancelAddLead) cancelAddLead.onclick=()=>{ S.tab='pipeline'; S.deal=null; loadTab(); };
+const lsearch=document.getElementById('leadsearch');
+if(lsearch) lsearch.onkeydown=e=>{ if(e.key==='Enter'){ S.leadQ=lsearch.value.replace(/[,()]/g,''); applyLeadFilters(); } };
+const lstage=document.getElementById('leadstagesel');
+if(lstage) lstage.onchange=()=>{ S.leadStage=lstage.value?Number(lstage.value):null; applyLeadFilters(); };
+const lsource=document.getElementById('leadsourcesel');
+if(lsource) lsource.onchange=()=>{ S.leadSource=lsource.value?Number(lsource.value):null; applyLeadFilters(); };
+document.querySelectorAll('[data-followf]').forEach(b=>b.onclick=()=>{ S.leadFollow=b.dataset.followf; applyLeadFilters(); });
+const lmore=document.getElementById('leadLoadMore'); if(lmore) lmore.onclick=loadMoreLeads;
+
+const alitems=document.getElementById('alitems');
+if(alitems){
+alitems.appendChild(itemRow());
+document.getElementById('aladdrow').onclick=()=>alitems.appendChild(itemRow());
+document.getElementById('saveLead').onclick=saveLead;
 }
 }
 
