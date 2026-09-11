@@ -357,6 +357,26 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-btn.sm svg{width:14px;height:14px}
 .cd-btn.estimate{background:rgba(61,116,230,.16);color:#3D74E6;border:1px solid rgba(61,116,230,.35);box-shadow:none}
 .cd-btn.estimate:hover{border-color:#3D74E6}
+.cd-btn.approve{background:linear-gradient(135deg,var(--green),#4E8A3E);color:#0D1710}
+
+.cd-est-row{display:grid;grid-template-columns:1.6fr .6fr .8fr auto;gap:8px;margin-bottom:8px;align-items:center}
+.cd-est-row select,.cd-est-row input{width:100%;background:var(--cd-surface2);border:1px solid var(--cd-line);border-radius:9px;padding:9px 11px;color:var(--cd-text);font:500 13px Archivo}
+.cd-est-rm{width:32px;height:32px;border-radius:8px;background:var(--cd-surface2);border:1px solid var(--cd-line);color:var(--cd-muted);flex:none;font-size:17px;line-height:1}
+.cd-est-rm:hover{border-color:var(--rose);color:var(--rose)}
+.cd-est-totals{border-top:1px solid var(--cd-line);margin-top:14px;padding-top:12px}
+.cd-est-trow{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:var(--cd-muted)}
+.cd-est-trow.final{font-size:16px;font-weight:800;color:var(--cd-text);border-top:1px solid var(--cd-line);margin-top:6px;padding-top:10px}
+.cd-est-locked{background:rgba(110,158,92,.1);border:1px solid rgba(110,158,92,.3);border-radius:11px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:var(--green);font:700 12.5px Archivo}
+.cd-est-locked svg{width:16px;height:16px;flex:none}
+.cd-est-err{background:rgba(226,110,60,.12);border:1px solid rgba(226,110,60,.35);color:#E26E3C;border-radius:10px;padding:10px 13px;margin-top:12px;font:600 12.5px Archivo}
+.cd-gst-toggle{display:flex;align-items:center;gap:10px;margin:12px 0 4px;font:600 12.5px Archivo;color:var(--cd-text);cursor:pointer;user-select:none}
+.cd-toggle{position:relative;width:38px;height:21px;flex:none}
+.cd-toggle input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.cd-toggle-track{position:absolute;inset:0;background:var(--cd-surface2);border:1px solid var(--cd-line);border-radius:999px;transition:background .15s,border-color .15s}
+.cd-toggle-thumb{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--cd-muted);transition:transform .15s,background .15s}
+.cd-toggle input:checked ~ .cd-toggle-track{background:rgba(255,122,41,.22);border-color:var(--cd-accent)}
+.cd-toggle input:checked ~ .cd-toggle-track .cd-toggle-thumb{transform:translateX(17px);background:var(--cd-accent)}
+.cd-gst-state{color:var(--cd-muted);font-weight:700;font-size:11px;letter-spacing:.04em;min-width:26px}
 
 @media (max-width:700px){
 .cd-form .two,.cd-form .three{grid-template-columns:1fr}
@@ -851,6 +871,131 @@ function findQuotedStage(pipelineId){
 return S.stages.find(s=>s.pipeline_id===pipelineId && /quoted/i.test(s.name||''));
 }
 
+function isRetailPipeline(pipelineId){
+return S.pipelines.find(p=>p.id===pipelineId)?.name==='Retail Sales';
+}
+
+// Display-only derived status for the lead header. stage_id itself is never
+// touched by this -- the deal is still, in the database, sitting in whatever
+// stage it was already in (in practice "Quoted"). Customer Approved != Won,
+// so once an Estimate is approved but before 100% payment is recorded, the
+// CRE should see something more informative than the raw "Quoted" stage
+// name here. This is the agreed placeholder until a real "Payment Pending"
+// stage exists (see the note in 01_migration_estimates.sql).
+function dealStatusLabel(d){
+if(d.estimate_approved_at && isRetailPipeline(d.pipeline_id)) return 'Estimate Approved · Payment Pending';
+return d.stages?.name||'';
+}
+
+function estimateItemRow(item){
+const opts = S.products.map(p=>`<option value="${p.id}" ${item&&item.product_id===p.id?'selected':''}>${esc(p.model_code?p.model_code+' — ':'')}${esc(p.name)}</option>`).join('');
+const row=document.createElement('div'); row.className='cd-est-row';
+row.innerHTML=`<select class="p"><option value="">Select item</option>${opts}</select>
+<input class="q" type="number" inputmode="decimal" value="${item?Number(item.qty):1}" placeholder="Qty">
+<input class="r" type="number" inputmode="decimal" value="${item?Number(item.rate):''}" placeholder="Rate">
+<button type="button" class="cd-est-rm">&times;</button>`;
+row.querySelector('.cd-est-rm').onclick=()=>{ row.remove(); updateEstimateTotals(); };
+return row;
+}
+
+// GST is optional per Estimate, fixed at 18%, applied AFTER the Final
+// Discount. No separate GST amount is stored anywhere -- it's derived here
+// (and, authoritatively, inside approve_estimate()) from the subtotal, the
+// discount and the on/off toggle alone. Shared by the editable live-preview
+// and the approved/locked display so both use exactly the same formula.
+function estimateBreakdown(subtotal, discount, gstEnabled){
+const taxable = Math.max(0, subtotal - discount);
+const gst = gstEnabled ? Math.round(taxable*0.18*100)/100 : 0;
+const final = taxable + gst;
+return { taxable, gst, final };
+}
+
+function updateEstimateTotals(){
+const wrap=document.getElementById('estItems'); if(!wrap) return;
+let subtotal=0;
+wrap.querySelectorAll('.cd-est-row').forEach(r=>{
+const q=Number(r.querySelector('.q').value||0), rt=Number(r.querySelector('.r').value||0);
+if(r.querySelector('.p').value) subtotal += q*rt;
+});
+const discInput=document.getElementById('estDiscount');
+const disc=Math.max(0,Number(discInput?.value||0));
+const gstCheckbox=document.getElementById('estGst');
+const gstEnabled=!!(gstCheckbox&&gstCheckbox.checked);
+const { taxable, gst, final } = estimateBreakdown(subtotal, disc, gstEnabled);
+const st=document.getElementById('estSubtotal'); if(st) st.textContent=rs(subtotal);
+const gstRows=document.getElementById('estGstRows');
+if(gstRows) gstRows.style.display = gstEnabled ? '' : 'none';
+const tx=document.getElementById('estTaxable'); if(tx) tx.textContent=rs(taxable);
+const ga=document.getElementById('estGstAmt'); if(ga) ga.textContent=rs(gst);
+const ft=document.getElementById('estFinal'); if(ft) ft.textContent=rs(final);
+const gs=document.getElementById('estGstState'); if(gs) gs.textContent = gstEnabled?'ON':'OFF';
+}
+
+function leadEstimateTab(d){
+if(!isRetailPipeline(d.pipeline_id)) return `<div class="cd-soon"><b>Estimates — coming soon</b><p>This module isn't built yet for this pipeline.</p></div>`;
+if(d.estimate_approved_at) return renderApprovedEstimate(d);
+return renderEditableEstimate(d);
+}
+
+function renderApprovedEstimate(d){
+const subtotal=(d.items||[]).reduce((a,i)=>a+Number(i.amount||0),0);
+const discount=Number(d.estimate_discount||0);
+const gstEnabled=!!d.estimate_gst_enabled;
+const { taxable, gst } = estimateBreakdown(subtotal, discount, gstEnabled);
+const items=(d.items&&d.items.length)?d.items.map(i=>`<div class="cd-frow">
+<div class="isq" style="background:rgba(255,122,41,.14);color:var(--cd-accent)">${ic('box')}</div>
+<div class="grow"><div class="name">${esc(i.products?.name||i.product_other||'Item')}</div><div class="sub">${Number(i.qty)} × ${rs(i.rate)}</div></div>
+<div style="font-weight:700;font-size:13px">${rs(i.amount)}</div>
+</div>`).join(''):`<div class="cd-empty"><b>No items</b></div>`;
+return `<div class="cd-est-locked">${ic('check')}Estimate approved ${day(d.estimate_approved_at)} — locked</div>
+<div class="cd-panel"><h3>Items</h3>${items}</div>
+<div class="cd-panel"><h3>Total</h3>
+<div class="cd-est-totals">
+<div class="cd-est-trow"><span>Item Subtotal</span><span>${rs(subtotal)}</span></div>
+<div class="cd-est-trow"><span>Final Discount</span><span>${rs(discount)}</span></div>
+${gstEnabled?`<div class="cd-est-trow"><span>Taxable Amount</span><span>${rs(taxable)}</span></div>
+<div class="cd-est-trow"><span>GST @18%</span><span>${rs(gst)}</span></div>`:''}
+<div class="cd-est-trow final"><span>Final Estimate Total</span><span>${rs(d.value)}</span></div>
+</div></div>`;
+}
+
+function renderEditableEstimate(d){
+const subtotal=(d.items||[]).reduce((a,i)=>a+Number(i.amount||0),0);
+const discount=Number(d.estimate_discount||0);
+const gstEnabled=!!d.estimate_gst_enabled;
+const { taxable, gst, final } = estimateBreakdown(subtotal, discount, gstEnabled);
+return `<div class="cd-panel"><h3>Estimate items</h3>
+<div id="estItems"></div>
+<button class="cd-btn ghost" id="estAddRow" style="margin-top:8px;width:auto;padding:8px 14px;font-size:12px">Add item</button>
+</div>
+<div class="cd-panel"><h3>Total</h3>
+<div class="cd-form"><label for="estDiscount">Final Discount</label><input id="estDiscount" type="number" inputmode="decimal" value="${discount}"></div>
+<label class="cd-gst-toggle" for="estGst">
+<span class="cd-toggle"><input type="checkbox" id="estGst" ${gstEnabled?'checked':''}><span class="cd-toggle-track"><span class="cd-toggle-thumb"></span></span></span>
+<span>GST 18%</span>
+<span class="cd-gst-state" id="estGstState">${gstEnabled?'ON':'OFF'}</span>
+</label>
+<div class="cd-est-totals">
+<div class="cd-est-trow"><span>Item Subtotal</span><span id="estSubtotal">${rs(subtotal)}</span></div>
+<div id="estGstRows"${gstEnabled?'':' style="display:none"'}>
+<div class="cd-est-trow"><span>Taxable Amount</span><span id="estTaxable">${rs(taxable)}</span></div>
+<div class="cd-est-trow"><span>GST @18%</span><span id="estGstAmt">${rs(gst)}</span></div>
+</div>
+<div class="cd-est-trow final"><span>Final Estimate Total</span><span id="estFinal">${rs(final)}</span></div>
+</div>
+<button class="cd-btn" id="estSave" style="margin-top:16px;width:100%">Save Estimate</button>
+</div>
+<div class="cd-panel"><h3>Send to customer</h3>
+${d.estimate_sent_at?`<p class="sub" style="margin-bottom:12px">Last sent ${day(d.estimate_sent_at)}</p>`:`<p class="sub" style="margin-bottom:12px">Not sent yet.</p>`}
+<button class="cd-btn ghost" id="estSend" style="width:100%">${d.estimate_sent_at?'Send Again':'Send Estimate'}</button>
+</div>
+<div class="cd-panel"><h3>Customer approval</h3>
+<p class="sub" style="margin-bottom:12px">Customer approval locks the final Estimate. Deal confirmation happens after full payment.</p>
+<button class="cd-btn approve" id="estApprove" style="width:100%">Customer Approved</button>
+<div id="estErr"></div>
+</div>`;
+}
+
 async function fetchLeadsPage(){
 let dealIdFilter=null;
 if(S.leadFollow!=='all'){
@@ -1109,9 +1254,10 @@ let body='';
 if(S.dealTab==='overview') body=leadOverview(d,bal);
 else if(S.dealTab==='followups') body=leadFollowups(d);
 else if(S.dealTab==='notes') body=leadNotes(d);
-else body=`<div class="cd-soon"><b>${S.dealTab==='estimates'?'Estimates':'Orders'} — coming soon</b><p>This module isn't built yet. Use Create Estimate below to move this lead forward in the meantime.</p></div>`;
+else if(S.dealTab==='estimates') body=leadEstimateTab(d);
+else body=`<div class="cd-soon"><b>Orders — coming soon</b><p>This module isn't built yet. Use Create Estimate below to move this lead forward in the meantime.</p></div>`;
 const qStage = findQuotedStage(d.pipeline_id);
-const canEstimate = qStage && d.stage_id!==qStage.id;
+const canEstimate = qStage && d.stage_id!==qStage.id && !d.estimate_approved_at;
 
 app.innerHTML = shell(`
 <button class="cd-backbtn" id="back">← Back to My Leads</button>
@@ -1119,7 +1265,7 @@ app.innerHTML = shell(`
 <div class="av">${esc(initials)}</div>
 <div class="grow">
 <h1>${esc(d.customers?.name||'No customer')}</h1>
-<div class="sub">${esc(d.customers?.phone||'')}${d.customers?.district?' · '+esc(d.customers.district):''} · ${esc(d.stages?.name||'')}</div>
+<div class="sub">${esc(d.customers?.phone||'')}${d.customers?.district?' · '+esc(d.customers.district):''} · ${esc(dealStatusLabel(d))}</div>
 </div>
 <div class="acts">
 ${d.customers?.phone?`<a class="cd-btn ghost" href="${telLink(d.customers.phone)}">${ic('call')}Call</a>`:''}
@@ -1144,6 +1290,7 @@ if(!target) return;
 await sb.from('deals').update({stage_id:target.id}).eq('id',d.id);
 await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:target.id,changed_by:S.me.id});
 await logActivity('quotation_sent', d.id, (d.customers?.name?d.customers.name+' → ':'')+target.name);
+S.dealTab='estimates';
 openDeal(d.id);
 };
 const qh=document.getElementById('qaHot');
@@ -1152,6 +1299,27 @@ qh.disabled=true;
 await sb.from('deals').update({is_hot:!d.is_hot}).eq('id',d.id);
 openDeal(d.id);
 };
+
+const estItemsEl=document.getElementById('estItems');
+if(estItemsEl){
+if(d.items && d.items.length){ d.items.forEach(it=>estItemsEl.appendChild(estimateItemRow(it))); }
+else { estItemsEl.appendChild(estimateItemRow(null)); }
+estItemsEl.addEventListener('input', updateEstimateTotals);
+}
+const estAddRow=document.getElementById('estAddRow');
+if(estAddRow) estAddRow.onclick=()=>{ estItemsEl.appendChild(estimateItemRow(null)); updateEstimateTotals(); };
+const estDiscount=document.getElementById('estDiscount');
+if(estDiscount) estDiscount.oninput=updateEstimateTotals;
+const estGst=document.getElementById('estGst');
+if(estGst) estGst.onchange=updateEstimateTotals;
+const estSave=document.getElementById('estSave');
+if(estSave) estSave.onclick=()=>saveEstimate(d);
+const estSend=document.getElementById('estSend');
+if(estSend) estSend.onclick=()=>sendEstimate(d);
+const estApprove=document.getElementById('estApprove');
+if(estApprove) estApprove.onclick=()=>approveEstimateAction(d);
+if(estItemsEl) updateEstimateTotals();
+
 const sf2=document.getElementById('savefollow2');
 if(sf2) sf2.onclick=async e=>{
 e.target.disabled=true;
@@ -1175,6 +1343,56 @@ e.target.disabled=true;
 await sb.from('notes').insert({deal_id:d.id, author_id:S.me.id, body});
 openDeal(d.id);
 };
+}
+
+async function saveEstimate(d){
+const btn=document.getElementById('estSave'); if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+const errBox=document.getElementById('estErr'); if(errBox) errBox.innerHTML='';
+try{
+const rows=[...document.querySelectorAll('#estItems .cd-est-row')].map((r,i)=>({
+deal_id:d.id,
+product_id:r.querySelector('.p').value?Number(r.querySelector('.p').value):null,
+qty:Number(r.querySelector('.q').value||1),
+rate:Number(r.querySelector('.r').value||0),
+sort_order:i+1
+})).filter(r=>r.product_id);
+const discount=Math.max(0,Number(document.getElementById('estDiscount').value||0));
+const gstEnabled=!!document.getElementById('estGst')?.checked;
+let r1=await sb.from('deal_items').delete().eq('deal_id',d.id); if(r1.error) throw r1.error;
+if(rows.length){ let r2=await sb.from('deal_items').insert(rows); if(r2.error) throw r2.error; }
+let r3=await sb.from('deals').update({estimate_discount:discount, estimate_gst_enabled:gstEnabled}).eq('id',d.id); if(r3.error) throw r3.error;
+openDeal(d.id);
+}catch(err){
+if(errBox) errBox.innerHTML=`<div class="cd-est-err">${esc(err.message||String(err))}</div>`;
+if(btn){ btn.disabled=false; btn.textContent='Save Estimate'; }
+}
+}
+
+async function sendEstimate(d){
+const btn=document.getElementById('estSend'); if(btn) btn.disabled=true;
+const errBox=document.getElementById('estErr'); if(errBox) errBox.innerHTML='';
+try{
+let r1=await sb.from('deals').update({estimate_sent_at:new Date().toISOString()}).eq('id',d.id); if(r1.error) throw r1.error;
+await logActivity('estimate_sent', d.id, d.customers?.name||'');
+openDeal(d.id);
+}catch(err){
+if(errBox) errBox.innerHTML=`<div class="cd-est-err">${esc(err.message||String(err))}</div>`;
+if(btn) btn.disabled=false;
+}
+}
+
+async function approveEstimateAction(d){
+const btn=document.getElementById('estApprove'); if(btn){ btn.disabled=true; btn.textContent='Approving…'; }
+const errBox=document.getElementById('estErr'); if(errBox) errBox.innerHTML='';
+try{
+const { error } = await sb.rpc('approve_estimate',{p_deal_id:d.id});
+if(error) throw error;
+await logActivity('estimate_approved', d.id, d.customers?.name||'');
+openDeal(d.id);
+}catch(err){
+if(errBox) errBox.innerHTML=`<div class="cd-est-err">${esc(err.message||String(err))}</div>`;
+if(btn){ btn.disabled=false; btn.textContent='Customer Approved'; }
+}
 }
 
 /* ── money in ── */
@@ -1394,7 +1612,8 @@ return `<div class="qa-grid">
 const VERB_LABEL = {
 lead_created:'New lead added', lead_assigned:'Lead reassigned', stage_moved:'Stage updated',
 quotation_sent:'Quotation sent', payment_received:'Payment received', dispatched:'Order dispatched',
-followup_completed:'Follow-up completed', hot_marked:'Marked as hot lead'
+followup_completed:'Follow-up completed', hot_marked:'Marked as hot lead',
+estimate_sent:'Estimate sent', estimate_approved:'Estimate approved'
 };
 function timeAgo(ts){
 const s = Math.max(1, Math.round((Date.now()-new Date(ts).getTime())/1000));
