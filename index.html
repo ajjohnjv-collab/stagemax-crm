@@ -871,6 +871,21 @@ function findQuotedStage(pipelineId){
 return S.stages.find(s=>s.pipeline_id===pipelineId && /quoted/i.test(s.name||''));
 }
 
+// Forward-only guard for the "Create Estimate" quick action. It must never be
+// possible to use this button to move a deal BACKWARD (or sideways) in the
+// pipeline -- e.g. a deal already at Confirmed/Won or Delivered must never be
+// silently downgraded to Quoted just because someone opened/created an
+// Estimate. Only a deal that hasn't reached Quoted yet (lower sort_order) may
+// be advanced into it this way. This is the single source of truth used both
+// to decide whether the button renders and, defensively, inside the click
+// handler itself in case of a stale render.
+function canAdvanceToQuoted(d, stages){
+const target = stages.find(s=>s.pipeline_id===d.pipeline_id && /quoted/i.test(s.name||''));
+const cur = stages.find(s=>s.id===d.stage_id);
+if(!target || !cur) return false;
+return cur.sort_order < target.sort_order;
+}
+
 function isRetailPipeline(pipelineId){
 return S.pipelines.find(p=>p.id===pipelineId)?.name==='Retail Sales';
 }
@@ -1257,7 +1272,13 @@ else if(S.dealTab==='notes') body=leadNotes(d);
 else if(S.dealTab==='estimates') body=leadEstimateTab(d);
 else body=`<div class="cd-soon"><b>Orders — coming soon</b><p>This module isn't built yet. Use Create Estimate below to move this lead forward in the meantime.</p></div>`;
 const qStage = findQuotedStage(d.pipeline_id);
-const canEstimate = qStage && d.stage_id!==qStage.id && !d.estimate_approved_at;
+// Button VISIBILITY is intentionally independent of the forward-only stage
+// guard: "Create Estimate"/"Estimate" must stay reachable across the whole
+// deal lifecycle (New Enquiry through Approved) so Estimates stays a normal
+// tab, not something that vanishes once a deal moves past Quoted. Whether
+// clicking it is allowed to WRITE stage_id is decided separately, inside
+// the click handler below, by canAdvanceToQuoted().
+const canEstimate = !!qStage;
 
 app.innerHTML = shell(`
 <button class="cd-backbtn" id="back">← Back to My Leads</button>
@@ -1286,10 +1307,22 @@ const qe=document.getElementById('qaMakeEstimate');
 if(qe) qe.onclick=async()=>{
 qe.disabled=true;
 const target=findQuotedStage(d.pipeline_id);
-if(!target) return;
+// Defense in depth: only ADVANCE stage_id to Quoted when the forward-only
+// guard allows it (deal is strictly before Quoted). This is a write guard,
+// not a visibility guard — re-checked here in case this button was
+// rendered from a stale/cached deal snapshot (e.g. the deal advanced past
+// Quoted in another tab/session since this page was last rendered). Never
+// let this handler move stage_id backward or sideways.
+if(target && canAdvanceToQuoted(d, S.stages)){
 await sb.from('deals').update({stage_id:target.id}).eq('id',d.id);
 await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:target.id,changed_by:S.me.id});
 await logActivity('quotation_sent', d.id, (d.customers?.name?d.customers.name+' → ':'')+target.name);
+}
+// Whether or not a stage write happened, always take the user to the
+// Estimates tab: to view/edit an existing estimate (Quoted/Confirmed/
+// Delivered) or the locked read-only view (Approved) — leadEstimateTab()
+// itself decides editable vs. locked based on estimate_approved_at, so no
+// stage-guard logic is duplicated here.
 S.dealTab='estimates';
 openDeal(d.id);
 };
