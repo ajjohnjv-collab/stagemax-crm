@@ -457,7 +457,7 @@ pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[],
 dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
 myPerf:[], myRevivals:[], myPromises:[],
-openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], err:'',
+openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
 sideOpen:false, presetPipeline:null, presetStage:null,
 leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview' };
 
@@ -738,14 +738,16 @@ return `<div class="chips">${pipes}</div><div class="chips">${chips}</div>${card
 
 /* ── deal detail ── */
 async function openDeal(id){
-const [{data:d},{data:items},{data:fups},{data:notes}] = await Promise.all([
+const [{data:d},{data:items},{data:fups},{data:notes},{data:receipts}] = await Promise.all([
 sb.from('deals').select('*, customers(*), stages(*), pipelines(name), sources(name)').eq('id',id).single(),
 sb.from('deal_items').select('*, products(name,model_code)').eq('deal_id',id).order('sort_order'),
 sb.from('follow_ups').select('*').eq('deal_id',id).order('due_date'),
-sb.from('notes').select('*').eq('deal_id',id).order('created_at',{ascending:false})
+sb.from('notes').select('*').eq('deal_id',id).order('created_at',{ascending:false}),
+sb.from('receipts').select('*').eq('deal_id',id).order('created_at',{ascending:false})
 ]);
-S.deal = { ...d, items: items||[] }; S.dealFollowUps = fups||[]; S.dealNotes = notes||[];
+S.deal = { ...d, items: items||[] }; S.dealFollowUps = fups||[]; S.dealNotes = notes||[]; S.dealReceipts = receipts||[];
 if(!S.dealTab) S.dealTab='overview';
+try{ await resolveReceiptRecorders(S.dealReceipts); }catch(e){ /* name resolution is best-effort -- never blocks the deal page */ }
 render();
 }
 
@@ -783,9 +785,15 @@ ${i.products?.model_code?`<span class="sub"> · ${esc(i.products.model_code)}</s
 <div class="row" style="margin-top:6px"><div class="grow sub">Received</div><div class="amt" style="font-size:14px">${rs(d.amount_collected)}</div></div>
 <div class="row" style="margin-top:6px"><div class="grow sub">Balance</div>
 <div class="amt" style="font-size:14px;color:${bal>0?'#E8899E':'#9BC489'}">${rs(bal)}</div></div>
-<label for="col">Update amount received</label>
-<input id="col" type="number" inputmode="decimal" value="${Number(d.amount_collected||0)}">
-<button class="btn" id="savecol">Save payment</button>
+${!isRetailPipeline(d.pipeline_id)?`<div class="sub" style="margin-top:10px">Payment recording for this pipeline isn't available yet — it's still tracked outside the app.</div>`:
+!d.estimate_approved_at?`<div class="sub" style="margin-top:10px">Payments can be recorded once this deal's Estimate is approved.</div>`:
+bal<=0?`<div class="tag paid" style="margin-top:10px;display:inline-block">Fully paid</div>`:
+`<div style="margin-top:4px">${paymentFormFields(bal)}
+<button class="btn" id="payRecord">Record Amount Received</button>
+<div id="payErr"></div>
+</div>`}
+<h3 style="margin-top:16px;font:700 13px Archivo">Payment History</h3>
+${receiptHistoryListPlain()}
 </div>
 
 <h2>Stage</h2>
@@ -810,14 +818,6 @@ ${S.dealFollowUps.length ? '<div style="margin-top:12px">'+S.dealFollowUps.map(f
 wire();
 
 document.getElementById('back').onclick = ()=>{ S.deal=null; loadTab(); };
-document.getElementById('savecol').onclick = async e=>{
-e.target.disabled=true;
-const v=Number(document.getElementById('col').value||0);
-const prev=Number(d.amount_collected||0);
-await sb.from('deals').update({amount_collected:v}).eq('id',d.id);
-if(v>prev) await logActivity('payment_received', d.id, rs(v-prev)+' from '+(d.customers?.name||'customer'));
-openDeal(d.id);
-};
 document.getElementById('savestg').onclick = async e=>{
 e.target.disabled=true;
 const to=Number(document.getElementById('stg').value);
@@ -898,7 +898,7 @@ return S.pipelines.find(p=>p.id===pipelineId)?.name==='Retail Sales';
 // name here. This is the agreed placeholder until a real "Payment Pending"
 // stage exists (see the note in 01_migration_estimates.sql).
 function dealStatusLabel(d){
-if(d.estimate_approved_at && isRetailPipeline(d.pipeline_id)) return 'Estimate Approved · Payment Pending';
+if(d.estimate_approved_at && isRetailPipeline(d.pipeline_id) && !d.stages?.is_won) return 'Estimate Approved · Payment Pending';
 return d.stages?.name||'';
 }
 
@@ -946,6 +946,146 @@ const ft=document.getElementById('estFinal'); if(ft) ft.textContent=rs(final);
 const gs=document.getElementById('estGstState'); if(gs) gs.textContent = gstEnabled?'ON':'OFF';
 }
 
+// ---------------------------------------------------------------------
+// PAYMENT / RECEIPT UI (payment-architecture migration 001) — replaces the
+// old raw cumulative deals.amount_collected editor everywhere it appeared.
+// CRE-recorded scope is deliberately minimal: an amount and an optional
+// human note. No payment method, channel, or reference/transaction number
+// is captured anywhere in this UI -- per the original business
+// simplification decision ("drops payment method / reference number per
+// your business simplification", 003_migration_review.md §1.1), which the
+// approved receipts schema itself reflects (no payment_method or
+// reference_no columns). A brief reintroduction of those fields in an
+// earlier round of this integration was a spec-drift mistake, corrected
+// here; do not reintroduce them without a fresh, explicit decision.
+// ---------------------------------------------------------------------
+function paymentFormFields(balance){
+return `<label for="payAmount">Amount Received Now</label>
+<input id="payAmount" type="number" inputmode="decimal" placeholder="0" min="0" max="${balance}">
+<label for="payNote">Note (optional)</label>
+<input id="payNote" placeholder="Anything worth recording">`;
+}
+
+// recorded_by is a profiles.id (uuid). S.profiles is fetched active-only
+// at boot (see the app-init profiles query), so a CRE who has since gone
+// inactive won't resolve there even though their row and name still exist
+// -- resolveReceiptRecorders() below does one small, targeted fetch (by id,
+// no is_active filter) for exactly the ids a deal's receipt history needs
+// that aren't already in S.profiles, and caches the result. Both this and
+// recordedByName() are deliberately failure-safe: a missing/unresolvable
+// profile (deleted row, fetch error, RLS edge case) must never break
+// receipt history -- it just falls back to a neutral "staff" label.
+async function resolveReceiptRecorders(receipts){
+const ids = [...new Set((receipts||[]).filter(r=>r.source!=='legacy_migration' && r.recorded_by).map(r=>r.recorded_by))];
+const unresolved = ids.filter(id => !S.profiles.some(p=>p.id===id) && !(id in S.receiptRecorderNames));
+if(!unresolved.length) return;
+try{
+const { data, error } = await sb.from('profiles').select('id,full_name').in('id', unresolved);
+if(error) return;
+(data||[]).forEach(p=>{ S.receiptRecorderNames[p.id] = p.full_name || null; });
+}catch(e){ /* best-effort only -- recordedByName()'s fallback covers this */ }
+}
+
+function recordedByName(id){
+if(!id) return null;
+const active = S.profiles.find(p=>p.id===id);
+if(active && active.full_name) return active.full_name;
+const cached = S.receiptRecorderNames[id];
+if(cached) return cached;
+return null;
+}
+
+function receiptRowMeta(r){
+const isReversal = !!r.reverses_receipt_id;
+const isLegacy = r.source==='legacy_migration';
+return { isReversal, isLegacy };
+}
+
+// Legacy rows never got (and never will get) a real operator or date --
+// stated once here so both receipt-history renderers below share the exact
+// same wording rather than risking drift between the CD and Plain copies.
+function receiptSubline(r, isLegacy){
+if(isLegacy) return 'Migrated opening balance — no method or date recorded';
+const who = recordedByName(r.recorded_by) || 'staff';
+return day(r.occurred_at||r.created_at) + ' · Recorded by ' + esc(who);
+}
+
+function receiptNoteLine(r, isLegacy){
+if(isLegacy) return '';
+const note = (r.note||'').trim();
+return note ? esc(note) : '';
+}
+
+// CRE-facing (.cd-* dark theme) — used inside the Estimates tab.
+function receiptHistoryListCD(){
+const list = S.dealReceipts||[];
+if(!list.length) return `<div class="cd-empty"><b>No payments recorded yet</b></div>`;
+const reversedIds = new Set(list.filter(r=>r.reverses_receipt_id).map(r=>r.reverses_receipt_id));
+return list.map(r=>{
+const { isReversal, isLegacy } = receiptRowMeta(r);
+const alreadyReversed = reversedIds.has(r.id);
+const canReverse = isOwner() && !isReversal && !isLegacy && !alreadyReversed;
+return `<div class="cd-frow">
+<div class="isq" style="background:${isReversal?'rgba(194,80,107,.16)':'rgba(110,158,92,.16)'};color:${isReversal?'var(--rose)':'var(--green)'}">${ic(isReversal?'wallet':'check')}</div>
+<div class="grow">
+<div class="name">${isReversal?'Reversed — ':''}${rs(Math.abs(r.amount))}${isLegacy?' <span class="cd-pill" style="background:rgba(154,142,130,.18);color:var(--cd-muted)">Legacy</span>':''}${alreadyReversed?' <span class="cd-pill" style="background:rgba(194,80,107,.16);color:var(--rose)">Reversed</span>':''}</div>
+<div class="sub">${receiptSubline(r, isLegacy)}</div>
+${receiptNoteLine(r, isLegacy)?`<div class="sub" style="margin-top:2px">${receiptNoteLine(r, isLegacy)}</div>`:''}
+</div>
+${canReverse?`<button class="cd-btn ghost" data-reverse-receipt="${r.id}" style="width:auto;padding:6px 12px;font-size:11px;margin-top:0">Reverse</button>`:''}
+</div>`;
+}).join('');
+}
+
+// Owner-facing (legacy/light, .card/.item/.tag) — used inside renderDeal().
+function receiptHistoryListPlain(){
+const list = S.dealReceipts||[];
+if(!list.length) return `<div class="sub" style="margin-top:10px">No payments recorded yet.</div>`;
+const reversedIds = new Set(list.filter(r=>r.reverses_receipt_id).map(r=>r.reverses_receipt_id));
+return `<div style="margin-top:10px">`+list.map(r=>{
+const { isReversal, isLegacy } = receiptRowMeta(r);
+const alreadyReversed = reversedIds.has(r.id);
+const canReverse = isOwner() && !isReversal && !isLegacy && !alreadyReversed;
+return `<div class="item">
+<div class="grow">
+<div>${isReversal?'Reversed — ':''}${rs(Math.abs(r.amount))}${isLegacy?' <span class="tag">Legacy</span>':''}${alreadyReversed?' <span class="tag">Reversed</span>':''}</div>
+<div class="sub">${receiptSubline(r, isLegacy)}</div>
+${receiptNoteLine(r, isLegacy)?`<div class="sub" style="margin-top:2px">${receiptNoteLine(r, isLegacy)}</div>`:''}
+</div>
+${canReverse?`<button class="btn ghost" data-reverse-receipt="${r.id}" style="width:auto;padding:7px 12px;margin-top:0;font-size:12px">Reverse</button>`:''}
+</div>`;
+}).join('')+`</div>`;
+}
+
+async function recordPayment(d){
+if(!d) return;
+const btn=document.getElementById('payRecord'); if(btn){ btn.disabled=true; btn.textContent='Recording…'; }
+const errBox=document.getElementById('payErr'); if(errBox) errBox.innerHTML='';
+try{
+const amt=Number(document.getElementById('payAmount').value||0);
+if(!(amt>0)) throw new Error('Enter an amount greater than 0.');
+const note=document.getElementById('payNote').value.trim();
+const { error } = await sb.rpc('record_amount_received',{p_deal_id:d.id, p_amount:amt, p_note: note || null});
+if(error) throw error;
+openDeal(d.id);
+}catch(err){
+if(errBox) errBox.innerHTML=`<div class="err" style="margin-top:12px">${esc(err.message||String(err))}</div>`;
+if(btn){ btn.disabled=false; btn.textContent='Record Amount Received'; }
+}
+}
+
+async function reverseReceiptAction(receiptId){
+const reason=prompt('Reason for reversing this receipt (required):');
+if(!reason || !reason.trim()) return;
+try{
+const { error } = await sb.rpc('owner_reverse_receipt',{p_receipt_id:receiptId, p_reason:reason.trim()});
+if(error) throw error;
+openDeal(S.deal.id);
+}catch(err){
+alert(err.message||String(err));
+}
+}
+
 function leadEstimateTab(d){
 if(!isRetailPipeline(d.pipeline_id)) return `<div class="cd-soon"><b>Estimates — coming soon</b><p>This module isn't built yet for this pipeline.</p></div>`;
 if(d.estimate_approved_at) return renderApprovedEstimate(d);
@@ -957,6 +1097,9 @@ const subtotal=(d.items||[]).reduce((a,i)=>a+Number(i.amount||0),0);
 const discount=Number(d.estimate_discount||0);
 const gstEnabled=!!d.estimate_gst_enabled;
 const { taxable, gst } = estimateBreakdown(subtotal, discount, gstEnabled);
+const received=Number(d.amount_collected||0);
+const balance=Math.max(0, Number(d.value||0)-received);
+const fullyPaid=balance<=0;
 const items=(d.items&&d.items.length)?d.items.map(i=>`<div class="cd-frow">
 <div class="isq" style="background:rgba(255,122,41,.14);color:var(--cd-accent)">${ic('box')}</div>
 <div class="grow"><div class="name">${esc(i.products?.name||i.product_other||'Item')}</div><div class="sub">${Number(i.qty)} × ${rs(i.rate)}</div></div>
@@ -971,7 +1114,19 @@ return `<div class="cd-est-locked">${ic('check')}Estimate approved ${day(d.estim
 ${gstEnabled?`<div class="cd-est-trow"><span>Taxable Amount</span><span>${rs(taxable)}</span></div>
 <div class="cd-est-trow"><span>GST @18%</span><span>${rs(gst)}</span></div>`:''}
 <div class="cd-est-trow final"><span>Final Estimate Total</span><span>${rs(d.value)}</span></div>
-</div></div>`;
+</div></div>
+<div class="cd-panel"><h3>Payment</h3>
+<div class="cd-est-totals">
+<div class="cd-est-trow"><span>Already Received</span><span>${rs(received)}</span></div>
+<div class="cd-est-trow final"><span>Balance</span><span>${rs(balance)}</span></div>
+</div>
+${fullyPaid?`<div class="cd-pill" style="background:rgba(110,158,92,.16);color:var(--green);margin-top:12px;display:inline-block">${ic('check')} Fully paid</div>`:`
+<div class="cd-form" style="margin-top:4px">${paymentFormFields(balance)}
+<button class="cd-btn" id="payRecord" style="margin-top:16px;width:100%">Record Amount Received</button>
+<div id="payErr"></div>
+</div>`}
+</div>
+<div class="cd-panel"><h3>Payment History</h3>${receiptHistoryListCD()}</div>`;
 }
 
 function renderEditableEstimate(d){
@@ -1418,9 +1573,8 @@ async function approveEstimateAction(d){
 const btn=document.getElementById('estApprove'); if(btn){ btn.disabled=true; btn.textContent='Approving…'; }
 const errBox=document.getElementById('estErr'); if(errBox) errBox.innerHTML='';
 try{
-const { error } = await sb.rpc('approve_estimate',{p_deal_id:d.id});
+const { error } = await sb.rpc('approve_retail_estimate',{p_deal_id:d.id});
 if(error) throw error;
-await logActivity('estimate_approved', d.id, d.customers?.name||'');
 openDeal(d.id);
 }catch(err){
 if(errBox) errBox.innerHTML=`<div class="cd-est-err">${esc(err.message||String(err))}</div>`;
@@ -2145,6 +2299,8 @@ document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=N
 document.querySelectorAll('[data-kpipipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.kpipipe); S.stage=b.dataset.kpistage?Number(b.dataset.kpistage):null; S.tab='pipeline'; S.deal=null; loadTab(); });
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
 document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
+const payBtn=document.getElementById('payRecord'); if(payBtn) payBtn.onclick=()=>recordPayment(S.deal);
+document.querySelectorAll('[data-reverse-receipt]').forEach(b=>b.onclick=()=>reverseReceiptAction(b.dataset.reverseReceipt));
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
 document.querySelectorAll('[data-due]').forEach(el=>el.onclick=()=>toggleDue(el.dataset.due));
 document.querySelectorAll('[data-dispatch]').forEach(b=>b.onclick=()=>markDispatched(b.dataset.dispatch,b));
