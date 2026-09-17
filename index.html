@@ -454,7 +454,7 @@ const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="
 
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30, chaseTab:'all', search:'', searchResults:null,
 pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
-dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[],
+dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[], ordersOpen:[], ordersDelivered:[],
 dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
 myPerf:[], myRevivals:[], myPromises:[],
 openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
@@ -619,12 +619,30 @@ sb.from('deals').select('*, customers(name,phone,district)')
 if(r1.error) throw r1.error; if(r2.error) throw r2.error;
 S.dispatchReady = r1.data||[]; S.dispatchSent = r2.data||[];
 }
+if(S.tab==='orders'){
+// Orders is Retail-Sales-only. A Won (is_won && !is_delivered) or Delivered
+// Retail deal IS the order record -- no separate orders table, no new
+// pipeline stages. dispatch_date (not courier_name) is the authoritative
+// signal for Awaiting Dispatch vs In Transit; that split happens client-side
+// in viewOrders() from the single "open" query below.
+const retailId = S.pipelines.find(p=>p.name==='Retail Sales')?.id;
+const openIds = S.stages.filter(s=>s.pipeline_id===retailId && s.is_won && !s.is_delivered).map(s=>s.id);
+const deliveredIds = S.stages.filter(s=>s.pipeline_id===retailId && s.is_delivered).map(s=>s.id);
+const [r3,r4] = await Promise.all([
+sb.from('deals').select('*, customers(name,phone,district,address), stages(name,is_won,is_lost,is_delivered)')
+.in('stage_id', openIds.length?openIds:[-1]).order('created_at',{ascending:true}),
+sb.from('deals').select('*, customers(name,phone,district,address), stages(name,is_won,is_lost,is_delivered)')
+.in('stage_id', deliveredIds.length?deliveredIds:[-1]).order('delivered_at',{ascending:false}).limit(50)
+]);
+if(r3.error) throw r3.error; if(r4.error) throw r4.error;
+S.ordersOpen = r3.data||[]; S.ordersDelivered = r4.data||[];
+}
 }catch(e){ S.err = e.message || String(e); }
 render();
 }
 
 /* ── shell ── */
-const SOON_TABS = ['estimates','orders','customers','products','repairs'];
+const SOON_TABS = ['estimates','customers','products','repairs'];
 
 function render(){
 if(S.deal) return isOwner() ? renderDeal() : renderLeadDetail();
@@ -634,6 +652,7 @@ S.tab==='addlead' ? viewAddLead() :
 S.tab==='money' ? viewMoney() :
 S.tab==='dues' ? viewDues() :
 S.tab==='dispatch' ? viewDispatch() :
+S.tab==='orders' ? viewOrders() :
 S.tab==='moving' ? viewMoving() :
 S.tab==='dashboard' ? viewDashboard() :
 S.tab==='mydash' ? viewMyDashboard() :
@@ -662,7 +681,7 @@ const CRE_NAV = [
 {key:'pipeline', label:'My Leads', icon:'users'},
 {key:'followups', label:'Follow-ups', icon:'bell'},
 {key:'estimates', label:'Estimates', icon:'doc', soon:true},
-{key:'orders', label:'Orders', icon:'cart', soon:true},
+{key:'orders', label:'Orders', icon:'cart'},
 {key:'dispatch', label:'Dispatch', icon:'truck'},
 {key:'customers', label:'Customers', icon:'users', soon:true},
 {key:'products', label:'Products', icon:'box', soon:true},
@@ -1415,6 +1434,30 @@ return `<div class="cd-panel"><h3>Add a note</h3>
 <div class="cd-panel"><h3>Notes</h3>${list}</div>`;
 }
 
+// Read-only order summary for the per-deal Orders sub-tab. No courier/AWB
+// entry here on purpose -- that stays exclusively in the Dispatch tab
+// (markRetailDispatched/markRetailDelivered). Reuses S.deal.items and
+// S.deal itself, both already loaded by openDeal() -- no new fetch.
+function leadOrderTab(d){
+if(!isRetailPipeline(d.pipeline_id)) return `<div class="cd-soon"><b>Orders — not applicable</b><p>Order tracking is only available for Retail Sales deals.</p></div>`;
+if(!d.stages?.is_won && !d.stages?.is_delivered) return `<div class="cd-soon"><b>Not yet an order</b><p>This becomes an order automatically once the Estimate is approved and fully paid.</p></div>`;
+const bal=Number(d.value||0)-Number(d.amount_collected||0);
+const status = d.stages?.is_delivered ? 'Delivered' : (d.dispatch_date ? 'In Transit' : 'Awaiting Dispatch');
+const items = (S.deal?.items||[]).map(it=>`<div class="row"><div class="grow">${esc(it.products?.name||it.product_other||'Item')}${it.products?.model_code?' — '+esc(it.products.model_code):''}<div class="sub">${it.qty} × ${rs(it.rate)}</div></div><div class="amt">${rs(it.amount)}</div></div>`).join('') || '<div class="cd-empty">No items</div>';
+return `<div class="cd-panel"><h3>Order status</h3>
+${cdStagePill(d.stages)}
+<div class="sub" style="margin-top:8px">${status}${bal<=0?' · Fully Paid':' · Balance '+rs(bal)}</div>
+</div>
+<div class="cd-panel"><h3>Items</h3>${items}</div>
+<div class="cd-panel"><h3>Order value</h3><div class="amt">${rs(d.value)}</div></div>
+<div class="cd-panel"><h3>Dispatch</h3>
+<div class="sub">Courier: ${esc(d.courier_name||'—')}</div>
+<div class="sub">AWB / Tracking: ${esc(d.awb_number||'—')}</div>
+<div class="sub">Dispatched: ${d.dispatch_date?day(d.dispatch_date):'—'}</div>
+<div class="sub">Delivered: ${d.delivered_at?day(d.delivered_at):'—'}</div>
+</div>`;
+}
+
 function renderLeadDetail(){
 const d=S.deal, bal=Number(d.value||0)-Number(d.amount_collected||0);
 const initials=(d.customers?.name||'?').split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()||'?';
@@ -1425,7 +1468,7 @@ if(S.dealTab==='overview') body=leadOverview(d,bal);
 else if(S.dealTab==='followups') body=leadFollowups(d);
 else if(S.dealTab==='notes') body=leadNotes(d);
 else if(S.dealTab==='estimates') body=leadEstimateTab(d);
-else body=`<div class="cd-soon"><b>Orders — coming soon</b><p>This module isn't built yet. Use Create Estimate below to move this lead forward in the meantime.</p></div>`;
+else body=leadOrderTab(d);
 const qStage = findQuotedStage(d.pipeline_id);
 // Button VISIBILITY is intentionally independent of the forward-only stage
 // guard: "Create Estimate"/"Estimate" must stay reachable across the whole
@@ -2165,9 +2208,19 @@ return `<div class="item" data-deal="${d.id}" style="cursor:pointer">
 }
 
 /* ── dispatch & courier ── */
+// Retail Sales gets the three-state Order -> Dispatched/In Transit -> Delivered
+// flow (dispatch_date is the authoritative operational signal, courier_name/
+// awb_number are informational only). Dealer Orders and Repairs are explicitly
+// out of scope for this phase and keep the original single-click
+// dispatch=delivered behavior via markDispatched(), unchanged.
 function viewDispatch(){
 const ready = S.dispatchReady, sent = S.dispatchSent;
-const readyCards = ready.length ? ready.map(d=>{
+const retailReady = ready.filter(d=>isRetailPipeline(d.pipeline_id));
+const otherReady = ready.filter(d=>!isRetailPipeline(d.pipeline_id));
+const awaiting = retailReady.filter(d=>!d.dispatch_date);
+const inTransit = retailReady.filter(d=>d.dispatch_date);
+
+const otherCards = otherReady.length ? otherReady.map(d=>{
 const addr=[d.customers?.address,d.customers?.district].filter(Boolean).join(', ');
 return `<div class="card">
 <div class="row"><div class="grow">
@@ -2180,7 +2233,31 @@ ${d.customers?.phone?`<div class="sub">${esc(d.customers.phone)}</div>`:''}
 <label for="awb-${d.id}">Tracking / AWB number</label><input id="awb-${d.id}" placeholder="AWB / consignment no." value="${esc(d.awb_number||'')}">
 <button class="btn" data-dispatch="${d.id}">Mark dispatched</button>
 </div>`;
+}).join('') : '';
+
+const awaitingCards = awaiting.length ? awaiting.map(d=>{
+const addr=[d.customers?.address,d.customers?.district].filter(Boolean).join(', ');
+return `<div class="card">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.title||'')}${d.invoice_no?' · '+esc(d.invoice_no):''} · ${esc(d.stages?.name||'')}</div>
+</div><div class="amt">${rs(d.value)}</div></div>
+${addr?`<div class="sub" style="margin-top:6px">${esc(addr)}</div>`:''}
+${d.customers?.phone?`<div class="sub">${esc(d.customers.phone)}</div>`:''}
+<label for="rcr-${d.id}">Courier</label><input id="rcr-${d.id}" placeholder="e.g. DTDC, Professional" value="${esc(d.courier_name||'')}">
+<label for="rawb-${d.id}">Tracking / AWB number</label><input id="rawb-${d.id}" placeholder="AWB / consignment no." value="${esc(d.awb_number||'')}">
+<button class="btn" data-retaildispatch="${d.id}">Mark Dispatched</button>
+</div>`;
 }).join('') : `<div class="empty">Nothing waiting to ship.</div>`;
+
+const transitCards = inTransit.length ? inTransit.map(d=>`<div class="card">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.title||'')}${d.invoice_no?' · '+esc(d.invoice_no):''} · ${esc(d.courier_name||'—')}${d.awb_number?' · '+esc(d.awb_number):''}</div>
+</div><div class="amt">${rs(d.value)}</div></div>
+<div class="sub" style="margin-top:6px">Dispatched ${day(d.dispatch_date)}</div>
+<button class="btn" data-retaildeliver="${d.id}">Mark Delivered</button>
+</div>`).join('') : '';
 
 const sentCards = sent.length ? sent.map(d=>`<div class="card">
 <div class="row"><div class="grow">
@@ -2189,7 +2266,9 @@ const sentCards = sent.length ? sent.map(d=>`<div class="card">
 </div><div class="sub">${day(d.dispatch_date)}</div></div>
 </div>`).join('') : '';
 
-return `<h2>Ready to dispatch · ${ready.length}</h2>${readyCards}` +
+return `<h2>Awaiting Dispatch · ${awaiting.length}</h2>${awaitingCards}` +
+(inTransit.length ? `<h2>In Transit</h2>${transitCards}` : '') +
+(otherReady.length ? `<h2>Ready to dispatch (Dealer / Repairs) · ${otherReady.length}</h2>${otherCards}` : '') +
 (sent.length ? `<h2>Recently dispatched</h2>${sentCards}` : '');
 }
 
@@ -2220,6 +2299,68 @@ if(target) await sb.from('stage_events').insert({deal_id:id,from_stage_id:deal.s
 await logActivity('dispatched', id, [courier,awb].filter(Boolean).join(' · ') || (deal.customers?.name||''));
 loadTab();
 }catch(err){ S.err=err.message||String(err); render(); }
+}
+
+// Retail Sales only. Records courier/AWB/dispatch_date exactly like
+// markDispatched() used to, but deliberately does NOT touch stage_id,
+// delivered_at, or stage_events -- dispatch_date alone is what moves a
+// Retail order from Awaiting Dispatch to In Transit (see viewDispatch()/
+// viewOrders()). Courier/AWB stay optional, matching the existing UI
+// contract (markDispatched() never required them either).
+async function markRetailDispatched(id,btn){
+btn.disabled=true; btn.textContent='Saving…';
+try{
+const deal=S.dispatchReady.find(x=>x.id===id);
+if(!deal) throw new Error('Deal not found');
+const courier=document.getElementById('rcr-'+id).value.trim();
+const awb=document.getElementById('rawb-'+id).value.trim();
+const upd={ courier_name:courier||null, awb_number:awb||null, dispatch_date:new Date().toISOString().slice(0,10) };
+await sb.from('deals').update(upd).eq('id',id);
+await logActivity('retail_dispatched', id, [courier,awb].filter(Boolean).join(' · ') || (deal.customers?.name||''));
+loadTab();
+}catch(err){ S.err=err.message||String(err); render(); }
+}
+
+// Retail Sales only. The separate, explicit "customer actually received it"
+// action -- only this moves Confirmed/Won -> Delivered, sets delivered_at,
+// and writes the stage_event. Never rewrites courier_name/awb_number/
+// dispatch_date, which markRetailDispatched() already recorded.
+async function markRetailDelivered(id,btn){
+btn.disabled=true; btn.textContent='Saving…';
+try{
+const deal=S.dispatchReady.find(x=>x.id===id);
+if(!deal) throw new Error('Deal not found');
+if(!deal.dispatch_date) throw new Error('Cannot mark delivered before dispatch is recorded');
+const target=S.stages.find(s=>s.pipeline_id===deal.pipeline_id && s.is_delivered);
+if(!target) throw new Error('No Delivered stage configured for this pipeline');
+const upd={ stage_id:target.id, delivered_at:new Date().toISOString() };
+await sb.from('deals').update(upd).eq('id',id);
+await sb.from('stage_events').insert({deal_id:id,from_stage_id:deal.stage_id,to_stage_id:target.id,changed_by:S.me.id});
+await logActivity('retail_delivered', id, deal.customers?.name||'');
+loadTab();
+}catch(err){ S.err=err.message||String(err); render(); }
+}
+
+/* ── orders (Retail Sales only; derived from existing deal/stage fields, no new table) ── */
+function viewOrders(){
+const awaiting = S.ordersOpen.filter(d=>!d.dispatch_date);
+const inTransit = S.ordersOpen.filter(d=>d.dispatch_date);
+const delivered = S.ordersDelivered;
+const card = (d, statusLabel) => {
+const bal=Number(d.value||0)-Number(d.amount_collected||0);
+return `<div class="card" data-deal="${d.id}" style="cursor:pointer">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.title||'')}${d.invoice_no?' · '+esc(d.invoice_no):''}</div>
+</div><div class="amt">${rs(d.value)}</div></div>
+<div class="sub" style="margin-top:6px">${statusLabel} · ${bal<=0?'Fully Paid':'Balance '+rs(bal)}</div>
+${d.courier_name?`<div class="sub">${esc(d.courier_name)}${d.awb_number?' · '+esc(d.awb_number):''}</div>`:''}
+</div>`;
+};
+const sec = (title, list, label) => `<h2>${title} · ${list.length}</h2>` + (list.length ? list.map(d=>card(d,label)).join('') : `<div class="empty">None right now.</div>`);
+return sec('Awaiting Dispatch', awaiting, 'Awaiting Dispatch') +
+sec('In Transit', inTransit, 'In Transit') +
+sec('Delivered', delivered, 'Delivered');
 }
 
 /* ── new deal ── */
@@ -2304,6 +2445,8 @@ document.querySelectorAll('[data-reverse-receipt]').forEach(b=>b.onclick=()=>rev
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
 document.querySelectorAll('[data-due]').forEach(el=>el.onclick=()=>toggleDue(el.dataset.due));
 document.querySelectorAll('[data-dispatch]').forEach(b=>b.onclick=()=>markDispatched(b.dataset.dispatch,b));
+document.querySelectorAll('[data-retaildispatch]').forEach(b=>b.onclick=()=>markRetailDispatched(b.dataset.retaildispatch,b));
+document.querySelectorAll('[data-retaildeliver]').forEach(b=>b.onclick=()=>markRetailDelivered(b.dataset.retaildeliver,b));
 document.querySelectorAll('.qa[data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; loadTab(); });
 document.querySelectorAll('[data-chase]').forEach(b=>b.onclick=()=>{ S.chaseTab=b.dataset.chase; render(); });
 document.querySelectorAll('[data-donefu]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); markFollowupDone(b.dataset.donefu); });
