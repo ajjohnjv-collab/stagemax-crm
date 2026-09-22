@@ -454,7 +454,7 @@ const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="
 
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30, chaseTab:'all', search:'', searchResults:null,
 pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
-dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[], ordersOpen:[], ordersDelivered:[],
+dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[], ordersOpen:[], ordersDelivered:[], globalEstimates:[],
 dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
 myPerf:[], myRevivals:[], myPromises:[],
 openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
@@ -541,6 +541,21 @@ const wonStageIds = new Set(S.stages.filter(s=>s.is_won).map(s=>s.id));
 S.monthWonIds = [...new Set((weR.data||[]).filter(r=>wonStageIds.has(r.to_stage_id)).map(r=>r.deal_id))];
 }
 
+// Global Estimates is an operational VIEW over the existing Retail Estimate
+// workflow -- no new table, no estimate editor of its own. Fetches ALL
+// Retail Sales deals (RLS already scopes a CRE to their own, and this has
+// no row cap, unlike S.openDeals below) and buckets client-side with
+// estimateGroup(). Shared verbatim by the Global Estimates screen and the
+// CRE Today dashboard's Estimate KPI tiles so the two can never disagree,
+// including for a shop with more than 300 active deals.
+async function loadGlobalEstimates(){
+const retailId = S.pipelines.find(p=>p.name==='Retail Sales')?.id;
+const r = await sb.from('deals').select('*, customers(name,phone,district), stages(name,is_won,is_lost,is_delivered)')
+.eq('pipeline_id', retailId||-1).order('created_at',{ascending:true});
+if(r.error) throw r.error;
+S.globalEstimates = (r.data||[]).filter(d=>estimateGroup(d));
+}
+
 async function loadTab(){
 S.err='';
 try{
@@ -603,6 +618,13 @@ const { data:perfData, error:perfErr } = await sb.from('cre_performance_daily').
 if(perfErr) throw perfErr; S.myPerf = perfData||[];
 await loadChaseSources();
 await loadDashboardShared();
+// The CRE Today dashboard's three Estimate KPI tiles (cdKpis) must never
+// disagree with Global Estimates just because a shop has passed the
+// 300-row cap on S.openDeals below. Rather than touching that shared cap
+// (used by unrelated tiles/modules too), load the SAME uncapped Retail
+// Estimate query Global Estimates itself uses, once, here -- one extra
+// query, not three, and cdKpis() reads from this exact array.
+if(S.tab==='mydash') await loadGlobalEstimates();
 }
 if(S.tab==='dues'){
 const { data, error } = await sb.from('customer_balance_summary').select('*');
@@ -637,12 +659,15 @@ sb.from('deals').select('*, customers(name,phone,district,address), stages(name,
 if(r3.error) throw r3.error; if(r4.error) throw r4.error;
 S.ordersOpen = r3.data||[]; S.ordersDelivered = r4.data||[];
 }
+if(S.tab==='estimates'){
+await loadGlobalEstimates();
+}
 }catch(e){ S.err = e.message || String(e); }
 render();
 }
 
 /* ── shell ── */
-const SOON_TABS = ['estimates','customers','products','repairs'];
+const SOON_TABS = ['customers','products','repairs'];
 
 function render(){
 if(S.deal) return isOwner() ? renderDeal() : renderLeadDetail();
@@ -653,6 +678,7 @@ S.tab==='money' ? viewMoney() :
 S.tab==='dues' ? viewDues() :
 S.tab==='dispatch' ? viewDispatch() :
 S.tab==='orders' ? viewOrders() :
+S.tab==='estimates' ? viewEstimatesGlobal() :
 S.tab==='moving' ? viewMoving() :
 S.tab==='dashboard' ? viewDashboard() :
 S.tab==='mydash' ? viewMyDashboard() :
@@ -680,7 +706,7 @@ const CRE_NAV = [
 {key:'mydash', label:'Today', icon:'home'},
 {key:'pipeline', label:'My Leads', icon:'users'},
 {key:'followups', label:'Follow-ups', icon:'bell'},
-{key:'estimates', label:'Estimates', icon:'doc', soon:true},
+{key:'estimates', label:'Estimates', icon:'doc'},
 {key:'orders', label:'Orders', icon:'cart'},
 {key:'dispatch', label:'Dispatch', icon:'truck'},
 {key:'customers', label:'Customers', icon:'users', soon:true},
@@ -907,6 +933,30 @@ return cur.sort_order < target.sort_order;
 
 function isRetailPipeline(pipelineId){
 return S.pipelines.find(p=>p.id===pipelineId)?.name==='Retail Sales';
+}
+
+// Single source of truth for "which Global Estimates bucket is this deal
+// in, if any" -- shared verbatim by the CRE Today dashboard's Estimate KPI
+// tiles (cdKpis) and the Global Estimates screen (viewEstimatesGlobal) so
+// the two can never disagree. Retail Sales only; Dealer/Repairs never
+// match. A deal that has reached a Won stage (100% payment, or the
+// existing auto-confirm-at-₹0 behavior) has graduated to Orders and
+// returns null -- Global Estimates is ACTIVE estimates only.
+//
+// Approval is authoritative over Sent/Draft classification (confirmed):
+// an Estimate can be approved without ever having estimate_sent_at
+// recorded (Send is a separate, skippable action -- see sendEstimate()),
+// so Approved is checked first and neither Sent nor Draft re-checks it.
+// This makes the three buckets strictly mutually exclusive. This phase
+// does not add a requirement that Send must happen before Approval --
+// that would be a separate business-rule change.
+function estimateGroup(d){
+if(!isRetailPipeline(d.pipeline_id)) return null;
+if(d.stages?.is_won) return null;
+if(d.estimate_approved_at) return 'approved';
+if(d.estimate_sent_at) return 'sent';
+if(d.estimate_started_at) return 'draft';
+return null;
 }
 
 // Display-only derived status for the lead header. stage_id itself is never
@@ -1591,7 +1641,13 @@ const discount=Math.max(0,Number(document.getElementById('estDiscount').value||0
 const gstEnabled=!!document.getElementById('estGst')?.checked;
 let r1=await sb.from('deal_items').delete().eq('deal_id',d.id); if(r1.error) throw r1.error;
 if(rows.length){ let r2=await sb.from('deal_items').insert(rows); if(r2.error) throw r2.error; }
-let r3=await sb.from('deals').update({estimate_discount:discount, estimate_gst_enabled:gstEnabled}).eq('id',d.id); if(r3.error) throw r3.error;
+// estimate_started_at: set on the first successful save only (a
+// deals_preserve_estimate_started_at DB trigger is the authoritative
+// guard -- this client-side fallback just avoids clobbering it with a
+// fresh timestamp on every subsequent save). Never set anywhere else --
+// not by opening this tab, not by Create Estimate, not by intake
+// deal_items -- only by an Estimate actually being saved.
+let r3=await sb.from('deals').update({estimate_discount:discount, estimate_gst_enabled:gstEnabled, estimate_started_at: d.estimate_started_at || new Date().toISOString()}).eq('id',d.id); if(r3.error) throw r3.error;
 openDeal(d.id);
 }catch(err){
 if(errBox) errBox.innerHTML=`<div class="cd-est-err">${esc(err.message||String(err))}</div>`;
@@ -1603,7 +1659,10 @@ async function sendEstimate(d){
 const btn=document.getElementById('estSend'); if(btn) btn.disabled=true;
 const errBox=document.getElementById('estErr'); if(errBox) errBox.innerHTML='';
 try{
-let r1=await sb.from('deals').update({estimate_sent_at:new Date().toISOString()}).eq('id',d.id); if(r1.error) throw r1.error;
+// A sent Estimate necessarily exists, so Send must guarantee
+// estimate_started_at is set too -- Send is reachable without a prior
+// Save (see saveEstimate's comment), so this can't rely on Save alone.
+let r1=await sb.from('deals').update({estimate_sent_at:new Date().toISOString(), estimate_started_at: d.estimate_started_at || new Date().toISOString()}).eq('id',d.id); if(r1.error) throw r1.error;
 await logActivity('estimate_sent', d.id, d.customers?.name||'');
 openDeal(d.id);
 }catch(err){
@@ -1966,15 +2025,22 @@ function cdKpis(){
 const chase = chaseList();
 const callsDue = chase.filter(i=>i.type==='call').length;
 const waFollowups = chase.filter(i=>i.type==='whatsapp').length;
-const estimatesPending = S.openDeals.filter(d=>d.stages?.name==='Quoted').length;
-const paymentPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_lost && (Number(d.value||0)-Number(d.amount_collected||0))>0).length;
+// Estimates Pending / Approval Waiting / Payment Pending use the exact same
+// estimateGroup() buckets, over the exact same S.globalEstimates array, as
+// the Global Estimates screen (loadGlobalEstimates() -- an uncapped Retail
+// Estimate query, loaded alongside this dashboard). This guarantees the two
+// screens agree even past the 300-row S.openDeals cap used by unrelated
+// tiles/modules (left untouched below and elsewhere -- see dispatchPending).
+const estimatesPending = S.globalEstimates.filter(d=>estimateGroup(d)==='draft').length;
+const approvalWaiting = S.globalEstimates.filter(d=>estimateGroup(d)==='sent').length;
+const paymentPending = S.globalEstimates.filter(d=>estimateGroup(d)==='approved').length;
 const dispatchPending = S.openDeals.filter(d=>d.stages?.is_won && !d.stages?.is_delivered).length;
 const cards = [
 {v:callsDue, l:'Calls Due Today', icon:'call', col:'#3F8F5F', ic2:'#fff', tab:'followups'},
 {v:waFollowups, l:'WhatsApp Follow-ups', icon:'wa', col:'#25D366', ic2:'#fff', tab:'followups'},
-{v:estimatesPending, l:'Estimates Pending', icon:'doc', col:'#3D74E6', ic2:'#fff', pipe:1, stage:3},
-{v:null, l:'Approval Waiting', icon:'clock', col:'#7A5FB0', ic2:'#fff'},
-{v:paymentPending, l:'Payment Pending', icon:'wallet', col:'#E8A33D', ic2:'#1A1206'},
+{v:estimatesPending, l:'Estimates Pending', icon:'doc', col:'#3D74E6', ic2:'#fff', tab:'estimates'},
+{v:approvalWaiting, l:'Approval Waiting', icon:'clock', col:'#7A5FB0', ic2:'#fff', tab:'estimates'},
+{v:paymentPending, l:'Payment Pending', icon:'wallet', col:'#E8A33D', ic2:'#1A1206', tab:'estimates'},
 {v:dispatchPending, l:'Dispatch Pending', icon:'truck', col:'#B23A5C', ic2:'#fff', tab:'dispatch'}
 ];
 return `<div class="cd-kpis">${cards.map(c=>{
@@ -2363,6 +2429,30 @@ sec('In Transit', inTransit, 'In Transit') +
 sec('Delivered', delivered, 'Delivered');
 }
 
+/* ── Global Estimates: an operational view over the existing Retail
+   Estimate workflow (deal_items + estimate_* columns on deals). No new
+   Estimate editor, no estimates table -- clicking a row opens the SAME
+   Estimates sub-tab inside the deal that Create Estimate already uses. ── */
+function viewEstimatesGlobal(){
+const groups = { draft:[], sent:[], approved:[] };
+(S.globalEstimates||[]).forEach(d=>{ const g=estimateGroup(d); if(g) groups[g].push(d); });
+const card = (d) => {
+const bal=Number(d.value||0)-Number(d.amount_collected||0);
+const sub = d.estimate_approved_at ? (bal<=0?'Fully paid':'Balance '+rs(bal)) : 'Started '+day(d.estimate_started_at);
+return `<div class="card" data-globalest="${d.id}" style="cursor:pointer">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.customers?.name||'No customer')}</div>
+<div class="sub">${esc(d.title||'')}</div>
+</div><div class="amt">${rs(d.value)}</div></div>
+<div class="sub" style="margin-top:6px">${sub}</div>
+</div>`;
+};
+const sec = (title, list) => `<h2>${title} · ${list.length}</h2>` + (list.length ? list.map(card).join('') : `<div class="empty">None right now.</div>`);
+return sec('Draft / Not Sent', groups.draft) +
+sec('Sent / Awaiting Approval', groups.sent) +
+sec('Approved / Payment Pending', groups.approved);
+}
+
 /* ── new deal ── */
 function viewNew(){
 const pipes=S.pipelines.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
@@ -2440,6 +2530,9 @@ document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=N
 document.querySelectorAll('[data-kpipipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.kpipipe); S.stage=b.dataset.kpistage?Number(b.dataset.kpistage):null; S.tab='pipeline'; S.deal=null; loadTab(); });
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
 document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
+// Global Estimates row click: always land on the deal's existing Estimates
+// sub-tab (the same one Create Estimate uses), never Overview.
+document.querySelectorAll('[data-globalest]').forEach(c=>c.onclick=()=>{ S.dealTab='estimates'; openDeal(c.dataset.globalest); });
 const payBtn=document.getElementById('payRecord'); if(payBtn) payBtn.onclick=()=>recordPayment(S.deal);
 document.querySelectorAll('[data-reverse-receipt]').forEach(b=>b.onclick=()=>reverseReceiptAction(b.dataset.reverseReceipt));
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
