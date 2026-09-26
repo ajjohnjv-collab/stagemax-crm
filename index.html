@@ -459,7 +459,8 @@ dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValu
 myPerf:[], myRevivals:[], myPromises:[],
 openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
 sideOpen:false, presetPipeline:null, presetStage:null,
-leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview' };
+leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview',
+custSearch:'', customers:[], customer:null, customerDeals:[], customerBalance:null, customerRepairs:[], custProfileTab:'overview', custEditing:false, newDealCustomerId:null, newDealCustomerInfo:null };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -630,6 +631,14 @@ if(S.tab==='dues'){
 const { data, error } = await sb.from('customer_balance_summary').select('*');
 if(error) throw error; S.dues = data||[]; S.duesOpen=null; S.duesDeals=[];
 }
+if(S.tab==='customers'){
+// Customers directory: one lightweight query, no deal-count/recent-activity
+// aggregation in V1 (would require a second broad query) and no N+1.
+let q = sb.from('customers').select('id,name,phone,alt_phone,district').order('name');
+if(S.custSearch) q = q.or(`name.ilike.%${S.custSearch}%,phone.ilike.%${S.custSearch}%,alt_phone.ilike.%${S.custSearch}%`);
+const { data, error } = await q;
+if(error) throw error; S.customers = data||[];
+}
 if(S.tab==='dispatch'){
 const readyIds = S.stages.filter(s=>s.is_won && !s.is_delivered).map(s=>s.id);
 const [r1,r2] = await Promise.all([
@@ -667,10 +676,11 @@ render();
 }
 
 /* ── shell ── */
-const SOON_TABS = ['customers','products','repairs'];
+const SOON_TABS = ['products','repairs'];
 
 function render(){
 if(S.deal) return isOwner() ? renderDeal() : renderLeadDetail();
+if(S.customer) return renderCustomerProfile();
 app.innerHTML = shell(
 S.tab==='pipeline' ? (isOwner() ? viewPipeline() : viewMyLeads()) :
 S.tab==='addlead' ? viewAddLead() :
@@ -684,6 +694,7 @@ S.tab==='dashboard' ? viewDashboard() :
 S.tab==='mydash' ? viewMyDashboard() :
 S.tab==='followups' ? viewFollowupsTab() :
 S.tab==='myperf' ? viewMyPerformance() :
+S.tab==='customers' ? viewCustomers() :
 SOON_TABS.includes(S.tab) ? viewComingSoon(S.tab) : viewNew()
 );
 wire();
@@ -698,7 +709,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('new','Add')}</nav>`;
+<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('customers','Customers')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('new','Add')}</nav>`;
 }
 
 /* ── CRE app shell — STAGEMAX reference redesign (Today page + shared chrome) ── */
@@ -709,7 +720,7 @@ const CRE_NAV = [
 {key:'estimates', label:'Estimates', icon:'doc'},
 {key:'orders', label:'Orders', icon:'cart'},
 {key:'dispatch', label:'Dispatch', icon:'truck'},
-{key:'customers', label:'Customers', icon:'users', soon:true},
+{key:'customers', label:'Customers', icon:'users'},
 {key:'products', label:'Products', icon:'box', soon:true},
 {key:'repairs', label:'Repairs / Service', icon:'wrench', soon:true},
 {key:'myperf', label:'My Performance', icon:'chart'}
@@ -1333,18 +1344,20 @@ ${S.leadHasMore?`<button class="cd-loadmore" id="leadLoadMore" ${S.leadsLoading?
 /* ── Phase 2: Add New Lead (CRE) ── */
 function viewAddLead(){
 const sourceOpts=S.sources.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+const known = S.newDealCustomerId ? S.newDealCustomerInfo : null;
 return `<div class="cd-leadbar"><h1>Add New Lead</h1><button class="cd-btn ghost" id="cancelAddLead">Cancel</button></div>
 <div class="cd-grid2">
 <div>
 <div class="cd-panel"><h3>Customer</h3>
 <div class="cd-form">
-<label for="alname">Customer Name</label><input id="alname" placeholder="Full name">
+${known?`<p class="hint">Customer already selected from Customers — identity fields are locked.</p>`:''}
+<label for="alname">Customer Name</label><input id="alname" placeholder="Full name" value="${known?esc(known.name||''):''}" ${known?'readonly':''}>
 <div class="two">
-<div><label for="alphone">Phone</label><input id="alphone" inputmode="numeric" placeholder="10 digits"></div>
-<div><label for="alalt">Alternate Number</label><input id="alalt" inputmode="numeric" placeholder="Optional"></div>
+<div><label for="alphone">Phone</label><input id="alphone" inputmode="numeric" placeholder="10 digits" value="${known?esc(known.phone||''):''}" ${known?'readonly':''}></div>
+<div><label for="alalt">Alternate Number</label><input id="alalt" inputmode="numeric" placeholder="Optional" value="${known?esc(known.alt_phone||''):''}" ${known?'readonly':''}></div>
 </div>
 <div class="two">
-<div><label for="aldist">Location / City</label><input id="aldist" placeholder="e.g. Malappuram"></div>
+<div><label for="aldist">Location / City</label><input id="aldist" placeholder="e.g. Malappuram" value="${known?esc(known.district||''):''}" ${known?'readonly':''}></div>
 <div><label for="altype">Customer Type</label><select id="altype"><option value="retail">Retail</option><option value="dealer">Dealer</option></select></div>
 </div>
 </div></div>
@@ -1381,6 +1394,12 @@ const dist=document.getElementById('aldist').value.trim();
 const ctype=document.getElementById('altype').value;
 
 let cid=null;
+if(S.newDealCustomerId){
+// Customer-known path (New Deal launched from an existing Customer Profile):
+// skip the normal phone lookup/insert entirely -- use the already-known
+// customer_id directly. Zero customer rows are created on this path.
+cid=S.newDealCustomerId;
+} else {
 if(phone){
 const { data:found } = await sb.from('customers').select('id').eq('phone',phone).limit(1);
 if(found?.length) cid=found[0].id;
@@ -1395,6 +1414,7 @@ const patch={};
 if(alt) patch.alt_phone=alt;
 if(dist) patch.district=dist;
 if(Object.keys(patch).length) await sb.from('customers').update(patch).eq('id',cid);
+}
 }
 
 const retailPipe = S.pipelines.find(p=>/retail/i.test(p.name)) || S.pipelines[0];
@@ -1422,6 +1442,7 @@ sort_order:i+1
 if(rows.length) await sb.from('deal_items').insert(rows);
 await logActivity('lead_created', deal.id, name);
 
+S.newDealCustomerId=null; S.newDealCustomerInfo=null; // clear on successful customer-known save
 S.tab='pipeline';
 await openDeal(deal.id);
 }catch(err){
@@ -2162,7 +2183,7 @@ const t = targetsCard();
 return `<h2 style="margin-top:0">My performance</h2>${salesColumn('This month')}${t||'<div class="empty">No monthly target set yet — ask your admin to set one.</div>'}`;
 }
 
-const SOON_LABEL = {estimates:'Estimates', orders:'Orders', customers:'Customers', products:'Products', repairs:'Repairs / Service'};
+const SOON_LABEL = {estimates:'Estimates', orders:'Orders', products:'Products', repairs:'Repairs / Service'};
 function viewComingSoon(tab){
 return `<div class="cd-panel cd-soon"><b>${esc(SOON_LABEL[tab]||tab)} — coming in a later phase</b>This screen is part of the approved redesign plan and will be built next, wired to real StageMax data. Nothing here is faked in the meantime.</div>`;
 }
@@ -2237,6 +2258,154 @@ ${products}
 
 <h2>Team performance · ${esc(rangeLabel)}</h2>
 ${teamCards}`;
+}
+
+/* ── customers (directory + profile) ──
+Customers is a directory + history layer over the existing CRM, not a second
+pipeline/Orders/Payments/Repairs system. The customer's deals are loaded once
+in openCustomer() and reused for Overview, All Deals, Purchases and the
+repairs deal-id lookup -- no N+1 queries. Purchases reuses the exact
+isRetailPipeline()+stages.is_won predicate viewOrders() already uses; Payments
+reads customer_balance_summary only, no receipts query. */
+
+function waHref(phone){
+// Additive to Customers V1 only -- existing inline WhatsApp links elsewhere
+// (renderDeal(), viewDues()) are intentionally left untouched.
+const digits = String(phone||'').replace(/\D/g,'');
+let ten = null;
+if(digits.length===10) ten = digits;
+else if(digits.length===12 && digits.startsWith('91')) ten = digits.slice(2);
+else if(digits.length===11 && digits.startsWith('0')) ten = digits.slice(1);
+else if(digits.length>10) ten = digits.slice(-10);
+if(!ten || ten.length!==10) return null; // never fabricate a link from an unusable value
+return `https://wa.me/91${ten}`;
+}
+
+function viewCustomers(){
+const rows = S.customers.length ? S.customers.map(c=>`<div class="card" data-customer="${c.id}" style="cursor:pointer">
+<div class="row"><div class="grow">
+<div class="name">${esc(c.name||'')}</div>
+<div class="sub">${c.phone?esc(c.phone):'No phone'}${c.district?' · '+esc(c.district):''}</div>
+</div></div>
+</div>`).join('') : `<div class="empty">No customers found.${S.custSearch?'<br>Try a different name or phone number.':''}</div>`;
+return `<h2>Customers</h2>
+<div class="card">
+<label for="custsearch">Search</label>
+<input id="custsearch" placeholder="Name, phone or alternate phone" value="${esc(S.custSearch)}">
+</div>
+${rows}`;
+}
+
+async function openCustomer(id){
+// Corrected query order: customer row, customer deals and
+// customer_balance_summary are genuinely independent and run together.
+// Repairs depends on the deal IDs from the customer-deals query, so it is
+// issued only after that result is in hand, and only when there is at
+// least one deal ID -- no pointless empty .in() query.
+const [{data:cust},{data:deals},{data:balRows}] = await Promise.all([
+sb.from('customers').select('*').eq('id',id).single(),
+sb.from('deals').select('*, stages(name,is_won,is_lost,is_delivered,pipeline_id), pipelines(name)').eq('customer_id',id).order('created_at',{ascending:false}),
+sb.from('customer_balance_summary').select('*').eq('customer_id',id)
+]);
+S.customer = cust; S.customerDeals = deals||[]; S.customerBalance = (balRows&&balRows[0])||null;
+const dealIds = S.customerDeals.map(d=>d.id);
+if(dealIds.length>0){
+const { data:reps } = await sb.from('repairs').select('*').in('deal_id', dealIds);
+S.customerRepairs = reps||[];
+} else {
+S.customerRepairs = [];
+}
+S.custProfileTab='overview'; S.custEditing=false;
+render();
+}
+
+function renderCustomerProfile(){
+const c = S.customer, deals = S.customerDeals, bal = S.customerBalance;
+const activeDeals = deals.filter(d=>!d.stages?.is_won && !d.stages?.is_lost);
+const purchases = deals.filter(d=>isRetailPipeline(d.pipeline_id) && d.stages?.is_won);
+const totalSales = purchases.reduce((a,d)=>a+Number(d.value||0),0);
+const wa = waHref(c.phone);
+
+const headerCard = S.custEditing ? `<div class="card">
+<label for="cename">Name</label><input id="cename" value="${esc(c.name||'')}">
+<div class="two">
+<div><label for="cephone">Phone</label><input id="cephone" inputmode="numeric" value="${esc(c.phone||'')}"></div>
+<div><label for="cealt">Alternate Phone</label><input id="cealt" inputmode="numeric" value="${esc(c.alt_phone||'')}"></div>
+</div>
+<label for="cedist">District</label><input id="cedist" value="${esc(c.district||'')}">
+<div class="row" style="margin-top:9px;gap:7px">
+<button class="btn ghost" id="custEditCancel" style="flex:1">Cancel</button>
+<button class="btn" id="custEditSave" style="flex:1">Save</button>
+</div>
+</div>` : `<div class="card">
+<div class="row"><div class="grow">
+<div class="name" style="font-size:18px">${esc(c.name||'')}</div>
+<div class="sub">${c.phone?esc(c.phone):'No phone'}${c.district?' · '+esc(c.district):''}</div>
+</div></div>
+<div class="row" style="margin-top:9px;gap:7px">
+${c.phone?`<a class="btn ghost" style="flex:1;text-align:center;text-decoration:none" href="tel:${esc(c.phone)}">Call</a>`:''}
+${wa?`<a class="btn ghost" style="flex:1;text-align:center;text-decoration:none" href="${wa}">WhatsApp</a>`:''}
+<button class="btn ghost" id="custEditBtn" style="flex:1">Edit Customer</button>
+<button class="btn" id="custNewDealBtn" style="flex:1">New Deal</button>
+</div>
+</div>`;
+
+let tabBody='';
+const tabs=[['overview','Overview'],['deals','Deals'],['payments','Payments'],['repairs','Repairs / Service']];
+const tabBar = tabs.map(([k,l])=>`<button class="chip ${S.custProfileTab===k?'on':''}" data-custtab="${k}">${l}</button>`).join('');
+const dealCard = d=>`<div class="card" data-deal="${d.id}" style="cursor:pointer">
+<div class="row"><div class="grow">
+<div class="name">${esc(d.title||'')}</div>
+<div class="sub">${esc(d.stages?.name||'')}${d.pipelines?.name?' · '+esc(d.pipelines.name):''}</div>
+</div><div class="amt">${rs(d.value)}</div></div>
+</div>`;
+
+if(S.custProfileTab==='overview'){
+tabBody = `<div class="card">
+<div class="row"><div class="grow">Total Deals</div><div class="amt">${deals.length}</div></div>
+<div class="row"><div class="grow">Active Deals</div><div class="amt">${activeDeals.length}</div></div>
+<div class="row"><div class="grow">Completed Purchases</div><div class="amt">${purchases.length}</div></div>
+<div class="row"><div class="grow">Total Sales</div><div class="amt">${rs(totalSales)}</div></div>
+<div class="row"><div class="grow">Outstanding</div><div class="amt" style="${Number(bal?.total_balance||0)>0?'color:#E8899E':''}">${rs(bal?.total_balance||0)}</div></div>
+</div>`;
+} else if(S.custProfileTab==='deals'){
+tabBody = `<h3>All Deals</h3>${deals.length?deals.map(dealCard).join(''):'<div class="empty">No deals yet.</div>'}
+<h3 style="margin-top:16px">Purchases</h3>${purchases.length?purchases.map(dealCard).join(''):'<div class="empty">No completed purchases yet.</div>'}`;
+} else if(S.custProfileTab==='payments'){
+tabBody = bal ? `<div class="card">
+<div class="row"><div class="grow">Outstanding</div><div class="amt">${rs(bal.total_balance)}</div></div>
+<div class="row"><div class="grow">Pending Deals</div><div class="amt">${bal.pending_deals||0}</div></div>
+${bal.oldest_pending_since?`<div class="row"><div class="grow">Pending Since</div><div class="sub">${day(bal.oldest_pending_since)}</div></div>`:''}
+</div>` : `<div class="empty">Nothing pending. This customer is settled up.</div>`;
+} else if(S.custProfileTab==='repairs'){
+tabBody = S.customerRepairs.length ? S.customerRepairs.map(r=>`<div class="card">
+<div class="row"><div class="grow">
+<div class="name">${esc(r.status||'Repair / Service')}</div>
+<div class="sub">${r.created_at?day(r.created_at):''}</div>
+</div></div>
+</div>`).join('') : `<div class="empty">No repair or service records for this customer yet.</div>`;
+}
+
+app.innerHTML = shell(`
+<button class="back" id="custback">← Back to customers</button>
+${headerCard}
+${!S.custEditing?`<div class="row" style="margin-top:12px;gap:7px;flex-wrap:wrap">${tabBar}</div><div style="margin-top:12px">${tabBody}</div>`:''}
+`);
+wire();
+}
+
+async function saveCustomerEdit(){
+const name = document.getElementById('cename').value.trim();
+if(!name){ S.err='Customer name is needed.'; render(); return; }
+const phone = document.getElementById('cephone').value.trim();
+const alt = document.getElementById('cealt').value.trim();
+const dist = document.getElementById('cedist').value.trim();
+const patch = { name, phone:phone||null, alt_phone:alt||null, district:dist||null };
+const { error } = await sb.from('customers').update(patch).eq('id', S.customer.id);
+if(error){ S.err = error.message; render(); return; }
+S.customer = { ...S.customer, ...patch };
+S.custEditing = false;
+render();
 }
 
 /* ── dues (owner only) ── */
@@ -2460,12 +2629,14 @@ const sources=S.sources.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`
 const assign = isOwner() ? `<label for="nassign">Assign to</label><select id="nassign">
 ${S.profiles.map(p=>`<option value="${p.id}" ${p.id===S.me.id?'selected':''}>${esc(p.full_name)}</option>`).join('')}
 </select>` : '';
+const known = S.newDealCustomerId ? S.newDealCustomerInfo : null;
 return `<h2>New deal</h2>
 <div class="card">
-<label for="cname">Customer name</label><input id="cname" placeholder="Name on the bill">
+${known?`<div class="sub" style="margin-bottom:8px">Customer already selected from Customers — identity fields are locked.</div>`:''}
+<label for="cname">Customer name</label><input id="cname" placeholder="Name on the bill" value="${known?esc(known.name||''):''}" ${known?'readonly':''}>
 <div class="two">
-<div><label for="cphone">Phone</label><input id="cphone" inputmode="numeric" placeholder="10 digits"></div>
-<div><label for="cdist">District</label><input id="cdist" placeholder="Malappuram"></div>
+<div><label for="cphone">Phone</label><input id="cphone" inputmode="numeric" placeholder="10 digits" value="${known?esc(known.phone||''):''}" ${known?'readonly':''}></div>
+<div><label for="cdist">District</label><input id="cdist" placeholder="Malappuram" value="${known?esc(known.district||''):''}" ${known?'readonly':''}></div>
 </div>
 <label for="npipe">Pipeline</label><select id="npipe">${pipes}</select>
 <label for="nstage">Stage</label><select id="nstage"></select>
@@ -2511,7 +2682,7 @@ S.search=q;
 const like=`%${q}%`;
 const [dR,cR,pR] = await Promise.all([
 sb.from('deals').select('id,title,value,customers(name,phone)').ilike('title', like).limit(5),
-sb.from('customers').select('id,name,phone,district').ilike('name', like).limit(5),
+sb.from('customers').select('id,name,phone,district').or(`name.ilike.${like},phone.ilike.${like},alt_phone.ilike.${like}`).limit(5),
 sb.from('products').select('id,name,model_code,category').ilike('name', like).limit(5)
 ]);
 S.searchResults = { deals:dR.data||[], customers:cR.data||[], products:pR.data||[] };
@@ -2521,11 +2692,14 @@ render();
 /* ── wiring ── */
 function wire(){
 const out=document.getElementById('out'); if(out) out.onclick=async()=>{ await sb.auth.signOut(); S={...S,me:null,deal:null}; renderLogin(); };
-document.querySelectorAll('nav button, [data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; S.sideOpen=false; loadTab(); });
-const fab=document.getElementById('fab'); if(fab) fab.onclick=()=>{ S.tab='new'; loadTab(); };
+// Any normal navigation away (including the owner's "Add" nav button, which
+// is itself a [data-tab="new"] element) must not carry a stale customer-known
+// context into an unrelated later New Deal / Add Lead.
+document.querySelectorAll('nav button, [data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; S.customer=null; S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.sideOpen=false; loadTab(); });
+const fab=document.getElementById('fab'); if(fab) fab.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.tab='new'; loadTab(); };
 const burger=document.getElementById('cdBurger'); if(burger) burger.onclick=()=>{ S.sideOpen=!S.sideOpen; render(); };
-const qe=document.getElementById('qaEstimate'); if(qe) qe.onclick=()=>{ S.presetPipeline=1; S.presetStage=3; S.tab='new'; S.deal=null; loadTab(); };
-const qr=document.getElementById('qaRepair'); if(qr) qr.onclick=()=>{ S.presetPipeline=3; S.presetStage=12; S.tab='new'; S.deal=null; loadTab(); };
+const qe=document.getElementById('qaEstimate'); if(qe) qe.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.presetPipeline=1; S.presetStage=3; S.tab='new'; S.deal=null; loadTab(); };
+const qr=document.getElementById('qaRepair'); if(qr) qr.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.presetPipeline=3; S.presetStage=12; S.tab='new'; S.deal=null; loadTab(); };
 document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.pipe); S.stage=null; loadTab(); });
 document.querySelectorAll('[data-kpipipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.kpipipe); S.stage=b.dataset.kpistage?Number(b.dataset.kpistage):null; S.tab='pipeline'; S.deal=null; loadTab(); });
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
@@ -2566,9 +2740,9 @@ document.getElementById('save').onclick=saveDeal;
 /* ── Phase 2 wiring: My Leads / Add New Lead ── */
 document.querySelectorAll('[data-lead]').forEach(c=>c.onclick=()=>openDeal(c.dataset.lead));
 const addLeadBtn=document.getElementById('addLeadBtn');
-if(addLeadBtn) addLeadBtn.onclick=()=>{ S.tab='addlead'; S.deal=null; render(); };
+if(addLeadBtn) addLeadBtn.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.tab='addlead'; S.deal=null; render(); };
 const cancelAddLead=document.getElementById('cancelAddLead');
-if(cancelAddLead) cancelAddLead.onclick=()=>{ S.tab='pipeline'; S.deal=null; loadTab(); };
+if(cancelAddLead) cancelAddLead.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.tab='pipeline'; S.deal=null; loadTab(); };
 const lsearch=document.getElementById('leadsearch');
 if(lsearch) lsearch.onkeydown=e=>{ if(e.key==='Enter'){ S.leadQ=lsearch.value.replace(/[,()]/g,''); applyLeadFilters(); } };
 const lstage=document.getElementById('leadstagesel');
@@ -2584,6 +2758,29 @@ alitems.appendChild(itemRow());
 document.getElementById('aladdrow').onclick=()=>alitems.appendChild(itemRow());
 document.getElementById('saveLead').onclick=saveLead;
 }
+
+/* ── customers wiring ── */
+document.querySelectorAll('[data-customer]').forEach(c=>c.onclick=()=>openCustomer(c.dataset.customer));
+const custsearch=document.getElementById('custsearch');
+if(custsearch) custsearch.onkeydown=e=>{ if(e.key==='Enter'){ S.custSearch=custsearch.value.trim(); loadTab(); } };
+const custback=document.getElementById('custback');
+if(custback) custback.onclick=()=>{ S.customer=null; S.custEditing=false; loadTab(); };
+document.querySelectorAll('[data-custtab]').forEach(b=>b.onclick=()=>{ S.custProfileTab=b.dataset.custtab; render(); });
+const custEditBtn=document.getElementById('custEditBtn');
+if(custEditBtn) custEditBtn.onclick=()=>{ S.custEditing=true; render(); };
+const custEditCancel=document.getElementById('custEditCancel');
+if(custEditCancel) custEditCancel.onclick=()=>{ S.custEditing=false; render(); };
+const custEditSave=document.getElementById('custEditSave');
+if(custEditSave) custEditSave.onclick=saveCustomerEdit;
+const custNewDealBtn=document.getElementById('custNewDealBtn');
+if(custNewDealBtn) custNewDealBtn.onclick=()=>{
+// Set only here -- the sole entry point for the customer-known path.
+S.newDealCustomerId = S.customer.id;
+S.newDealCustomerInfo = { name:S.customer.name, phone:S.customer.phone, alt_phone:S.customer.alt_phone, district:S.customer.district };
+S.customer=null; S.custEditing=false;
+S.tab = isOwner() ? 'new' : 'addlead';
+loadTab();
+};
 }
 
 async function saveDeal(e){
@@ -2594,6 +2791,12 @@ if(!name) throw new Error('Customer name is needed.');
 const phone=document.getElementById('cphone').value.trim();
 
 let cid=null;
+if(S.newDealCustomerId){
+// Customer-known path (New Deal launched from an existing Customer Profile):
+// skip the normal phone lookup/insert entirely -- use the already-known
+// customer_id directly. Zero customer rows are created on this path.
+cid=S.newDealCustomerId;
+} else {
 if(phone){
 const { data:found } = await sb.from('customers').select('id').eq('phone',phone).limit(1);
 if(found?.length) cid=found[0].id;
@@ -2604,6 +2807,7 @@ const { data:c, error } = await sb.from('customers')
 district:document.getElementById('cdist').value.trim()||null, state:'Kerala' })
 .select('id').single();
 if(error) throw error; cid=c.id;
+}
 }
 
 const { data:deal, error:de } = await sb.from('deals').insert({
@@ -2628,6 +2832,7 @@ sort_order:i+1
 if(rows.length) await sb.from('deal_items').insert(rows);
 await logActivity('lead_created', deal.id, name);
 
+S.newDealCustomerId=null; S.newDealCustomerInfo=null; // clear on successful customer-known save
 S.tab='pipeline'; S.pipeline=Number(document.getElementById('npipe').value); loadTab();
 }catch(err){
 S.err=err.message||String(err); btn.disabled=false; btn.textContent='Save deal'; render();
