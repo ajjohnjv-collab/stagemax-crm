@@ -453,14 +453,15 @@ bolt:'<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a
 const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;/* Flat glyph icons for KPI + Quick Action cards: Phosphor (fill weight, ISC license, https://phosphoricons.com) + Simple Icons (WhatsApp brand mark, CC0, https://simpleicons.org) */const GLYPHS = {call:{vb:256,p:'<path d="M231.88,175.08A56.26,56.26,0,0,1,176,224C96.6,224,32,159.4,32,80A56.26,56.26,0,0,1,80.92,24.12a16,16,0,0,1,16.62,9.52l21.12,47.15,0,.12A16,16,0,0,1,117.39,96c-.18.27-.37.52-.57.77L96,121.45c7.49,15.22,23.41,31,38.83,38.51l24.34-20.71a8.12,8.12,0,0,1,.75-.56,16,16,0,0,1,15.17-1.4l.13.06,47.11,21.11A16,16,0,0,1,231.88,175.08Z"/>'},wa:{vb:24,p:'<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>'},doc:{vb:256,p:'<path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,176H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm-8-56V44l44,44Z"/>'},clock:{vb:256,p:'<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm56,112H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z"/>'},wallet:{vb:256,p:'<path d="M216,64H56a8,8,0,0,1,0-16H192a8,8,0,0,0,0-16H56A24,24,0,0,0,32,56V184a24,24,0,0,0,24,24H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm-36,80a12,12,0,1,1,12-12A12,12,0,0,1,180,144Z"/>'},truck:{vb:256,p:'<path d="M255.43,117l-14-35A15.93,15.93,0,0,0,226.58,72H192V64a8,8,0,0,0-8-8H32A16,16,0,0,0,16,72V184a16,16,0,0,0,16,16H49a32,32,0,0,0,62,0h50a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V120A8.13,8.13,0,0,0,255.43,117ZM80,208a16,16,0,1,1,16-16A16,16,0,0,1,80,208ZM32,136V72H176v64Zm160,72a16,16,0,1,1,16-16A16,16,0,0,1,192,208Zm0-96V88h34.58l9.6,24Z"/>'},userplus:{vb:256,p:'<path d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136ZM144,157.68a68,68,0,1,0-71.9,0c-20.65,6.76-39.23,19.39-54.17,37.17A8,8,0,0,0,24,208H192a8,8,0,0,0,6.13-13.15C183.18,177.07,164.6,164.44,144,157.68Z"/>'},cart:{vb:256,p:'<path d="M230.14,58.87A8,8,0,0,0,224,56H62.68L56.6,22.57A8,8,0,0,0,48.73,16H24a8,8,0,0,0,0,16h18L67.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,160,204a28,28,0,1,0,28-28H91.17a8,8,0,0,1-7.87-6.57L80.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,230.14,58.87ZM104,204a12,12,0,1,1-12-12A12,12,0,0,1,104,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,200,204Z"/>'},wrench:{vb:256,p:'<path d="M232,96a72,72,0,0,1-100.94,66L79,222.22c-.12.14-.26.29-.39.42a32,32,0,0,1-45.26-45.26c.14-.13.28-.27.43-.39L94,124.94a72.07,72.07,0,0,1,83.54-98.78,8,8,0,0,1,3.93,13.19L144,80l5.66,26.35L176,112l40.65-37.52a8,8,0,0,1,13.19,3.93A72.6,72.6,0,0,1,232,96Z"/>'}};const gi = name => { const g = GLYPHS[name]; if(!g) return ''; return `<svg viewBox="0 0 ${g.vb} ${g.vb}" fill="currentColor">${g.p}</svg>`; };
 
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30, chaseTab:'all', search:'', searchResults:null,
-pipelines:[], stages:[], products:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
+pipelines:[], stages:[], products:[], brands:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[], ordersOpen:[], ordersDelivered:[], globalEstimates:[],
 dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
 myPerf:[], myRevivals:[], myPromises:[],
 openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
 sideOpen:false, presetPipeline:null, presetStage:null,
 leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview',
-custSearch:'', customers:[], customer:null, customerDeals:[], customerBalance:null, customerRepairs:[], custProfileTab:'overview', custEditing:false, newDealCustomerId:null, newDealCustomerInfo:null };
+custSearch:'', customers:[], customer:null, customerDeals:[], customerBalance:null, customerRepairs:[], custProfileTab:'overview', custEditing:false, newDealCustomerId:null, newDealCustomerInfo:null,
+prodSearch:'', productsList:[], productEditing:null };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -499,14 +500,15 @@ document.getElementById('pw').onkeydown = e => { if(e.key==='Enter') go(); };
 
 /* ── data ── */
 async function loadRefs(){
-const [p,st,pr,pf,sr] = await Promise.all([
+const [p,st,pr,pf,sr,br] = await Promise.all([
 sb.from('pipelines').select('*').eq('is_active',true).order('sort_order'),
 sb.from('stages').select('*').order('sort_order'),
 sb.from('products').select('*').eq('is_active',true).order('name'),
 sb.from('profiles').select('*').eq('is_active',true),
-sb.from('sources').select('*').eq('is_active',true)
+sb.from('sources').select('*').eq('is_active',true),
+sb.from('brands').select('*').eq('is_active',true).order('sort_order')
 ]);
-S.pipelines=p.data||[]; S.stages=st.data||[]; S.products=pr.data||[]; S.profiles=pf.data||[]; S.sources=sr.data||[];
+S.pipelines=p.data||[]; S.stages=st.data||[]; S.products=pr.data||[]; S.profiles=pf.data||[]; S.sources=sr.data||[]; S.brands=br.data||[];
 }
 
 async function loadChaseSources(){
@@ -639,6 +641,15 @@ if(S.custSearch) q = q.or(`name.ilike.%${S.custSearch}%,phone.ilike.%${S.custSea
 const { data, error } = await q;
 if(error) throw error; S.customers = data||[];
 }
+if(S.tab==='products'){
+// Products directory: a separate, unfiltered query (both active and
+// inactive) so Owner can find and reactivate a retired product -- kept
+// deliberately apart from S.products (the is_active-only cache loadRefs()
+// keeps for the Estimate picker) so nothing about that existing, working
+// path changes.
+const { data, error } = await sb.from('products').select('*, brands(name)').order('name');
+if(error) throw error; S.productsList = data||[];
+}
 if(S.tab==='dispatch'){
 const readyIds = S.stages.filter(s=>s.is_won && !s.is_delivered).map(s=>s.id);
 const [r1,r2] = await Promise.all([
@@ -676,7 +687,7 @@ render();
 }
 
 /* ── shell ── */
-const SOON_TABS = ['products','repairs'];
+const SOON_TABS = ['repairs'];
 
 function render(){
 if(S.deal) return isOwner() ? renderDeal() : renderLeadDetail();
@@ -695,6 +706,7 @@ S.tab==='mydash' ? viewMyDashboard() :
 S.tab==='followups' ? viewFollowupsTab() :
 S.tab==='myperf' ? viewMyPerformance() :
 S.tab==='customers' ? viewCustomers() :
+S.tab==='products' ? viewProducts() :
 SOON_TABS.includes(S.tab) ? viewComingSoon(S.tab) : viewNew()
 );
 wire();
@@ -709,7 +721,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('customers','Customers')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('new','Add')}</nav>`;
+<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('customers','Customers')}${t('products','Products')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('new','Add')}</nav>`;
 }
 
 /* ── CRE app shell — STAGEMAX reference redesign (Today page + shared chrome) ── */
@@ -721,7 +733,7 @@ const CRE_NAV = [
 {key:'orders', label:'Orders', icon:'cart'},
 {key:'dispatch', label:'Dispatch', icon:'truck'},
 {key:'customers', label:'Customers', icon:'users'},
-{key:'products', label:'Products', icon:'box', soon:true},
+{key:'products', label:'Products', icon:'box'},
 {key:'repairs', label:'Repairs / Service', icon:'wrench', soon:true},
 {key:'myperf', label:'My Performance', icon:'chart'}
 ];
@@ -990,6 +1002,21 @@ row.innerHTML=`<select class="p"><option value="">Select item</option>${opts}</s
 <input class="r" type="number" inputmode="decimal" value="${item?Number(item.rate):''}" placeholder="Rate">
 <button type="button" class="cd-est-rm">&times;</button>`;
 row.querySelector('.cd-est-rm').onclick=()=>{ row.remove(); updateEstimateTotals(); };
+// Products V1 auto-price rule (approved): a deliberate change of the
+// selected product always overwrites Rate with that product's current
+// default_price; the CRE can still edit Rate by hand afterwards, and that
+// manual value is what saves. Setting the `selected` attribute above at
+// initial render (new row, or redrawing an already-saved item while
+// reopening an existing Estimate) never fires `change`, so this can only
+// ever fire from an actual user selection -- never from a reopen/redraw.
+// Calls updateEstimateTotals() itself (rather than relying on the
+// container's delegated 'input' listener) so the total reflects the new
+// rate immediately, with no dependency on select/change event ordering.
+row.querySelector('.p').onchange=()=>{
+const p = S.products.find(x=>String(x.id)===row.querySelector('.p').value);
+if(p) row.querySelector('.r').value = Number(p.default_price||0);
+updateEstimateTotals();
+};
 return row;
 }
 
@@ -2183,9 +2210,95 @@ const t = targetsCard();
 return `<h2 style="margin-top:0">My performance</h2>${salesColumn('This month')}${t||'<div class="empty">No monthly target set yet — ask your admin to set one.</div>'}`;
 }
 
-const SOON_LABEL = {estimates:'Estimates', orders:'Orders', products:'Products', repairs:'Repairs / Service'};
+const SOON_LABEL = {estimates:'Estimates', orders:'Orders', repairs:'Repairs / Service'};
 function viewComingSoon(tab){
 return `<div class="cd-panel cd-soon"><b>${esc(SOON_LABEL[tab]||tab)} — coming in a later phase</b>This screen is part of the approved redesign plan and will be built next, wired to real StageMax data. Nothing here is faked in the meantime.</div>`;
+}
+
+/* ── products (V1: name/brand/model/category/default price/active master.
+   Explicitly NOT inventory -- no stock, no purchases, no suppliers. Owner
+   maintains the master; CRE reads/searches only, enforced by both the UI
+   below (isOwner() gates) and, independently, by RLS at the database layer
+   (owner-only INSERT/UPDATE policies, no DELETE policy for anyone). ── */
+function viewProducts(){
+if(S.productEditing) return viewProductForm();
+const q = S.prodSearch.trim().toLowerCase();
+// CRE only ever sees active products here -- matching exactly what they'd
+// actually be able to pick in an Estimate. Owner sees everything, including
+// inactive ones, since retiring/reactivating a product is done from here.
+const base = isOwner() ? S.productsList : S.productsList.filter(p=>p.is_active);
+const list = q ? base.filter(p =>
+(p.name||'').toLowerCase().includes(q) ||
+(p.category||'').toLowerCase().includes(q) ||
+(p.model_code||'').toLowerCase().includes(q) ||
+(p.brands?.name||'').toLowerCase().includes(q)
+) : base;
+const rows = list.length ? list.map(p=>`<div class="card"${isOwner()?` data-product="${p.id}" style="cursor:pointer"`:''}>
+<div class="row"><div class="grow">
+<div class="name">${esc(p.name)}${!p.is_active?' <span class="tag due">Inactive</span>':''}</div>
+<div class="sub">${p.brands?.name?esc(p.brands.name)+' · ':''}${p.model_code?esc(p.model_code)+' · ':''}${esc(p.category||'')}</div>
+</div><div class="amt">${rs(p.default_price)}</div></div>
+</div>`).join('') : `<div class="empty">No products found.${S.prodSearch?'<br>Try a different name.':''}</div>`;
+return `<h2>Products</h2>
+<div class="card">
+<label for="prodsearch">Search</label>
+<input id="prodsearch" placeholder="Name, brand, model or category" value="${esc(S.prodSearch)}">
+</div>
+${isOwner()?`<button class="btn" id="prodAddBtn" style="margin:12px 0">Add Product</button>`:''}
+${rows}`;
+}
+
+function viewProductForm(){
+const isNew = S.productEditing==='new';
+const p = isNew ? {} : S.productEditing;
+const brandOpts = S.brands.filter(b=>b.is_carried).map(b=>
+`<option value="${b.id}" ${p.brand_id===b.id?'selected':''}>${esc(b.name)}</option>`
+).join('');
+return `<button class="back" id="prodFormBack">← Back to products</button>
+<h2>${isNew?'Add Product':'Edit Product'}</h2>
+<div class="card">
+<label for="pfname">Product Name</label><input id="pfname" value="${esc(p.name||'')}">
+<label for="pfbrand">Brand</label><select id="pfbrand"><option value="">Not specified</option>${brandOpts}</select>
+<label for="pfmodel">Model Code</label><input id="pfmodel" value="${esc(p.model_code||'')}">
+<label for="pfcat">Category</label><input id="pfcat" value="${esc(p.category||'')}">
+<label for="pfprice">Default Price</label><input id="pfprice" type="number" inputmode="decimal" value="${p.default_price!=null?Number(p.default_price):0}">
+<label class="row" style="align-items:center;gap:8px;margin-top:9px;cursor:pointer">
+<input id="pfactive" type="checkbox" ${p.is_active!==false?'checked':''}><span>Active</span>
+</label>
+<div class="row" style="margin-top:9px;gap:7px">
+<button class="btn ghost" id="prodFormCancel" style="flex:1">Cancel</button>
+<button class="btn" id="prodFormSave" style="flex:1">Save</button>
+</div>
+</div>`;
+}
+
+async function saveProduct(){
+const name = document.getElementById('pfname').value.trim();
+if(!name){ S.err='Product name is needed.'; render(); return; }
+const brandVal = document.getElementById('pfbrand').value;
+const patch = {
+name,
+brand_id: brandVal ? Number(brandVal) : null,
+model_code: document.getElementById('pfmodel').value.trim() || null,
+category: document.getElementById('pfcat').value.trim() || null,
+default_price: Number(document.getElementById('pfprice').value || 0),
+is_active: document.getElementById('pfactive').checked
+};
+const isNew = S.productEditing==='new';
+const { error } = isNew
+? await sb.from('products').insert(patch)
+: await sb.from('products').update(patch).eq('id', S.productEditing.id);
+if(error){ S.err = error.message; render(); return; }
+// Refresh both the directory list and the Estimate-picker cache (S.products,
+// active-only) so a save is reflected immediately everywhere, without a
+// full reload and without touching how either is normally loaded.
+const [dirR, pickR] = await Promise.all([
+sb.from('products').select('*, brands(name)').order('name'),
+sb.from('products').select('*').eq('is_active',true).order('name')
+]);
+S.productsList = dirR.data||[]; S.products = pickR.data||[];
+S.productEditing = null;
+render();
 }
 
 function viewDashboard(){
@@ -2656,6 +2769,16 @@ const d=document.createElement('div'); d.className='three';
 d.innerHTML=`<select class="p"><option value="">Select item</option>${opts}</select>
 <input class="q" type="number" inputmode="decimal" value="1" placeholder="Qty">
 <input class="r" type="number" inputmode="decimal" placeholder="Rate">`;
+// Same Products V1 auto-price rule as estimateItemRow(): a deliberate
+// change of the selected product overwrites Rate with its current
+// default_price; CRE can still hand-edit Rate afterwards. This row is
+// always freshly created with no product pre-selected (New Deal / Add
+// Lead has no "reopen an existing row" case), so there is no redraw
+// scenario to guard against here either.
+d.querySelector('.p').onchange=e=>{
+const p = S.products.find(x=>String(x.id)===e.target.value);
+if(p) d.querySelector('.r').value = Number(p.default_price||0);
+};
 return d;
 }
 
@@ -2781,6 +2904,28 @@ S.customer=null; S.custEditing=false;
 S.tab = isOwner() ? 'new' : 'addlead';
 loadTab();
 };
+
+/* ── products wiring ── */
+// data-product is only ever rendered for Owner (see viewProducts()), so this
+// selector naturally finds nothing, and opens no edit UI, when CRE is signed
+// in -- enforced independently again at the database layer by RLS.
+document.querySelectorAll('[data-product]').forEach(c=>c.onclick=()=>{
+S.productEditing = S.productsList.find(p=>String(p.id)===c.dataset.product) || null;
+render();
+});
+const prodsearch=document.getElementById('prodsearch');
+// Live client-side filter over the already-loaded S.productsList -- unlike
+// Customers' server-side search, no round trip is needed for a shop
+// product catalog of this size.
+if(prodsearch) prodsearch.oninput=()=>{ S.prodSearch=prodsearch.value; render(); };
+const prodAddBtn=document.getElementById('prodAddBtn');
+if(prodAddBtn) prodAddBtn.onclick=()=>{ S.productEditing='new'; render(); };
+const prodFormBack=document.getElementById('prodFormBack');
+if(prodFormBack) prodFormBack.onclick=()=>{ S.productEditing=null; render(); };
+const prodFormCancel=document.getElementById('prodFormCancel');
+if(prodFormCancel) prodFormCancel.onclick=()=>{ S.productEditing=null; render(); };
+const prodFormSave=document.getElementById('prodFormSave');
+if(prodFormSave) prodFormSave.onclick=saveProduct;
 }
 
 async function saveDeal(e){
