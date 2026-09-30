@@ -1602,23 +1602,16 @@ document.querySelectorAll('[data-dealtab]').forEach(b=>b.onclick=()=>{ S.dealTab
 const qe=document.getElementById('qaMakeEstimate');
 if(qe) qe.onclick=async()=>{
 qe.disabled=true;
-const target=findQuotedStage(d.pipeline_id);
-// Defense in depth: only ADVANCE stage_id to Quoted when the forward-only
-// guard allows it (deal is strictly before Quoted). This is a write guard,
-// not a visibility guard — re-checked here in case this button was
-// rendered from a stale/cached deal snapshot (e.g. the deal advanced past
-// Quoted in another tab/session since this page was last rendered). Never
-// let this handler move stage_id backward or sideways.
-if(target && canAdvanceToQuoted(d, S.stages)){
-await sb.from('deals').update({stage_id:target.id}).eq('id',d.id);
-await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:target.id,changed_by:S.me.id});
-await logActivity('quotation_sent', d.id, (d.customers?.name?d.customers.name+' → ':'')+target.name);
-}
-// Whether or not a stage write happened, always take the user to the
-// Estimates tab: to view/edit an existing estimate (Quoted/Confirmed/
-// Delivered) or the locked read-only view (Approved) — leadEstimateTab()
-// itself decides editable vs. locked based on estimate_approved_at, so no
-// stage-guard logic is duplicated here.
+// Business rule: opening (or editing/saving/sending/approving) an Estimate
+// must never itself change stage_id. "Create Estimate" is now pure
+// navigation to the Estimates tab -- it used to also force-advance
+// stage_id to Quoted here (findQuotedStage/canAdvanceToQuoted), which
+// fired on every click, including before any item was selected or saved.
+// That write was removed. canAdvanceToQuoted()/findQuotedStage() are kept
+// (findQuotedStage is still used above for canEstimate button visibility)
+// but are no longer called from this handler. leadEstimateTab() decides
+// editable vs. locked based on estimate_approved_at, so no stage logic is
+// needed here.
 S.dealTab='estimates';
 openDeal(d.id);
 };
