@@ -996,11 +996,18 @@ return d.stages?.name||'';
 
 function estimateItemRow(item){
 const opts = S.products.map(p=>`<option value="${p.id}" ${item&&item.product_id===p.id?'selected':''}>${esc(p.model_code?p.model_code+' — ':'')}${esc(p.name)}</option>`).join('');
+// Manual-item extension (Estimate manual-item enhancement, approved): a
+// saved row is a manual item only when it has no product_id AND has a
+// product_other value -- matches how product_id/product_other are written
+// by saveEstimate() below, so a reopened manual row always re-selects
+// "Other / Enter manually" rather than falling back to "Select item".
+const isOther = !!(item && !item.product_id && item.product_other);
 const row=document.createElement('div'); row.className='cd-est-row';
-row.innerHTML=`<select class="p"><option value="">Select item</option>${opts}</select>
+row.innerHTML=`<select class="p"><option value="">Select item</option>${opts}<option value="__other__" ${isOther?'selected':''}>Other / Enter manually</option></select>
 <input class="q" type="number" inputmode="decimal" value="${item?Number(item.qty):1}" placeholder="Qty">
 <input class="r" type="number" inputmode="decimal" value="${item?Number(item.rate):''}" placeholder="Rate">
-<button type="button" class="cd-est-rm">&times;</button>`;
+<button type="button" class="cd-est-rm">&times;</button>
+<input class="po" type="text" placeholder="Item / repair description" value="${isOther?esc(item.product_other):''}" style="grid-column:1/-1;${isOther?'':'display:none'}">`;
 row.querySelector('.cd-est-rm').onclick=()=>{ row.remove(); updateEstimateTotals(); };
 // Products V1 auto-price rule (approved): a deliberate change of the
 // selected product always overwrites Rate with that product's current
@@ -1012,9 +1019,26 @@ row.querySelector('.cd-est-rm').onclick=()=>{ row.remove(); updateEstimateTotals
 // Calls updateEstimateTotals() itself (rather than relying on the
 // container's delegated 'input' listener) so the total reflects the new
 // rate immediately, with no dependency on select/change event ordering.
+//
+// Manual-item extension (Estimate manual-item enhancement, approved): the
+// same select also carries a sentinel "__other__" option. Choosing it
+// reveals the free-text description field (`.po`) and deliberately skips
+// the default_price autofill below -- no product in S.products has id
+// "__other__", so `p` stays undefined and Rate is left exactly as the CRE
+// typed it. Switching away from "__other__" back to a real product (or to
+// "Select item") hides AND clears `.po`, so a stale manual description can
+// never ride along into a product-backed save.
 row.querySelector('.p').onchange=()=>{
-const p = S.products.find(x=>String(x.id)===row.querySelector('.p').value);
+const val = row.querySelector('.p').value;
+const poEl = row.querySelector('.po');
+if(val==='__other__'){
+poEl.style.display='';
+} else {
+poEl.style.display='none';
+poEl.value='';
+const p = S.products.find(x=>String(x.id)===val);
 if(p) row.querySelector('.r').value = Number(p.default_price||0);
+}
 updateEstimateTotals();
 };
 return row;
@@ -1671,13 +1695,25 @@ async function saveEstimate(d){
 const btn=document.getElementById('estSave'); if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
 const errBox=document.getElementById('estErr'); if(errBox) errBox.innerHTML='';
 try{
-const rows=[...document.querySelectorAll('#estItems .cd-est-row')].map((r,i)=>({
+const rowEls=[...document.querySelectorAll('#estItems .cd-est-row')];
+// Manual-item validation (Estimate manual-item enhancement, approved):
+// checked and thrown BEFORE the deal_items delete below runs. A row left
+// on "Other / Enter manually" with a blank description must never reach
+// the delete+insert pair -- that would wipe this deal's existing saved
+// items first and then insert nothing for the blank row, losing data.
+const blankOther = rowEls.some(r=>r.querySelector('.p').value==='__other__' && !r.querySelector('.po').value.trim());
+if(blankOther){ throw new Error('Enter a description for every manual item, or remove the row.'); }
+const rows=rowEls.map((r,i)=>{
+const pVal=r.querySelector('.p').value, isOther=pVal==='__other__';
+return {
 deal_id:d.id,
-product_id:r.querySelector('.p').value?Number(r.querySelector('.p').value):null,
+product_id:(pVal && !isOther)?Number(pVal):null,
+product_other:isOther?r.querySelector('.po').value.trim():null,
 qty:Number(r.querySelector('.q').value||1),
 rate:Number(r.querySelector('.r').value||0),
 sort_order:i+1
-})).filter(r=>r.product_id);
+};
+}).filter(r=>r.product_id||r.product_other);
 const discount=Math.max(0,Number(document.getElementById('estDiscount').value||0));
 const gstEnabled=!!document.getElementById('estGst')?.checked;
 let r1=await sb.from('deal_items').delete().eq('deal_id',d.id); if(r1.error) throw r1.error;
