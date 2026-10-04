@@ -395,6 +395,18 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-who .meta{display:none}
 
 }
+/* Repairs V1 Phase 2 */
+.rq-head,.rq-row{display:grid;grid-template-columns:2fr 1.5fr 1.1fr .9fr .9fr;gap:12px;align-items:center}
+.rq-head{font:600 11px Archivo;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:0 13px 6px}
+.rq-row{cursor:pointer}
+.rq-c{min-width:0;overflow-wrap:anywhere}
+.rp-ta{width:100%;min-height:76px;resize:vertical;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:11px 12px;color:inherit;font:inherit}
+.rp-kv{margin-top:10px}
+.rp-kv b{display:block;font:600 11px Archivo;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.rp-kv div{white-space:pre-wrap;overflow-wrap:anywhere}
+.rp-err{color:#EFA3B3;font-size:13.5px;margin-top:10px}
+@media (max-width:859px){nav{overflow-x:auto;scrollbar-width:none}}
+@media (max-width:640px){.rq-head{display:none}.rq-row{grid-template-columns:1fr 1fr}.rq-c::before{content:attr(data-l);display:block;font:600 10px Archivo;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}}
 </style>
 </head>
 <body>
@@ -461,7 +473,7 @@ openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollo
 sideOpen:false, presetPipeline:null, presetStage:null,
 leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview',
 custSearch:'', customers:[], customer:null, customerDeals:[], customerBalance:null, customerRepairs:[], custProfileTab:'overview', custEditing:false, newDealCustomerId:null, newDealCustomerInfo:null,
-prodSearch:'', productsList:[], productEditing:null };
+prodSearch:'', productsList:[], productEditing:null, repairQueue:[], dealRepair:null, repairEditing:false };
 
 function isOwner(){ return S.me?.role==='owner'; }
 
@@ -527,9 +539,14 @@ S.myPromises = (promR.data||[]).filter(d=>(Number(d.value||0)-Number(d.amount_co
 async function loadDashboardShared(){
 const today = new Date().toISOString().slice(0,10);
 const mStart = monthStart();
+// CRE sales-lead metrics must not be distorted by repair jobs: leave the Repairs pipeline out of the
+// open-deal set and out of the "Deals won" stage set (Repaired/Returned are is_won stages).
+const dashRepId = isOwner() ? null : repairsPipelineId();
+let openQ = sb.from('deals').select('*, customers(name,phone,district), stages(name,is_won,is_lost,is_delivered,pipeline_id,sort_order), pipelines(name,sort_order)')
+.order('created_at',{ascending:false}).limit(300);
+if(dashRepId!=null) openQ = openQ.neq('pipeline_id', dashRepId);
 const [openR,fuR,actR,mpR,weR] = await Promise.all([
-sb.from('deals').select('*, customers(name,phone,district), stages(name,is_won,is_lost,is_delivered,pipeline_id,sort_order), pipelines(name,sort_order)')
-.order('created_at',{ascending:false}).limit(300),
+openQ,
 sb.from('follow_ups').select('*, deals(title, customers(name,phone), stages(name,is_won,is_lost,is_delivered))').eq('done',false).lte('due_date', today).order('due_date',{ascending:true}),
 sb.from('activity_log').select('*, deals(title, customers(name))').order('created_at',{ascending:false}).limit(10),
 sb.from('cre_performance_daily').select('*').gte('day', mStart),
@@ -540,7 +557,7 @@ if(fuR.error) throw fuR.error; S.followUps = fuR.data||[];
 if(actR.error) throw actR.error; S.activity = actR.data||[];
 if(mpR.error) throw mpR.error; S.monthPerf = mpR.data||[];
 if(weR.error) throw weR.error;
-const wonStageIds = new Set(S.stages.filter(s=>s.is_won).map(s=>s.id));
+const wonStageIds = new Set(S.stages.filter(s=>s.is_won && (dashRepId==null || s.pipeline_id!==dashRepId)).map(s=>s.id));
 S.monthWonIds = [...new Set((weR.data||[]).filter(r=>wonStageIds.has(r.to_stage_id)).map(r=>r.deal_id))];
 }
 
@@ -651,12 +668,16 @@ const { data, error } = await sb.from('products').select('*, brands(name)').orde
 if(error) throw error; S.productsList = data||[];
 }
 if(S.tab==='dispatch'){
-const readyIds = S.stages.filter(s=>s.is_won && !s.is_delivered).map(s=>s.id);
+// Repairs are returned physically via the Repairs stage workflow only -- never through Dispatch.
+const dispRepId = repairsPipelineId();
+const readyIds = S.stages.filter(s=>s.is_won && !s.is_delivered && !isRepairsPipeline(s.pipeline_id)).map(s=>s.id);
+let sentQ = sb.from('deals').select('*, customers(name,phone,district)')
+.not('courier_name','is',null).order('dispatch_date',{ascending:false}).limit(25);
+if(dispRepId!=null) sentQ = sentQ.neq('pipeline_id', dispRepId);
 const [r1,r2] = await Promise.all([
 sb.from('deals').select('*, customers(name,phone,district,address), stages(name)')
 .in('stage_id', readyIds.length?readyIds:[-1]).order('created_at',{ascending:true}),
-sb.from('deals').select('*, customers(name,phone,district)')
-.not('courier_name','is',null).order('dispatch_date',{ascending:false}).limit(25)
+sentQ
 ]);
 if(r1.error) throw r1.error; if(r2.error) throw r2.error;
 S.dispatchReady = r1.data||[]; S.dispatchSent = r2.data||[];
@@ -682,15 +703,26 @@ S.ordersOpen = r3.data||[]; S.ordersDelivered = r4.data||[];
 if(S.tab==='estimates'){
 await loadGlobalEstimates();
 }
+if(S.tab==='repairs'){
+// Shared queue: every authenticated user sees every Repairs deal. No assigned_to filter.
+const rid = repairsPipelineId();
+if(rid==null){ S.repairQueue = []; }
+else {
+const { data, error } = await sb.from('deals')
+.select('id,title,created_at,stage_id,pipeline_id, customers(name,phone,district), stages(name,is_won,is_lost,is_delivered), repairs(brand_id,brand_other,model,fault_reported,received_at,returned_at, brands(name))')
+.eq('pipeline_id', rid).order('created_at',{ascending:false}).limit(500);
+if(error) throw error; S.repairQueue = data||[];
+}
+}
 }catch(e){ S.err = e.message || String(e); }
 render();
 }
 
 /* ── shell ── */
-const SOON_TABS = ['repairs'];
+const SOON_TABS = [];
 
 function render(){
-if(S.deal) return isOwner() ? renderDeal() : renderLeadDetail();
+if(S.deal) return isRepairsPipeline(S.deal.pipeline_id) ? renderRepairDetail() : (isOwner() ? renderDeal() : renderLeadDetail());
 if(S.customer) return renderCustomerProfile();
 app.innerHTML = shell(
 S.tab==='pipeline' ? (isOwner() ? viewPipeline() : viewMyLeads()) :
@@ -707,6 +739,8 @@ S.tab==='followups' ? viewFollowupsTab() :
 S.tab==='myperf' ? viewMyPerformance() :
 S.tab==='customers' ? viewCustomers() :
 S.tab==='products' ? viewProducts() :
+S.tab==='repairs' ? viewRepairs() :
+S.tab==='addrepair' ? viewAddRepair() :
 SOON_TABS.includes(S.tab) ? viewComingSoon(S.tab) : viewNew()
 );
 wire();
@@ -721,7 +755,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('customers','Customers')}${t('products','Products')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('new','Add')}</nav>`;
+<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('customers','Customers')}${t('products','Products')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('repairs','Repairs')}${t('new','Add')}</nav>`;
 }
 
 /* ── CRE app shell — STAGEMAX reference redesign (Today page + shared chrome) ── */
@@ -734,7 +768,7 @@ const CRE_NAV = [
 {key:'dispatch', label:'Dispatch', icon:'truck'},
 {key:'customers', label:'Customers', icon:'users'},
 {key:'products', label:'Products', icon:'box'},
-{key:'repairs', label:'Repairs / Service', icon:'wrench', soon:true},
+{key:'repairs', label:'Repairs / Service', icon:'wrench'},
 {key:'myperf', label:'My Performance', icon:'chart'}
 ];
 
@@ -814,6 +848,12 @@ sb.from('notes').select('*').eq('deal_id',id).order('created_at',{ascending:fals
 sb.from('receipts').select('*').eq('deal_id',id).order('created_at',{ascending:false})
 ]);
 S.deal = { ...d, items: items||[] }; S.dealFollowUps = fups||[]; S.dealNotes = notes||[]; S.dealReceipts = receipts||[];
+S.dealRepair = null; S.repairEditing = false;
+if(isRepairsPipeline(d.pipeline_id)){
+// Intake row may be missing for legacy Repairs deals -- maybeSingle() yields null, never throws.
+const { data:rp } = await sb.from('repairs').select('*, brands(name)').eq('deal_id',id).maybeSingle();
+S.dealRepair = rp || null;
+}
 if(!S.dealTab) S.dealTab='overview';
 try{ await resolveReceiptRecorders(S.dealReceipts); }catch(e){ /* name resolution is best-effort -- never blocks the deal page */ }
 render();
@@ -1317,6 +1357,9 @@ if(!custIdFilter.length){ if(S.leadPage===0) S.deals=[]; S.leadHasMore=false; re
 let q=sb.from('deals').select('*, customers(name,phone,district,customer_type,alt_phone), stages(name,is_won,is_lost,is_delivered), sources(name)')
 .order('created_at',{ascending:false})
 .range(S.leadPage*S.leadPageSize, S.leadPage*S.leadPageSize+S.leadPageSize-1);
+// Repairs deals live only in the shared Repairs queue, never in My Leads.
+const repLeadId = repairsPipelineId();
+if(repLeadId!=null) q=q.neq('pipeline_id',repLeadId);
 if(S.leadStage) q=q.eq('stage_id',S.leadStage);
 if(S.leadSource) q=q.eq('source_id',S.leadSource);
 if(dealIdFilter) q=q.in('id',dealIdFilter);
@@ -1347,7 +1390,7 @@ S.leadsLoading=false; render();
 }
 
 function viewMyLeads(){
-const stageOpts = S.stages.map(s=>{
+const stageOpts = S.stages.filter(s=>!isRepairsPipeline(s.pipeline_id)).map(s=>{
 const p=S.pipelines.find(pp=>pp.id===s.pipeline_id);
 return `<option value="${s.id}" ${S.leadStage===s.id?'selected':''}>${esc(p?.name||'')} · ${esc(s.name)}</option>`;
 }).join('');
@@ -2520,12 +2563,18 @@ tabBody = bal ? `<div class="card">
 ${bal.oldest_pending_since?`<div class="row"><div class="grow">Pending Since</div><div class="sub">${day(bal.oldest_pending_since)}</div></div>`:''}
 </div>` : `<div class="empty">Nothing pending. This customer is settled up.</div>`;
 } else if(S.custProfileTab==='repairs'){
-tabBody = S.customerRepairs.length ? S.customerRepairs.map(r=>`<div class="card">
+// The parent deal is the source of truth for stage; the repairs row (if any) only adds intake detail.
+// Legacy Repairs deals have no repairs row -- render them safely.
+const repairDeals = deals.filter(d=>isRepairsPipeline(d.pipeline_id));
+tabBody = repairDeals.length ? repairDeals.map(d=>{
+const rp = S.customerRepairs.find(r=>r.deal_id===d.id);
+const brand = rp ? ((S.brands.find(b=>b.id===rp.brand_id)?.name) || rp.brand_other || '') : '';
+return `<div class="card" data-deal="${d.id}" style="cursor:pointer">
 <div class="row"><div class="grow">
-<div class="name">${esc(r.status||'Repair / Service')}</div>
-<div class="sub">${r.created_at?day(r.created_at):''}</div>
-</div></div>
-</div>`).join('') : `<div class="empty">No repair or service records for this customer yet.</div>`;
+<div class="name">${esc(d.title||'Repair / Service')}</div>
+<div class="sub">${rp ? esc([brand,rp.model].filter(Boolean).join(' · ')) + (rp.received_at ? ((brand||rp.model)?' · ':'') + 'Received ' + esc(day(rp.received_at)) : '') : 'No intake details recorded'}</div>
+</div><span class="tag">${esc(d.stages?.name||'')}</span></div>
+</div>`; }).join('') : `<div class="empty">No repair or service records for this customer yet.</div>`;
 }
 
 app.innerHTML = shell(`
@@ -2851,7 +2900,7 @@ document.querySelectorAll('nav button, [data-tab]').forEach(b=>b.onclick=()=>{ S
 const fab=document.getElementById('fab'); if(fab) fab.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.tab='new'; loadTab(); };
 const burger=document.getElementById('cdBurger'); if(burger) burger.onclick=()=>{ S.sideOpen=!S.sideOpen; render(); };
 const qe=document.getElementById('qaEstimate'); if(qe) qe.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.presetPipeline=1; S.presetStage=3; S.tab='new'; S.deal=null; loadTab(); };
-const qr=document.getElementById('qaRepair'); if(qr) qr.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.presetPipeline=3; S.presetStage=12; S.tab='new'; S.deal=null; loadTab(); };
+const qr=document.getElementById('qaRepair'); if(qr) qr.onclick=()=>{ S.newDealCustomerId=null; S.newDealCustomerInfo=null; S.tab='addrepair'; S.deal=null; S.customer=null; loadTab(); };
 document.querySelectorAll('[data-pipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.pipe); S.stage=null; loadTab(); });
 document.querySelectorAll('[data-kpipipe]').forEach(b=>b.onclick=()=>{ S.pipeline=Number(b.dataset.kpipipe); S.stage=b.dataset.kpistage?Number(b.dataset.kpistage):null; S.tab='pipeline'; S.deal=null; loadTab(); });
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.dataset.stage?Number(b.dataset.stage):null; render(); });
@@ -2934,6 +2983,13 @@ S.tab = isOwner() ? 'new' : 'addlead';
 loadTab();
 };
 
+/* ── repairs wiring ── */
+const addRepairBtn=document.getElementById('addRepairBtn'); if(addRepairBtn) addRepairBtn.onclick=()=>{ S.tab='addrepair'; S.deal=null; render(); };
+const cancelAddRepair=document.getElementById('cancelAddRepair'); if(cancelAddRepair) cancelAddRepair.onclick=()=>{ S.tab='repairs'; S.deal=null; loadTab(); };
+const saveRepairBtn=document.getElementById('saveRepair'); if(saveRepairBtn) saveRepairBtn.onclick=saveRepair;
+const rbrand=document.getElementById('rbrand');
+if(rbrand){ const sync=()=>{ document.getElementById('rbrandotherwrap').style.display = rbrand.value==='other' ? '' : 'none'; }; rbrand.onchange=sync; sync(); }
+
 /* ── products wiring ── */
 // data-product is only ever rendered for Owner (see viewProducts()), so this
 // selector naturally finds nothing, and opens no edit UI, when CRE is signed
@@ -2955,6 +3011,236 @@ const prodFormCancel=document.getElementById('prodFormCancel');
 if(prodFormCancel) prodFormCancel.onclick=()=>{ S.productEditing=null; render(); };
 const prodFormSave=document.getElementById('prodFormSave');
 if(prodFormSave) prodFormSave.onclick=saveProduct;
+}
+
+/* ── Repairs V1 Phase 2 ── */
+function repairsPipelineId(){ return S.pipelines.find(p=>p.name==='Repairs')?.id ?? null; }
+function isRepairsPipeline(pipelineId){ return pipelineId!=null && S.pipelines.find(p=>p.id===pipelineId)?.name==='Repairs'; }
+// PostgREST returns an object for a one-to-one embed and an array otherwise; tolerate both and "missing".
+const repairRow = r => Array.isArray(r) ? (r[0]||null) : (r||null);
+const dayFull = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+function localDateStr(d){
+const x = d ? new Date(d) : new Date(); if(isNaN(x.getTime())) return '';
+return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+}
+const dateInputToTs = v => v ? new Date(v+'T00:00:00').toISOString() : null;
+function repairBrandName(rp){
+if(!rp) return '';
+return rp.brands?.name || S.brands.find(b=>b.id===rp.brand_id)?.name || rp.brand_other || '';
+}
+function repairReceivedSort(d){ const rp=repairRow(d.repairs); return new Date(rp?.received_at || d.created_at).getTime() || 0; }
+
+function viewRepairs(){
+const rows = [...S.repairQueue].sort((a,b)=>repairReceivedSort(b)-repairReceivedSort(a));
+const list = rows.length ? rows.map(d=>{
+const rp = repairRow(d.repairs);
+return `<div class="card rq-row" data-deal="${d.id}">
+<div class="rq-c" data-l="Equipment / Product"><div class="name">${esc(d.title||'Untitled')}</div>${rp?.model?`<div class="sub">${esc(rp.model)}</div>`:''}</div>
+<div class="rq-c" data-l="Customer"><div>${esc(d.customers?.name||'No customer')}</div><div class="sub">${esc(d.customers?.phone||'')}</div></div>
+<div class="rq-c" data-l="Brand">${rp ? (esc(repairBrandName(rp)) || '<span class="sub">—</span>') : '<span class="sub">No intake details recorded</span>'}</div>
+<div class="rq-c" data-l="Stage"><span class="tag">${esc(d.stages?.name||'')}</span></div>
+<div class="rq-c" data-l="Received">${rp?.received_at ? esc(dayFull(rp.received_at)) : '<span class="sub">—</span>'}</div>
+</div>`;
+}).join('') : `<div class="empty">No repairs yet.<br>Tap Add Repair to log the first one.</div>`;
+return `<div class="row" style="align-items:center;margin-top:16px"><h2 class="grow" style="margin:0">Repairs</h2><button class="btn" id="addRepairBtn" style="width:auto;margin:0;padding:10px 16px">Add Repair</button></div>
+<div class="sub" style="margin:6px 0 12px">Shared queue · newest received first</div>
+<div class="rq-head"><div>Equipment / Product</div><div>Customer</div><div>Brand</div><div>Stage</div><div>Received</div></div>
+${list}`;
+}
+
+function brandOptionsHtml(selId, extra){
+const opts = S.brands.map(b=>`<option value="${b.id}" ${String(selId)===String(b.id)?'selected':''}>${esc(b.name)}</option>`).join('');
+return opts + (extra||'');
+}
+
+function viewAddRepair(){
+return `<button class="back" id="cancelAddRepair">← Back to Repairs</button>
+<h2>Add Repair</h2>
+<div class="card">
+<label for="rcname">Customer name</label><input id="rcname" placeholder="Name on the job card">
+<div class="two">
+<div><label for="rcphone">Phone</label><input id="rcphone" inputmode="numeric" placeholder="10 digits"></div>
+<div><label for="rcdist">District</label><input id="rcdist" placeholder="Malappuram"></div>
+</div>
+<div class="sub" style="margin-top:6px">An existing customer with this phone number is reused automatically.</div>
+<label for="rtitle">Equipment / Product name</label><input id="rtitle" placeholder="Big dipper parlight">
+<div class="two">
+<div><label for="rbrand">Brand</label><select id="rbrand"><option value="">Not specified</option>${brandOptionsHtml(null,'<option value="other">Other…</option>')}</select></div>
+<div><label for="rmodel">Model</label><input id="rmodel" placeholder="Model number"></div>
+</div>
+<div id="rbrandotherwrap" style="display:none"><label for="rbrandother">Brand name</label><input id="rbrandother" placeholder="Brand not in the list"></div>
+<label for="rcomplaint">Customer complaint</label><textarea id="rcomplaint" class="rp-ta" placeholder="What the customer says is wrong"></textarea>
+<label for="rreceived">Received date</label><input id="rreceived" type="date" value="${localDateStr()}">
+<div class="rp-err" id="repairAddErr"></div>
+<button class="btn" id="saveRepair">Save repair</button>
+</div>`;
+}
+
+// Single place that defines the add_repair() RPC payload.
+function repairRpcArgs(f){
+const other = f.brandSel==='other';
+const args = {
+p_customer_id: f.cid || null,
+p_customer_name: f.cid ? null : f.name,
+p_customer_phone: f.cid ? null : (f.phone || null),
+p_customer_district: f.cid ? null : (f.district || null),
+p_title: f.title,
+p_brand_id: (f.brandSel && !other) ? Number(f.brandSel) : null,
+p_brand_other: other ? (f.brandOther || null) : null,
+p_model: f.model || null,
+p_fault_reported: f.complaint || null
+};
+// p_received_at defaults to now() in the database; only send it when a date was chosen (an explicit null would override the default).
+if(f.received) args.p_received_at = dateInputToTs(f.received);
+return args;
+}
+// add_repair() hands back the new deal's id; tolerate a bare uuid, {deal_id|id}, or a one-row array of either.
+function repairRpcDealId(data){
+const x = Array.isArray(data) ? data[0] : data;
+if(!x) return null;
+if(typeof x==='string') return x;
+return x.deal_id || x.id || null;
+}
+
+async function saveRepair(e){
+const btn=e.target, errEl=document.getElementById('repairAddErr');
+errEl.textContent=''; btn.disabled=true; btn.textContent='Saving…';
+try{
+const g=id=>document.getElementById(id).value.trim();
+const name=g('rcname'), phone=g('rcphone'), title=g('rtitle');
+if(!name) throw new Error('Customer name is needed.');
+if(!title) throw new Error('Equipment / product name is needed.');
+// Same lookup rule as saveDeal(): an existing customer with this phone is reused; otherwise add_repair() creates one.
+let cid=null;
+if(phone){
+const { data:found, error:fe } = await sb.from('customers').select('id').eq('phone',phone).limit(1);
+if(fe) throw fe;
+if(found?.length) cid=found[0].id;
+}
+const args = repairRpcArgs({ cid, name, phone, district:g('rcdist'), title,
+brandSel:document.getElementById('rbrand').value, brandOther:g('rbrandother'),
+model:g('rmodel'), complaint:g('rcomplaint'), received:document.getElementById('rreceived').value });
+const { data, error } = await sb.rpc('add_repair', args);
+if(error) throw error;
+const dealId = repairRpcDealId(data);
+if(!dealId) throw new Error('The repair was saved, but it could not be opened. Check the Repairs list.');
+S.err=''; S.tab='repairs'; S.dealTab='overview';
+await openDeal(dealId);
+}catch(err){
+errEl.textContent = err.message || String(err);
+btn.disabled=false; btn.textContent='Save repair';
+}
+}
+
+function renderRepairDetail(){
+const d=S.deal, rp=S.dealRepair;
+const stages=S.stages.filter(s=>s.pipeline_id===d.pipeline_id);
+const kv=(k,v)=>`<div class="rp-kv"><b>${esc(k)}</b><div>${v?esc(v):'<span class="sub">Not recorded</span>'}</div></div>`;
+let intake;
+if(!rp){
+intake = `<div class="sub">No intake details recorded</div>`;
+} else if(S.repairEditing){
+const brandSel = rp.brand_id!=null ? String(rp.brand_id) : (rp.brand_other ? 'other' : '');
+const missingBrand = rp.brand_id!=null && !S.brands.some(b=>b.id===rp.brand_id) ? `<option value="${rp.brand_id}" selected>${esc(rp.brands?.name||'Brand')}</option>` : '';
+intake = `<label for="retitle">Equipment / Product name</label><input id="retitle" value="${esc(d.title||'')}">
+<div class="two">
+<div><label for="rebrand">Brand</label><select id="rebrand"><option value="" ${brandSel===''?'selected':''}>Not specified</option>${missingBrand}${brandOptionsHtml(rp.brand_id)}<option value="other" ${brandSel==='other'?'selected':''}>Other…</option></select></div>
+<div><label for="remodel">Model</label><input id="remodel" value="${esc(rp.model||'')}"></div>
+</div>
+<div id="rebrandotherwrap" style="display:${brandSel==='other'?'':'none'}"><label for="rebrandother">Brand name</label><input id="rebrandother" value="${esc(rp.brand_other||'')}"></div>
+<label for="recomplaint">Customer complaint</label><textarea id="recomplaint" class="rp-ta">${esc(rp.fault_reported||'')}</textarea>
+<label for="rereceived">Received date</label><input id="rereceived" type="date" value="${esc(localDateStr(rp.received_at))}">
+<div class="rp-err" id="repairEditErr"></div>
+<button class="btn" id="repairSave">Save changes</button>
+<button class="btn ghost" id="repairEditCancel">Cancel</button>`;
+} else {
+intake = kv('Equipment / Product', d.title) + kv('Brand', repairBrandName(rp)) + kv('Model', rp.model)
++ kv('Customer complaint', rp.fault_reported) + kv('Received', dayFull(rp.received_at))
++ (rp.returned_at ? kv('Returned', dayFull(rp.returned_at)) : '');
+}
+app.innerHTML = shell(`
+<button class="back" id="back">← Back</button>
+<div class="card">
+<div class="row"><div class="grow">
+<div class="name" style="font-size:18px">${esc(d.title||'Repair')}</div>
+<div class="sub">${esc(d.customers?.name||'No customer')}${d.customers?.phone?' · '+esc(d.customers.phone):''}${d.customers?.district?' · '+esc(d.customers.district):''}</div>
+</div><span class="tag">${esc(d.stages?.name||'')}</span></div>
+${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none" href="${telLink(d.customers.phone)}">Call customer</a>`:''}
+</div>
+
+<div class="row" style="align-items:center"><h2 class="grow">Intake</h2>${rp && !S.repairEditing?`<button class="chip" id="repairEditBtn">Edit</button>`:''}</div>
+<div class="card">${intake}</div>
+
+<h2>Stage</h2>
+<div class="card">
+<select id="rstg">${stages.map(s=>`<option value="${s.id}" ${s.id===d.stage_id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+<button class="btn ghost" id="repairSaveStage">Update stage</button>
+</div>`);
+wire();
+document.getElementById('back').onclick = ()=>{
+S.deal=null; S.dealRepair=null; S.repairEditing=false;
+if(S.customer){ render(); } else { S.tab='repairs'; loadTab(); }
+};
+const eb=document.getElementById('repairEditBtn'); if(eb) eb.onclick=()=>{ S.repairEditing=true; render(); };
+const ec=document.getElementById('repairEditCancel'); if(ec) ec.onclick=()=>{ S.repairEditing=false; render(); };
+const es=document.getElementById('repairSave'); if(es) es.onclick=saveRepairEdit;
+const reb=document.getElementById('rebrand');
+if(reb) reb.onchange=()=>{ document.getElementById('rebrandotherwrap').style.display = reb.value==='other' ? '' : 'none'; };
+document.getElementById('repairSaveStage').onclick=saveRepairStage;
+}
+
+async function saveRepairEdit(e){
+const d=S.deal, btn=e.target, errEl=document.getElementById('repairEditErr');
+errEl.textContent=''; btn.disabled=true;
+try{
+const g=id=>document.getElementById(id).value.trim();
+const title=g('retitle'), received=document.getElementById('rereceived').value;
+if(!title) throw new Error('Equipment / product name is needed.');
+if(!received) throw new Error('Received date is needed.');
+const brandSel=document.getElementById('rebrand').value, other=brandSel==='other';
+const upd = {
+model: g('remodel') || null,
+fault_reported: g('recomplaint') || null,
+brand_id: (brandSel && !other) ? Number(brandSel) : null,
+brand_other: other ? (g('rebrandother') || null) : null,
+received_at: dateInputToTs(received)
+};
+// Intake row first: if it fails nothing has changed. Never inserts -- a deal without an intake row stays untouched.
+const r1 = await sb.from('repairs').update(upd).eq('deal_id',d.id).select('deal_id');
+if(r1.error) throw r1.error;
+if(!r1.data?.length) throw new Error('This repair has no intake record to update.');
+if(title!==d.title){
+const r2 = await sb.from('deals').update({title}).eq('id',d.id);
+if(r2.error) throw new Error('Intake saved, but the equipment name could not be updated: '+r2.error.message);
+}
+S.err=''; S.repairEditing=false;
+await openDeal(d.id);
+}catch(err){
+errEl.textContent = err.message || String(err);
+btn.disabled=false;
+}
+}
+
+// Repairs stage change. Deliberately writes ONLY stage_id: delivered_at is a Retail concept, and
+// repairs.returned_at is stamped/cleared by the database trigger trg_repairs_stamp_returned.
+async function saveRepairStage(e){
+const d=S.deal, btn=e.target;
+const to=Number(document.getElementById('rstg').value);
+if(!to || to===d.stage_id) return;
+btn.disabled=true;
+const target=S.stages.find(s=>s.id===to);
+try{
+const { error } = await sb.from('deals').update({stage_id:to}).eq('id',d.id);
+if(error) throw error;
+S.err='';
+const ev = await sb.from('stage_events').insert({deal_id:d.id,from_stage_id:d.stage_id,to_stage_id:to,changed_by:S.me.id});
+if(ev.error) S.err='Stage updated, but the change could not be logged: '+ev.error.message;
+await logActivity('stage_moved', d.id, (d.customers?.name?d.customers.name+' → ':'')+(target?.name||''));
+}catch(err){
+S.err = err.message || String(err);
+btn.disabled=false; render(); return;
+}
+await openDeal(d.id);
 }
 
 async function saveDeal(e){
