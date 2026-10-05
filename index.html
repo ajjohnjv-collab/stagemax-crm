@@ -368,6 +368,7 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-est-trow.final{font-size:16px;font-weight:800;color:var(--cd-text);border-top:1px solid var(--cd-line);margin-top:6px;padding-top:10px}
 .cd-est-locked{background:rgba(110,158,92,.1);border:1px solid rgba(110,158,92,.3);border-radius:11px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:var(--green);font:700 12.5px Archivo}
 .cd-est-locked svg{width:16px;height:16px;flex:none}
+.cd-est-locked.stale{background:rgba(226,110,60,.12);border-color:rgba(226,110,60,.35);color:#E26E3C}
 .cd-est-err{background:rgba(226,110,60,.12);border:1px solid rgba(226,110,60,.35);color:#E26E3C;border-radius:10px;padding:10px 13px;margin-top:12px;font:600 12.5px Archivo}
 .cd-gst-toggle{display:flex;align-items:center;gap:10px;margin:12px 0 4px;font:600 12.5px Archivo;color:var(--cd-text);cursor:pointer;user-select:none}
 .cd-toggle{position:relative;width:38px;height:21px;flex:none}
@@ -471,7 +472,7 @@ dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValu
 myPerf:[], myRevivals:[], myPromises:[],
 openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
 sideOpen:false, presetPipeline:null, presetStage:null,
-leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview',
+leadQ:'', leadStage:null, leadSource:null, leadFollow:'all', leadPage:0, leadPageSize:25, leadHasMore:false, leadsLoading:false, leadFollowMap:{}, dealTab:'overview', dealTabKind:null,
 custSearch:'', customers:[], customer:null, customerDeals:[], customerBalance:null, customerRepairs:[], custProfileTab:'overview', custEditing:false, newDealCustomerId:null, newDealCustomerInfo:null,
 prodSearch:'', productsList:[], productEditing:null, repairQueue:[], dealRepair:null, repairEditing:false };
 
@@ -533,7 +534,7 @@ sb.from('deals').select('*, customers(name,phone,district), stages(name,is_deliv
 ]);
 if(revR.error) throw revR.error; S.myRevivals = (revR.data||[]).filter(d=>d.stages?.is_lost);
 if(promR.error) throw promR.error;
-S.myPromises = (promR.data||[]).filter(d=>(Number(d.value||0)-Number(d.amount_collected||0))>0);
+S.myPromises = (promR.data||[]).filter(d=>isNonRepairsPipeline(d.pipeline_id) && (Number(d.value||0)-Number(d.amount_collected||0))>0);
 }
 
 async function loadDashboardShared(){
@@ -601,14 +602,15 @@ if(error) throw error; S.movement = data||[];
 if(S.tab==='dashboard'){
 const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
 const trendSince = new Date(Date.now() - 13*86400000).toISOString().slice(0,10);
-const openIds = S.stages.filter(s=>!s.is_lost && !s.is_delivered).map(s=>s.id);
+const openIds = S.stages.filter(s=>!s.is_lost && !s.is_delivered && isNonRepairsPipeline(s.pipeline_id)).map(s=>s.id);
+const pipeRepId = repairsPipelineId();
 const [teamR,trendR,srcR,prodR,duesR,pipeR] = await Promise.all([
 sb.from('cre_performance_daily').select('*').gte('day', since),
 sb.from('cre_performance_daily').select('day,value_delivered,money_collected').gte('day', trendSince),
 sb.from('deals').select('source_id').gte('created_at', since),
 sb.from('product_movement').select('*').limit(5),
 sb.from('customer_balance_summary').select('total_balance'),
-sb.from('deals').select('value').in('stage_id', openIds.length?openIds:[-1])
+(pipeRepId!=null ? sb.from('deals').select('value').in('stage_id', openIds.length?openIds:[-1]).neq('pipeline_id', pipeRepId) : sb.from('deals').select('value').in('stage_id', [-1]))
 ]);
 if(teamR.error) throw teamR.error; S.team = teamR.data||[];
 if(trendR.error) throw trendR.error;
@@ -814,7 +816,8 @@ return `<button class="chip ${S.stage===s.id?'on':''}" data-stage="${s.id}">${es
 
 const cards = shown.length ? shown.map(d=>{
 const bal = Number(d.value||0)-Number(d.amount_collected||0);
-const paid = bal<=0 && Number(d.value)>0;
+const isRep = isRepairsPipeline(d.pipeline_id);   // a Repair Estimate total is not money owed: no Paid / due tag
+const paid = !isRep && bal<=0 && Number(d.value)>0;
 return `<div class="card" data-deal="${d.id}">
 <div class="row">
 <div class="grow">
@@ -827,7 +830,7 @@ return `<div class="card" data-deal="${d.id}">
 </div>
 </div>
 <div class="row" style="margin-top:9px;gap:7px">
-${paid?'<span class="tag paid">Paid</span>':(Number(d.value)>0?`<span class="tag due">${rs(bal)} due</span>`:'')}
+${isRep?'':(paid?'<span class="tag paid">Paid</span>':(Number(d.value)>0?`<span class="tag due">${rs(bal)} due</span>`:''))}
 ${d.customers?.district?`<span class="tag">${esc(d.customers.district)}</span>`:''}
 ${d.invoice_no?`<span class="tag">${esc(d.invoice_no)}</span>`:''}
 <span class="sub" style="margin-left:auto">${day(d.delivered_at||d.created_at)}</span>
@@ -839,7 +842,15 @@ return `<div class="chips">${pipes}</div><div class="chips">${chips}</div>${card
 }
 
 /* ── deal detail ── */
-async function openDeal(id){
+// Which deal-detail tabs exist per pipeline kind. Repairs: Overview + Estimate only. Retail keeps its five tabs.
+// Any other pipeline (Dealer) keeps today's tab list and still has NO working Estimate screen (its Estimate tab is the
+// existing "coming soon" panel, reachable only by an explicit click).
+function dealKind(pid){ return isRepairsPipeline(pid) ? 'repairs' : (isRetailPipeline(pid) ? 'retail' : 'other'); }
+function normalizeDealTab(pid, tab){
+const valid = dealKind(pid)==='repairs' ? ['overview','estimates'] : ['overview','followups','estimates','orders','notes'];
+return valid.includes(tab) ? tab : 'overview';
+}
+async function openDeal(id, tab){
 const [{data:d},{data:items},{data:fups},{data:notes},{data:receipts}] = await Promise.all([
 sb.from('deals').select('*, customers(*), stages(*), pipelines(name), sources(name)').eq('id',id).single(),
 sb.from('deal_items').select('*, products(name,model_code)').eq('deal_id',id).order('sort_order'),
@@ -854,7 +865,12 @@ if(isRepairsPipeline(d.pipeline_id)){
 const { data:rp } = await sb.from('repairs').select('*, brands(name)').eq('deal_id',id).maybeSingle();
 S.dealRepair = rp || null;
 }
-if(!S.dealTab) S.dealTab='overview';
+// A tab chosen explicitly (Create Estimate, a Global Estimates row) is honoured when this pipeline has it. Otherwise the
+// previous deal's tab only carries over to another deal of the SAME kind; moving between Retail / Repair / Dealer
+// always starts on Overview, so a stale Estimate (or Orders / Notes) tab can never leak into the wrong screen.
+const dkind = dealKind(d.pipeline_id);
+S.dealTab = normalizeDealTab(d.pipeline_id, tab || (S.dealTabKind===dkind ? S.dealTab : 'overview'));
+S.dealTabKind = dkind;
 try{ await resolveReceiptRecorders(S.dealReceipts); }catch(e){ /* name resolution is best-effort -- never blocks the deal page */ }
 render();
 }
@@ -1115,6 +1131,15 @@ const tx=document.getElementById('estTaxable'); if(tx) tx.textContent=rs(taxable
 const ga=document.getElementById('estGstAmt'); if(ga) ga.textContent=rs(gst);
 const ft=document.getElementById('estFinal'); if(ft) ft.textContent=rs(final);
 const gs=document.getElementById('estGstState'); if(gs) gs.textContent = gstEnabled?'ON':'OFF';
+// Repairs only (element exists only on an approved Repair Estimate): compare the live total with the approved total.
+const as=document.getElementById('estApprovedState');
+if(as){
+const st=repairApprovalState(Number(as.dataset.approved), final, as.dataset.at);
+as.classList.toggle('stale', st.stale);
+const at=document.getElementById('estApprovedText'); if(at) at.textContent=st.text;
+const ab=document.getElementById('estApprove');
+if(ab){ ab.textContent = st.stale ? 'Re-approve to update total' : 'Re-approve'; ab.className = st.stale ? 'cd-btn approve' : 'cd-btn ghost'; }
+}
 }
 
 // ---------------------------------------------------------------------
@@ -1258,6 +1283,8 @@ alert(err.message||String(err));
 }
 
 function leadEstimateTab(d){
+// Repairs reuse the SAME editor (renderEditableEstimate) and are never shown the locked/payment view.
+if(isRepairsPipeline(d.pipeline_id)) return renderEditableEstimate(d);
 if(!isRetailPipeline(d.pipeline_id)) return `<div class="cd-soon"><b>Estimates — coming soon</b><p>This module isn't built yet for this pipeline.</p></div>`;
 if(d.estimate_approved_at) return renderApprovedEstimate(d);
 return renderEditableEstimate(d);
@@ -1300,12 +1327,34 @@ ${fullyPaid?`<div class="cd-pill" style="background:rgba(110,158,92,.16);color:v
 <div class="cd-panel"><h3>Payment History</h3>${receiptHistoryListCD()}</div>`;
 }
 
+// Repairs only: a Repair Estimate stays editable after approval, so the approved total (deals.value, written by
+// approve_estimate) can fall behind the current estimate. This is the single place that decides that wording/state.
+function repairApprovalState(approvedTotal, currentTotal, approvedAt){
+const stale = Math.abs(Number(currentTotal) - Number(approvedTotal)) > 0.005;
+return { stale, text: stale
+? `Approved total ${rs(approvedTotal)} is out of date \u2014 current estimate total ${rs(currentTotal)}. Re-approve to update the total.`
+: `Estimate approved ${day(approvedAt)} \u2014 approved total ${rs(approvedTotal)}` };
+}
+
 function renderEditableEstimate(d){
+const repair = isRepairsPipeline(d.pipeline_id);
 const subtotal=(d.items||[]).reduce((a,i)=>a+Number(i.amount||0),0);
 const discount=Number(d.estimate_discount||0);
 const gstEnabled=!!d.estimate_gst_enabled;
 const { taxable, gst, final } = estimateBreakdown(subtotal, discount, gstEnabled);
-return `<div class="cd-panel"><h3>Estimate items</h3>
+const repairApproved = repair && !!d.estimate_approved_at;
+const ras = repairApproved ? repairApprovalState(Number(d.value||0), final, d.estimate_approved_at) : null;
+const repairBanner = repairApproved ? `<div class="cd-est-locked${ras.stale?' stale':''}" id="estApprovedState" data-approved="${Number(d.value||0)}" data-at="${esc(d.estimate_approved_at)}">${ic('doc')}<span id="estApprovedText">${esc(ras.text)}</span></div>` : '';
+const approvePanel = repair ? `<div class="cd-panel"><h3>Customer approval</h3>
+<p class="sub" style="margin-bottom:12px">${repairApproved?'Items, rates, discount and GST can still be changed. Re-approve to update the approved total.':'Approval records the total the customer has agreed. The repair stays at its current stage, and the Estimate can still be edited and re-approved.'}</p>
+<button class="${repairApproved&&!ras.stale?'cd-btn ghost':'cd-btn approve'}" id="estApprove" style="width:100%">${repairApproved?(ras.stale?'Re-approve to update total':'Re-approve'):'Customer Approved'}</button>
+<div id="estErr"></div>
+</div>` : `<div class="cd-panel"><h3>Customer approval</h3>
+<p class="sub" style="margin-bottom:12px">Customer approval locks the final Estimate. Deal confirmation happens after full payment.</p>
+<button class="cd-btn approve" id="estApprove" style="width:100%">Customer Approved</button>
+<div id="estErr"></div>
+</div>`;
+return `${repairBanner}<div class="cd-panel"><h3>Estimate items</h3>
 <div id="estItems"></div>
 <button class="cd-btn ghost" id="estAddRow" style="margin-top:8px;width:auto;padding:8px 14px;font-size:12px">Add item</button>
 </div>
@@ -1330,11 +1379,30 @@ return `<div class="cd-panel"><h3>Estimate items</h3>
 ${d.estimate_sent_at?`<p class="sub" style="margin-bottom:12px">Last sent ${day(d.estimate_sent_at)}</p>`:`<p class="sub" style="margin-bottom:12px">Not sent yet.</p>`}
 <button class="cd-btn ghost" id="estSend" style="width:100%">${d.estimate_sent_at?'Send Again':'Send Estimate'}</button>
 </div>
-<div class="cd-panel"><h3>Customer approval</h3>
-<p class="sub" style="margin-bottom:12px">Customer approval locks the final Estimate. Deal confirmation happens after full payment.</p>
-<button class="cd-btn approve" id="estApprove" style="width:100%">Customer Approved</button>
-<div id="estErr"></div>
-</div>`;
+${approvePanel}`;
+}
+
+// Estimate event wiring shared by Retail (renderLeadDetail) and Repairs (renderRepairDetail) -- one copy only.
+function wireEstimate(d){
+const estItemsEl=document.getElementById('estItems');
+if(estItemsEl){
+if(d.items && d.items.length){ d.items.forEach(it=>estItemsEl.appendChild(estimateItemRow(it))); }
+else { estItemsEl.appendChild(estimateItemRow(null)); }
+estItemsEl.addEventListener('input', updateEstimateTotals);
+}
+const estAddRow=document.getElementById('estAddRow');
+if(estAddRow) estAddRow.onclick=()=>{ estItemsEl.appendChild(estimateItemRow(null)); updateEstimateTotals(); };
+const estDiscount=document.getElementById('estDiscount');
+if(estDiscount) estDiscount.oninput=updateEstimateTotals;
+const estGst=document.getElementById('estGst');
+if(estGst) estGst.onchange=updateEstimateTotals;
+const estSave=document.getElementById('estSave');
+if(estSave) estSave.onclick=()=>saveEstimate(d);
+const estSend=document.getElementById('estSend');
+if(estSend) estSend.onclick=()=>sendEstimate(d);
+const estApprove=document.getElementById('estApprove');
+if(estApprove) estApprove.onclick=()=>approveEstimateAction(d);
+if(estItemsEl) updateEstimateTotals();
 }
 
 async function fetchLeadsPage(){
@@ -1679,8 +1747,7 @@ qe.disabled=true;
 // but are no longer called from this handler. leadEstimateTab() decides
 // editable vs. locked based on estimate_approved_at, so no stage logic is
 // needed here.
-S.dealTab='estimates';
-openDeal(d.id);
+openDeal(d.id,'estimates');
 };
 const qh=document.getElementById('qaHot');
 if(qh) qh.onclick=async()=>{
@@ -1689,25 +1756,7 @@ await sb.from('deals').update({is_hot:!d.is_hot}).eq('id',d.id);
 openDeal(d.id);
 };
 
-const estItemsEl=document.getElementById('estItems');
-if(estItemsEl){
-if(d.items && d.items.length){ d.items.forEach(it=>estItemsEl.appendChild(estimateItemRow(it))); }
-else { estItemsEl.appendChild(estimateItemRow(null)); }
-estItemsEl.addEventListener('input', updateEstimateTotals);
-}
-const estAddRow=document.getElementById('estAddRow');
-if(estAddRow) estAddRow.onclick=()=>{ estItemsEl.appendChild(estimateItemRow(null)); updateEstimateTotals(); };
-const estDiscount=document.getElementById('estDiscount');
-if(estDiscount) estDiscount.oninput=updateEstimateTotals;
-const estGst=document.getElementById('estGst');
-if(estGst) estGst.onchange=updateEstimateTotals;
-const estSave=document.getElementById('estSave');
-if(estSave) estSave.onclick=()=>saveEstimate(d);
-const estSend=document.getElementById('estSend');
-if(estSend) estSend.onclick=()=>sendEstimate(d);
-const estApprove=document.getElementById('estApprove');
-if(estApprove) estApprove.onclick=()=>approveEstimateAction(d);
-if(estItemsEl) updateEstimateTotals();
+wireEstimate(d);
 
 const sf2=document.getElementById('savefollow2');
 if(sf2) sf2.onclick=async e=>{
@@ -1791,16 +1840,38 @@ if(btn) btn.disabled=false;
 }
 }
 
+// True when the on-screen Estimate differs from what is saved. approve_estimate() prices the SAVED items, so a Repair
+// approval must never run over unsaved edits.
+function estimateIsDirty(d){
+const form=[...document.querySelectorAll('#estItems .cd-est-row')].map(r=>{
+const pVal=r.querySelector('.p').value, isOther=pVal==='__other__';
+return [(pVal&&!isOther)?Number(pVal):null, isOther?r.querySelector('.po').value.trim():null, Number(r.querySelector('.q').value||1), Number(r.querySelector('.r').value||0)];
+}).filter(r=>r[0]||r[1]);
+const saved=(d.items||[]).map(i=>[i.product_id!=null?Number(i.product_id):null, i.product_other||null, Number(i.qty), Number(i.rate)]);
+const disc=Math.max(0,Number(document.getElementById('estDiscount')?.value||0));
+const gst=!!document.getElementById('estGst')?.checked;
+return JSON.stringify(form)!==JSON.stringify(saved) || disc!==Number(d.estimate_discount||0) || gst!==!!d.estimate_gst_enabled;
+}
+
 async function approveEstimateAction(d){
-const btn=document.getElementById('estApprove'); if(btn){ btn.disabled=true; btn.textContent='Approving…'; }
+const btn=document.getElementById('estApprove');
+const label=btn?btn.textContent:'Customer Approved';
 const errBox=document.getElementById('estErr'); if(errBox) errBox.innerHTML='';
+// Repairs -> approve_estimate (re-approvable; logs its own activity row atomically in the database, so NO logActivity
+// here). Retail -> approve_retail_estimate, exactly as before.
+const repair=isRepairsPipeline(d.pipeline_id);
+if(repair && estimateIsDirty(d)){
+if(errBox) errBox.innerHTML=`<div class="cd-est-err">You have unsaved changes. Save the Estimate first, then approve or re-approve.</div>`;
+return;
+}
+if(btn){ btn.disabled=true; btn.textContent='Approving…'; }
 try{
-const { error } = await sb.rpc('approve_retail_estimate',{p_deal_id:d.id});
+const { error } = await sb.rpc(repair?'approve_estimate':'approve_retail_estimate',{p_deal_id:d.id});
 if(error) throw error;
 openDeal(d.id);
 }catch(err){
 if(errBox) errBox.innerHTML=`<div class="cd-est-err">${esc(err.message||String(err))}</div>`;
-if(btn){ btn.disabled=false; btn.textContent='Customer Approved'; }
+if(btn){ btn.disabled=false; btn.textContent=label; }
 }
 }
 
@@ -2022,7 +2093,8 @@ const VERB_LABEL = {
 lead_created:'New lead added', lead_assigned:'Lead reassigned', stage_moved:'Stage updated',
 quotation_sent:'Quotation sent', payment_received:'Payment received', dispatched:'Order dispatched',
 followup_completed:'Follow-up completed', hot_marked:'Marked as hot lead',
-estimate_sent:'Estimate sent', estimate_approved:'Estimate approved'
+estimate_sent:'Estimate sent', estimate_approved:'Estimate approved',
+repair_estimate_approved:'Repair estimate approved', repair_estimate_reapproved:'Repair estimate re-approved'
 };
 function timeAgo(ts){
 const s = Math.max(1, Math.round((Date.now()-new Date(ts).getTime())/1000));
@@ -2706,7 +2778,7 @@ const { data, error } = await sb.from('deals')
 .eq('customer_id', cid);
 if(error){ S.err=error.message; render(); return; }
 S.duesDeals = (data||[])
-.filter(d=>d.stages?.is_delivered && (Number(d.value||0)-Number(d.amount_collected||0))>0)
+.filter(d=>isNonRepairsPipeline(d.pipeline_id) && d.stages?.is_delivered && (Number(d.value||0)-Number(d.amount_collected||0))>0)
 .sort((a,b)=> new Date(a.delivered_at||0) - new Date(b.delivered_at||0));
 render();
 }
@@ -2907,7 +2979,7 @@ document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{ S.stage=b.d
 document.querySelectorAll('[data-deal]').forEach(c=>c.onclick=()=>openDeal(c.dataset.deal));
 // Global Estimates row click: always land on the deal's existing Estimates
 // sub-tab (the same one Create Estimate uses), never Overview.
-document.querySelectorAll('[data-globalest]').forEach(c=>c.onclick=()=>{ S.dealTab='estimates'; openDeal(c.dataset.globalest); });
+document.querySelectorAll('[data-globalest]').forEach(c=>c.onclick=()=>openDeal(c.dataset.globalest,'estimates'));
 const payBtn=document.getElementById('payRecord'); if(payBtn) payBtn.onclick=()=>recordPayment(S.deal);
 document.querySelectorAll('[data-reverse-receipt]').forEach(b=>b.onclick=()=>reverseReceiptAction(b.dataset.reverseReceipt));
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
@@ -3016,6 +3088,12 @@ if(prodFormSave) prodFormSave.onclick=saveProduct;
 /* ── Repairs V1 Phase 2 ── */
 function repairsPipelineId(){ return S.pipelines.find(p=>p.name==='Repairs')?.id ?? null; }
 function isRepairsPipeline(pipelineId){ return pipelineId!=null && S.pipelines.find(p=>p.id===pipelineId)?.name==='Repairs'; }
+// Positive, fail-CLOSED test used for money aggregates: true only for a KNOWN pipeline that is not Repairs. If the
+// Repairs pipeline cannot be resolved at all this is false for everything, so a Repair value can never slip in.
+function isNonRepairsPipeline(pipelineId){
+const rid=repairsPipelineId();
+return rid!=null && pipelineId!=null && pipelineId!==rid && S.pipelines.some(p=>p.id===pipelineId);
+}
 // PostgREST returns an object for a one-to-one embed and an array otherwise; tolerate both and "missing".
 const repairRow = r => Array.isArray(r) ? (r[0]||null) : (r||null);
 const dayFull = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
@@ -3158,6 +3236,16 @@ intake = kv('Equipment / Product', d.title) + kv('Brand', repairBrandName(rp)) +
 + kv('Customer complaint', rp.fault_reported) + kv('Received', dayFull(rp.received_at))
 + (rp.returned_at ? kv('Returned', dayFull(rp.returned_at)) : '');
 }
+const tab = normalizeDealTab(d.pipeline_id, S.dealTab); S.dealTab = tab;
+const tabBar = `<div class="cd-tabs">${[['overview','Overview'],['estimates','Estimate']].map(([k,l])=>`<button class="${tab===k?'on':''}" data-dealtab="${k}">${l}</button>`).join('')}</div>`;
+const overviewHtml = `<div class="row" style="align-items:center"><h2 class="grow">Intake</h2>${rp && !S.repairEditing?`<button class="chip" id="repairEditBtn">Edit</button>`:''}</div>
+<div class="card">${intake}</div>
+
+<h2>Stage</h2>
+<div class="card">
+<select id="rstg">${stages.map(s=>`<option value="${s.id}" ${s.id===d.stage_id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+<button class="btn ghost" id="repairSaveStage">Update stage</button>
+</div>`;
 app.innerHTML = shell(`
 <button class="back" id="back">← Back</button>
 <div class="card">
@@ -3168,14 +3256,8 @@ app.innerHTML = shell(`
 ${d.customers?.phone?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none" href="${telLink(d.customers.phone)}">Call customer</a>`:''}
 </div>
 
-<div class="row" style="align-items:center"><h2 class="grow">Intake</h2>${rp && !S.repairEditing?`<button class="chip" id="repairEditBtn">Edit</button>`:''}</div>
-<div class="card">${intake}</div>
-
-<h2>Stage</h2>
-<div class="card">
-<select id="rstg">${stages.map(s=>`<option value="${s.id}" ${s.id===d.stage_id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
-<button class="btn ghost" id="repairSaveStage">Update stage</button>
-</div>`);
+${tabBar}
+${tab==='estimates' ? leadEstimateTab(d) : overviewHtml}`);
 wire();
 document.getElementById('back').onclick = ()=>{
 S.deal=null; S.dealRepair=null; S.repairEditing=false;
@@ -3186,7 +3268,9 @@ const ec=document.getElementById('repairEditCancel'); if(ec) ec.onclick=()=>{ S.
 const es=document.getElementById('repairSave'); if(es) es.onclick=saveRepairEdit;
 const reb=document.getElementById('rebrand');
 if(reb) reb.onchange=()=>{ document.getElementById('rebrandotherwrap').style.display = reb.value==='other' ? '' : 'none'; };
-document.getElementById('repairSaveStage').onclick=saveRepairStage;
+const rss=document.getElementById('repairSaveStage'); if(rss) rss.onclick=saveRepairStage;
+document.querySelectorAll('[data-dealtab]').forEach(b=>b.onclick=()=>{ S.dealTab=b.dataset.dealtab; render(); });
+if(tab==='estimates') wireEstimate(d);
 }
 
 async function saveRepairEdit(e){
