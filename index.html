@@ -113,6 +113,24 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .stat2 .isq{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
 .stat2 .v{font:700 21px Archivo Narrow;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat2 .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+.oa-grid{display:grid;grid-template-columns:1fr;gap:9px;margin-bottom:9px}
+@media (min-width:640px){.oa-grid{grid-template-columns:1fr 1fr}}
+@media (min-width:1000px){.oa-grid{grid-template-columns:repeat(3,1fr)}}
+.oa-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.oa-head{display:flex;align-items:center;gap:8px}
+.oa-head[data-tab]{cursor:pointer}
+.oa-head .t{font:700 13px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:1}
+.oa-big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.oa-big .v{font:700 30px Archivo Narrow;line-height:1}
+.oa-big .v.alert{color:#E8899E}
+.oa-big .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.oa-line{display:flex;gap:8px;font-size:12.5px;color:var(--muted)}
+.oa-line b{color:var(--paper);font-weight:600}
+.oa-note{font-size:11.5px;color:var(--muted)}
+.oa-rows{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.oa-rows .trow{margin-bottom:0}
+.oa-row{background:var(--panel-2);border-radius:8px;padding:8px 10px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.oa-link{font-size:12px;color:var(--amber);cursor:pointer;text-decoration:underline;background:none;border:0;padding:0;text-align:left}
 
 .qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:9px}
 @media (min-width:640px){.qa-grid{grid-template-columns:repeat(4,1fr)}}
@@ -577,6 +595,274 @@ if(r.error) throw r.error;
 S.globalEstimates = (r.data||[]).filter(d=>estimateGroup(d));
 }
 
+/* ── Owner Dashboard V1 · Phase A: "Needs attention" ──────────────────────────────────────────────
+   Owner-only: called from loadTab('dashboard') and rendered by viewDashboard() only. It has its own loader --
+   loadDashboardShared() and loadChaseSources(), which the CRE dashboards also use, are untouched. Every "today",
+   missed/overdue and ageing boundary is the shop's local calendar date (Asia/Kolkata). Repairs are excluded
+   fail-CLOSED: if the Repairs pipeline cannot be resolved every figure is zero. Reads only: loading or
+   navigating performs no writes. Nothing here uses the 300-row S.openDeals list. ── */
+const IST_FMT = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'});
+function istDate(d){
+if(d===null || d==='') return '';
+const x = d===undefined ? new Date() : new Date(d);
+return isNaN(x.getTime()) ? '' : IST_FMT.format(x);
+}
+const istDayNum = s => Math.floor(Date.parse(s+'T00:00:00Z')/86400000);
+function istDaysSince(ts, today){ const s=istDate(ts); return s ? istDayNum(today)-istDayNum(s) : null; }
+function isDealerPipeline(pid){ return /dealer/i.test(S.pipelines.find(p=>p.id===pid)?.name||''); }
+// PostgREST caps one response (1000 rows on Supabase): read every page so no figure is silently truncated.
+async function fetchAllPages(build){
+const out=[];
+for(let from=0;;from+=1000){
+const r = await build().range(from, from+999);
+if(r.error) throw r.error;
+const rows = r.data||[]; out.push(...rows);
+if(rows.length<1000) break;
+}
+return out;
+}
+async function fetchByIds(table, sel, col, ids){
+const out=[];
+for(let i=0;i<ids.length;i+=100){
+const r = await sb.from(table).select(sel).in(col, ids.slice(i,i+100));
+if(r.error) throw r.error;
+out.push(...(r.data||[]));
+}
+return out;
+}
+function attnEmpty(today){
+return { today, failClosed:false, error:null,
+fu:{missed:[],dueToday:[]}, prom:{missed:[],dueToday:[]}, rev:{missed:[],dueToday:[]}, fuItems:[], byCre:[],
+leads:{headline:[],newToday:[],notContacted:[],noNext:[],hot:[],links:[]},
+est:{sent:[],approved:[],draft:[],oldestDays:null,sentValue:0},
+ord:{awaiting:[],transit:[],oldestDays:null},
+bal:{total:0,customers:0,b30:0,b60:0,b60p:0,retail:0,dealer:0,top:[],promiseDue:0} };
+}
+/* Owner follow-up list = exactly the A1 set (non-Repairs, Asia/Kolkata day): used by the owner Follow-ups screen and the
+   owner bell, so they can never disagree with the band. Empty when Phase A data is unavailable (fail-closed / error). */
+function ownerChaseList(){
+const A = S.ownerAttn;
+if(!A || A.failClosed || A.error) return [];
+const items = [...A.fu.missed, ...A.fu.dueToday, ...A.prom.missed, ...A.prom.dueToday, ...A.rev.missed, ...A.rev.dueToday];
+items.sort((a,b)=> a.date<b.date ? -1 : a.date>b.date ? 1 : (a.key<b.key?-1:1));
+return items;
+}
+async function loadOwnerAttention(){
+const A = attnEmpty(istDate());
+try{ await fillOwnerAttention(A); }catch(e){ A.error = (e&&e.message)||String(e); }
+S.ownerAttn = A;
+}
+async function fillOwnerAttention(A){
+const rid = repairsPipelineId();
+if(rid==null){ A.failClosed = true; return; }
+const today = A.today, dayN = istDayNum(today);
+const nonRep = d => !!d && isNonRepairsPipeline(d.pipeline_id);
+const none = ids => ids.length ? ids : [-1];
+const open = S.stages.filter(s=>!s.is_won && !s.is_lost && !s.is_delivered && isNonRepairsPipeline(s.pipeline_id));
+const wonOpenIds = S.stages.filter(s=>s.is_won && !s.is_delivered && isNonRepairsPipeline(s.pipeline_id)).map(s=>s.id);
+const wonIds = new Set(S.stages.filter(s=>s.is_won && isNonRepairsPipeline(s.pipeline_id)).map(s=>s.id));
+const firstStage = {};
+S.pipelines.forEach(p=>{
+if(!isNonRepairsPipeline(p.id)) return;
+const o = open.filter(s=>s.pipeline_id===p.id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+if(o[0]) firstStage[p.id] = o[0];
+});
+const stSel = 'stages(name,is_won,is_lost,is_delivered)';
+const [fuRows, promRows, revRows, openFuRows, dealRows, ordRows, ppRows] = await Promise.all([
+fetchAllPages(()=>sb.from('follow_ups').select('id,deal_id,assigned_to,due_date,contact_type,note,deals(title,pipeline_id,assigned_to,customers(name,phone),'+stSel+')').eq('done',false).lte('due_date',today).order('id')),
+fetchAllPages(()=>sb.from('deals').select('id,title,value,amount_collected,balance_promised_date,assigned_to,pipeline_id,customers(name,phone),'+stSel).not('balance_promised_date','is',null).lte('balance_promised_date',today).neq('pipeline_id',rid).order('id')),
+fetchAllPages(()=>sb.from('deals').select('id,title,lost_reason,revival_date,assigned_to,pipeline_id,customers(name,phone),'+stSel).not('revival_date','is',null).lte('revival_date',today).neq('pipeline_id',rid).order('id')),
+fetchAllPages(()=>sb.from('follow_ups').select('id,deal_id').eq('done',false).order('id')),
+fetchAllPages(()=>sb.from('deals').select('id,title,created_at,stage_id,pipeline_id,is_hot,assigned_to,estimate_sent_at,estimate_approved_at,customers(name,phone)').in('stage_id',none(open.map(s=>s.id))).neq('pipeline_id',rid).order('id')),
+fetchAllPages(()=>sb.from('deals').select('id,title,value,amount_collected,dispatch_date,pipeline_id,stage_id,assigned_to,customers(name,phone)').in('stage_id',none(wonOpenIds)).neq('pipeline_id',rid).order('id')),
+fetchAllPages(()=>sb.from('payments_pending').select('deal_id,customer_name,phone,title,balance,delivered_at').order('deal_id'))
+]);
+
+/* A1 · Follow-ups. Missed = unfinished follow-up dated before today; Due today = dated today. Open follow-ups are
+   kept even when the deal is Delivered or Lost. Payment promises and lost-lead revivals stay identifiable kinds. */
+const seen = new Set();
+for(const r of fuRows){
+if(seen.has(r.id) || !r.due_date) continue; seen.add(r.id);
+const d = r.deals; if(!nonRep(d)) continue;
+const it = {kind:'followup', key:'f'+r.id, fuId:r.id, dealId:r.deal_id, creId:r.assigned_to||d.assigned_to||null,
+name:d.customers?.name||'No customer', phone:d.customers?.phone||'', detail:r.note||d.title||'Scheduled follow-up',
+type:r.contact_type||'call', date:r.due_date,
+isFu:true, stName:d.stages?.name, stWon:d.stages?.is_won, stLost:d.stages?.is_lost, stDelivered:d.stages?.is_delivered};
+(r.due_date<today ? A.fu.missed : A.fu.dueToday).push(it); A.fuItems.push(it);
+}
+const seenP = new Set();
+for(const d of promRows){
+if(seenP.has(d.id) || !nonRep(d) || !d.balance_promised_date) continue; seenP.add(d.id);
+const bal = Number(d.value||0)-Number(d.amount_collected||0); if(!(bal>0)) continue;
+const it = {kind:'promise', key:'p'+d.id, dealId:d.id, creId:d.assigned_to||null, name:d.customers?.name||'No customer',
+phone:d.customers?.phone||'', detail:'Payment promised · '+rs(bal), type:'whatsapp', date:d.balance_promised_date,
+stName:'Payment due', stWon:true, stLost:false, stDelivered:false};
+(d.balance_promised_date<today ? A.prom.missed : A.prom.dueToday).push(it);
+}
+const seenR = new Set();
+for(const d of revRows){
+if(seenR.has(d.id) || !nonRep(d) || !d.revival_date || !d.stages?.is_lost) continue; seenR.add(d.id);
+const it = {kind:'revival', key:'r'+d.id, dealId:d.id, creId:d.assigned_to||null, name:d.customers?.name||'No customer',
+phone:d.customers?.phone||'', detail:d.lost_reason||'Follow up on lost lead', type:'call', date:d.revival_date,
+stName:d.stages?.name||'Lost', stWon:false, stLost:true, stDelivered:false};
+(d.revival_date<today ? A.rev.missed : A.rev.dueToday).push(it);
+}
+const byDate = (a,b)=> a.date<b.date ? -1 : a.date>b.date ? 1 : (a.key<b.key?-1:1);
+[A.fu,A.prom,A.rev].forEach(k=>{ k.missed.sort(byDate); k.dueToday.sort(byDate); });
+const creCount = {};
+A.fu.missed.forEach(i=>{ const k=i.creId||'—'; creCount[k]=(creCount[k]||0)+1; });
+A.byCre = Object.entries(creCount).map(([id,n])=>({id, n, name: id==='—' ? 'Unassigned' : (S.profiles.find(p=>p.id===id)?.full_name||'Unassigned')}))
+.sort((a,b)=>b.n-a.n || (a.name<b.name?-1:1));
+
+/* A2 · Leads needing attention (open Retail/Dealer deals; Repairs never). Headline = distinct deals having at least
+   one of: Not yet contacted / No next step / Hot. "New today" is information only and is not in the headline. */
+const fuDeals = new Set(openFuRows.map(r=>r.deal_id));
+const seenD = new Set(); const stageCount = {};
+for(const d of dealRows){
+if(seenD.has(d.id) || !nonRep(d)) continue; seenD.add(d.id);
+const fs = firstStage[d.pipeline_id]; const isFirst = !!fs && fs.id===d.stage_id;
+if(isFirst) stageCount[d.pipeline_id] = (stageCount[d.pipeline_id]||0)+1;
+const cd = d.created_at ? istDayNum(istDate(d.created_at)) : NaN;
+const tags = [];
+if(!isNaN(cd) && cd===dayN) A.leads.newToday.push(d);
+if(isFirst && !isNaN(cd) && cd<dayN){ tags.push('Not contacted'); A.leads.notContacted.push(d); }
+if(isRetailPipeline(d.pipeline_id) && !isFirst && !isNaN(cd) && (dayN-cd)>=2 && !fuDeals.has(d.id) && !d.estimate_sent_at && !d.estimate_approved_at){ tags.push('No next step'); A.leads.noNext.push(d); }
+if(d.is_hot){ tags.push('Hot'); A.leads.hot.push(d); }
+if(tags.length) A.leads.headline.push({...d, tags});
+}
+A.leads.headline.sort((a,b)=>(a.created_at||'')<(b.created_at||'') ? -1 : 1);
+Object.keys(stageCount).forEach(pid=>A.leads.links.push({pid:Number(pid), stageId:firstStage[pid].id, name:firstStage[pid].name, count:stageCount[pid]}));
+
+/* A3 · Estimates: exactly the existing Global Estimates grouping (Retail only). */
+await loadGlobalEstimates();
+(S.globalEstimates||[]).forEach(d=>{ const g=estimateGroup(d); if(g) A.est[g].push(d); });
+A.est.sent.sort((a,b)=>(a.estimate_sent_at||'')<(b.estimate_sent_at||'') ? -1 : 1);
+A.est.sentValue = A.est.sent.reduce((a,d)=>a+Number(d.value||0),0);
+if(A.est.sent.length && A.est.sent[0].estimate_sent_at) A.est.oldestDays = istDaysSince(A.est.sent[0].estimate_sent_at, today);
+
+/* A4 · Orders: Won, not Delivered, non-Repairs. No dispatch_date = Awaiting Dispatch; dispatch_date = In Transit. */
+const ordMap = new Map();
+ordRows.forEach(d=>{ if(nonRep(d) && !ordMap.has(d.id)) ordMap.set(d.id,d); });
+const awaiting = [...ordMap.values()].filter(d=>!d.dispatch_date);
+const transit = [...ordMap.values()].filter(d=>d.dispatch_date);
+if(awaiting.length){
+const evs = await fetchByIds('stage_events','deal_id,to_stage_id,changed_at','deal_id',awaiting.map(d=>d.id));
+const wonAt = {};
+evs.forEach(e=>{ if(wonIds.has(e.to_stage_id) && (!wonAt[e.deal_id] || e.changed_at>wonAt[e.deal_id])) wonAt[e.deal_id]=e.changed_at; });
+awaiting.forEach(d=>{ d.waitDays = wonAt[d.id] ? istDaysSince(wonAt[d.id], today) : null; });
+awaiting.sort((a,b)=>(b.waitDays??-1)-(a.waitDays??-1));
+const ages = awaiting.map(d=>d.waitDays).filter(n=>n!=null);
+A.ord.oldestDays = ages.length ? Math.max(...ages) : null;
+}
+A.ord.awaiting = awaiting; A.ord.transit = transit;
+
+/* A5 · Pending customer balances: delivered deals with a balance (payments_pending), kept only if the underlying deal's
+   PIPELINE is a known non-Repairs pipeline. Retail/Dealer split is by pipeline, never by customer type. */
+const dm = new Map((await fetchByIds('deals','id,pipeline_id,customer_id','id',ppRows.map(r=>r.deal_id))).map(d=>[d.id,d]));
+const cust = {};
+for(const r of ppRows){
+const d = dm.get(r.deal_id); if(!nonRep(d)) continue;
+const bal = Number(r.balance||0); if(!(bal>0)) continue;
+A.bal.total += bal;
+const age = istDaysSince(r.delivered_at, today);
+if(age!=null){ if(age<=30) A.bal.b30+=bal; else if(age<=60) A.bal.b60+=bal; else A.bal.b60p+=bal; }
+if(isRetailPipeline(d.pipeline_id)) A.bal.retail += bal; else if(isDealerPipeline(d.pipeline_id)) A.bal.dealer += bal;
+const k = d.customer_id || ('n:'+r.customer_name);
+if(!cust[k]) cust[k] = {id:d.customer_id||null, name:r.customer_name||'No customer', bal:0};
+cust[k].bal += bal;
+}
+const custList = Object.values(cust).sort((a,b)=>b.bal-a.bal);
+A.bal.customers = custList.length; A.bal.top = custList.slice(0,3);
+A.bal.promiseDue = A.prom.missed.length + A.prom.dueToday.length;
+}
+
+const oaAgo = n => n==null ? '—' : n===0 ? 'today' : n+' day'+(n===1?'':'s');
+function oaHead(tab,title){ return `<div class="oa-head" data-tab="${tab}"><span class="t">${esc(title)}</span><span class="sub">${ic('chev')}</span></div>`; }
+function oaFollowups(A){
+const missed=A.fu.missed.length, due=A.fu.dueToday.length;
+const kindLine=(label,k)=>`<div class="oa-line"><span class="grow">${label}</span><span><b>${k.missed.length}</b> overdue · <b>${k.dueToday.length}</b> due today</span></div>`;
+const cre = A.byCre.slice(0,3).map(c=>`${esc(c.name)} <b>${c.n}</b>`).join(' · ');
+const all = [...A.fu.missed,...A.prom.missed,...A.rev.missed].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.key<b.key?-1:1))
+.concat([...A.fu.dueToday,...A.prom.dueToday,...A.rev.dueToday].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.key<b.key?-1:1)));
+const row = i => {
+const isMissed = i.date<A.today;
+const kind = i.kind==='followup'?'Follow-up':i.kind==='promise'?'Payment promised':'Revival';
+const pill = isMissed ? (i.kind==='followup'?'Missed':'Overdue') : 'Due today';
+return `<div class="trow" data-deal="${i.dealId}" data-oakind="${i.kind}" style="cursor:pointer">
+<div class="row"><div class="grow"><div class="name">${esc(i.name)}</div><div class="sub">${esc(i.detail)}</div></div>
+<div style="text-align:right"><span class="tag ${isMissed?'due':''}">${pill}</span><div class="sub" style="margin-top:4px">${kind} · ${day(i.date)}</div></div></div>
+<div class="row" style="margin-top:9px;gap:6px">
+${i.phone?`<a class="iact call" href="${telLink(i.phone)}" title="Call">${ic('call')}</a>`:''}
+${i.phone?`<a class="iact wa" href="${waLink(i.phone)}" title="WhatsApp" target="_blank" rel="noopener">${ic('wa')}</a>`:''}
+${i.kind==='followup'?`<button class="iact done" data-oadone="${i.fuId}" title="Mark done">${ic('check')}</button>`:''}
+</div></div>`;
+};
+return `<div class="oa-card" data-oa="fu">${oaHead('followups','Follow-ups')}
+<div class="oa-big"><span class="v ${missed?'alert':''}" data-k="missed">${missed}</span><span class="l">Missed follow-ups</span></div>
+<div class="oa-line"><span class="grow">Due today</span><b data-k="due">${due}</b></div>
+${kindLine('Payment promises',A.prom)}${kindLine('Revival reminders',A.rev)}
+${cre?`<div class="oa-line"><span class="grow">Missed by CRE</span><span>${cre}</span></div>`:''}
+<div class="oa-rows">${all.length?all.slice(0,5).map(row).join(''):'<div class="oa-note">Nothing missed or due today.</div>'}</div></div>`;
+}
+function oaLeads(A){
+const L=A.leads, h=L.headline;
+const retailN = h.filter(d=>isRetailPipeline(d.pipeline_id)).length, dealerN = h.filter(d=>isDealerPipeline(d.pipeline_id)).length;
+const nc = pf => L.notContacted.filter(d=>pf(d.pipeline_id)).length;
+const row = d => `<div class="oa-row" data-deal="${d.id}"><div class="grow"><div class="name">${esc(d.customers?.name||'No customer')}</div><div class="sub">${esc(d.title||'')} · added ${day(d.created_at)}</div></div><div>${d.tags.map(t=>`<span class="tag ${t==='Hot'?'due':''}" style="margin-left:4px">${t}</span>`).join('')}</div></div>`;
+const links = L.links.map(l=>`<button class="oa-link" data-kpipipe="${l.pid}" data-kpistage="${l.stageId}">View ${esc(l.name)} (${l.count})</button>`).join('');
+return `<div class="oa-card" data-oa="leads"><div class="oa-head"><span class="t">Leads needing attention</span></div>
+<div class="oa-big"><span class="v ${h.length?'alert':''}" data-k="headline">${h.length}</span><span class="l">Leads</span></div>
+<div class="oa-line"><span class="grow">Retail · Dealer</span><span><b>${retailN}</b> · <b>${dealerN}</b></span></div>
+<div class="oa-line"><span class="grow">New today (information)</span><b data-k="newToday">${L.newToday.length}</b></div>
+<div class="oa-line"><span class="grow">Not yet contacted</span><span><b data-k="notContacted">${L.notContacted.length}</b> <span class="oa-note">(Retail ${nc(isRetailPipeline)} · Dealer ${nc(isDealerPipeline)})</span></span></div>
+<div class="oa-line"><span class="grow">No next step</span><b data-k="noNext">${L.noNext.length}</b></div>
+<div class="oa-line"><span class="grow">Hot</span><b data-k="hot">${L.hot.length}</b></div>
+<div class="oa-rows">${h.length?h.slice(0,3).map(row).join(''):'<div class="oa-note">No leads need attention.</div>'}</div>
+${links?`<div class="oa-rows">${links}</div>`:''}</div>`;
+}
+function oaEstimates(A){
+const E=A.est;
+const row = d => `<div class="oa-row" data-globalest="${d.id}"><div class="grow"><div class="name">${esc(d.customers?.name||'No customer')}</div><div class="sub">${esc(d.title||'')} · sent ${day(d.estimate_sent_at)}</div></div><span class="sub">${oaAgo(istDaysSince(d.estimate_sent_at,A.today))}</span></div>`;
+return `<div class="oa-card" data-oa="est">${oaHead('estimates','Estimates')}
+<div class="oa-big"><span class="v" data-k="awaiting">${E.sent.length}</span><span class="l">Awaiting Decision</span></div>
+<div class="oa-line"><span class="grow">Oldest waiting</span><b data-k="oldest">${E.sent.length?oaAgo(E.oldestDays):'—'}</b></div>
+<div class="oa-line"><span class="grow">Approved / Payment Pending</span><b data-k="approved">${E.approved.length}</b></div>
+<div class="oa-line"><span class="grow">Draft / Not Sent</span><b data-k="draft">${E.draft.length}</b></div>
+${E.sent.length?`<div class="oa-note">Estimate value awaiting decision ${rs(E.sentValue)} (quoted, not sales)</div>`:''}
+<div class="oa-rows">${E.sent.length?E.sent.slice(0,3).map(row).join(''):'<div class="oa-note">No estimates awaiting a decision.</div>'}</div></div>`;
+}
+function oaOrders(A){
+const O=A.ord;
+const cnt=(list,pf)=>list.filter(d=>pf(d.pipeline_id)).length;
+const row = d => `<div class="oa-row" data-tab="dispatch"><div class="grow"><div class="name">${esc(d.customers?.name||'No customer')}</div><div class="sub">${esc(d.title||'')} · ${isDealerPipeline(d.pipeline_id)?'Dealer':'Retail'}</div></div><span class="sub">${d.waitDays==null?'—':oaAgo(d.waitDays)}</span></div>`;
+return `<div class="oa-card" data-oa="ord">${oaHead('dispatch','Orders')}
+<div class="oa-big"><span class="v" data-k="awaiting">${O.awaiting.length}</span><span class="l">Awaiting Dispatch</span></div>
+<div class="oa-line"><span class="grow">Retail · Dealer</span><span><b data-k="awRetail">${cnt(O.awaiting,isRetailPipeline)}</b> · <b data-k="awDealer">${cnt(O.awaiting,isDealerPipeline)}</b></span></div>
+<div class="oa-line"><span class="grow">In Transit</span><b data-k="transit">${O.transit.length}</b></div>
+<div class="oa-line"><span class="grow">Oldest waiting</span><b data-k="oldest">${O.awaiting.length?oaAgo(O.oldestDays):'—'}</b></div>
+<div class="oa-rows">${O.awaiting.length?O.awaiting.slice(0,3).map(row).join(''):'<div class="oa-note">Nothing waiting to be dispatched.</div>'}</div></div>`;
+}
+function oaBalances(A){
+const B=A.bal;
+const row = c => `<div class="oa-row" ${c.id?`data-customer="${c.id}"`:''}><div class="grow"><div class="name">${esc(c.name)}</div></div><span class="amt" style="font-size:14px;color:#E8899E">${rs(c.bal)}</span></div>`;
+return `<div class="oa-card" data-oa="bal">${oaHead('dues','Pending balances')}
+<div class="oa-big"><span class="v" data-k="total">${rs(B.total)}</span><span class="l">${B.customers} customer${B.customers===1?'':'s'}</span></div>
+<div class="oa-line"><span class="grow">0–30 days</span><b data-k="b30">${rs(B.b30)}</b></div>
+<div class="oa-line"><span class="grow">31–60 days</span><b data-k="b60">${rs(B.b60)}</b></div>
+<div class="oa-line"><span class="grow">Over 60 days</span><b data-k="b60p">${rs(B.b60p)}</b></div>
+<div class="oa-line"><span class="grow">Retail · Dealer</span><span><b data-k="retail">${rs(B.retail)}</b> · <b data-k="dealer">${rs(B.dealer)}</b></span></div>
+<div class="oa-line"><span class="grow">Promised payment due</span><b data-k="promiseDue">${B.promiseDue}</b></div>
+<div class="oa-rows">${B.top.length?B.top.map(row).join(''):'<div class="oa-note">No pending customer balances.</div>'}</div></div>`;
+}
+function ownerAttentionBand(){
+const A = S.ownerAttn;
+if(!A) return '';
+const head = `<h2 id="followups-anchor" style="margin-top:0">Needs attention · today</h2>`;
+if(A.error) return head+`<div class="card"><div class="empty">Could not load this section.<br><span class="sub">${esc(A.error)}</span></div></div>`;
+const note = A.failClosed ? `<div class="oa-note" style="margin:-4px 0 9px">Repairs pipeline could not be resolved — these figures are held at zero until it can.</div>` : '';
+return head+note+`<div class="oa-grid">${oaFollowups(A)}${oaLeads(A)}${oaEstimates(A)}${oaOrders(A)}${oaBalances(A)}</div>`;
+}
+
 async function loadTab(){
 S.err='';
 try{
@@ -633,6 +919,7 @@ if(pipeR.error) throw pipeR.error;
 S.dashPipelineValue = (pipeR.data||[]).reduce((a,b)=>a+Number(b.value||0),0);
 await loadChaseSources();
 await loadDashboardShared();
+await loadOwnerAttention();
 }
 if(S.tab==='mydash' || S.tab==='followups' || S.tab==='myperf'){
 const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
@@ -647,6 +934,7 @@ await loadDashboardShared();
 // Estimate query Global Estimates itself uses, once, here -- one extra
 // query, not three, and cdKpis() reads from this exact array.
 if(S.tab==='mydash') await loadGlobalEstimates();
+if(S.tab==='followups' && isOwner()) await loadOwnerAttention();
 }
 if(S.tab==='dues'){
 const { data, error } = await sb.from('customer_balance_summary').select('*');
@@ -1032,6 +1320,7 @@ return S.pipelines.find(p=>p.id===pipelineId)?.name==='Retail Sales';
 function estimateGroup(d){
 if(!isRetailPipeline(d.pipeline_id)) return null;
 if(d.stages?.is_won) return null;
+if(d.stages?.is_lost && isOwner()) return null;
 if(d.estimate_approved_at) return 'approved';
 if(d.estimate_sent_at) return 'sent';
 if(d.estimate_started_at) return 'draft';
@@ -1950,6 +2239,7 @@ return `<div class="row" style="align-items:center;gap:16px">
 
 /* ── dashboard v2 shared helpers ── */
 function chaseList(){
+if(isOwner()) return ownerChaseList();
 const items = [];
 S.followUps.forEach(f=>items.push({
 type:f.contact_type, date:f.due_date, dealId:f.deal_id,
@@ -2274,7 +2564,7 @@ ${i.isFu?`<button data-donefu="${i.fuId}" style="background:rgba(232,163,61,.16)
 }
 
 function cdFollowupsPanel(limit){
-const today = new Date().toISOString().slice(0,10);
+const today = isOwner() ? istDate() : new Date().toISOString().slice(0,10);
 const all = chaseList();
 const shown = limit ? all.slice(0,limit) : all;
 const rows = shown.length ? shown.map(i=>cdFollowRow(i,today)).join('') : `<div class="cd-empty">
@@ -2346,6 +2636,7 @@ ${cdKpis()}
 }
 
 function viewFollowupsTab(){
+if(isOwner() && (S.ownerAttn?.failClosed || S.ownerAttn?.error)) return `<h2 style="margin-top:0">Follow-ups</h2><div class="oa-note">Follow-ups are held back until the Repairs pipeline can be resolved (or the data reloads).</div>`;
 return `<h2 style="margin-top:0">Follow-ups</h2>${cdFollowupsPanel(null)}`;
 }
 
@@ -2479,10 +2770,8 @@ const products = S.dashProducts.length ? S.dashProducts.map(m=>`<div class="card
 </div>`).join('') : `<div class="empty">No sales recorded yet.</div>`;
 
 return `${dashHero()}
-${statRow()}
+${ownerAttentionBand()}
 ${quickActions()}
-<h2 id="followups-anchor">Today's follow-ups · whole team</h2>
-${followupsTable()}
 <div class="cols3">
 ${salesColumn('Team sales · this month')}
 ${pipelineColumn('Team pipeline')}
@@ -2934,8 +3223,10 @@ return d;
 
 async function markFollowupDone(id){
 const f = S.followUps.find(x=>x.id===id);
+const oi = f ? null : (S.ownerAttn?.fuItems||[]).find(x=>String(x.fuId)===String(id));
 await sb.from('follow_ups').update({done:true, done_at:new Date().toISOString()}).eq('id',id);
 if(f) await logActivity('followup_completed', f.deal_id, f.deals?.customers?.name || '');
+else if(oi) await logActivity('followup_completed', oi.dealId, oi.name || '');
 loadTab();
 }
 
@@ -2990,6 +3281,7 @@ document.querySelectorAll('[data-retaildeliver]').forEach(b=>b.onclick=()=>markR
 document.querySelectorAll('.qa[data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; S.deal=null; S.stage=null; loadTab(); });
 document.querySelectorAll('[data-chase]').forEach(b=>b.onclick=()=>{ S.chaseTab=b.dataset.chase; render(); });
 document.querySelectorAll('[data-donefu]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); markFollowupDone(b.dataset.donefu); });
+document.querySelectorAll('[data-oadone]').forEach(b=>b.onclick=async(e)=>{ e.stopPropagation(); const it=(S.ownerAttn?.fuItems||[]).find(x=>String(x.fuId)===b.dataset.oadone); await sb.from('follow_ups').update({done:true, done_at:new Date().toISOString()}).eq('id',b.dataset.oadone); if(it) await logActivity('followup_completed', it.dealId, it.name||''); loadTab(); });
 document.querySelectorAll('[data-savetarget]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); saveTarget(b.dataset.savetarget,b); });
 const bell=document.getElementById('bellbtn'); if(bell) bell.onclick=()=>{ const a=document.getElementById('followups-anchor'); if(a) a.scrollIntoView({behavior:'smooth'}); else if(!isOwner()){ S.tab='followups'; S.deal=null; loadTab(); } };
 const gs=document.getElementById('gsearch');
