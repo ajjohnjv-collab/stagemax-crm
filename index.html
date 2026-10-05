@@ -540,9 +540,9 @@ S.myPromises = (promR.data||[]).filter(d=>isNonRepairsPipeline(d.pipeline_id) &&
 async function loadDashboardShared(){
 const today = new Date().toISOString().slice(0,10);
 const mStart = monthStart();
-// CRE sales-lead metrics must not be distorted by repair jobs: leave the Repairs pipeline out of the
-// open-deal set and out of the "Deals won" stage set (Repaired/Returned are is_won stages).
-const dashRepId = isOwner() ? null : repairsPipelineId();
+// Sales-lead metrics (CRE and Owner/Admin dashboards) must not be distorted by repair jobs: leave the Repairs
+// pipeline out of the open-deal set and out of the "Deals won" stage set (Repaired/Returned are is_won stages).
+const dashRepId = repairsPipelineId();
 let openQ = sb.from('deals').select('*, customers(name,phone,district), stages(name,is_won,is_lost,is_delivered,pipeline_id,sort_order), pipelines(name,sort_order)')
 .order('created_at',{ascending:false}).limit(300);
 if(dashRepId!=null) openQ = openQ.neq('pipeline_id', dashRepId);
@@ -553,12 +553,12 @@ sb.from('activity_log').select('*, deals(title, customers(name))').order('create
 sb.from('cre_performance_daily').select('*').gte('day', mStart),
 sb.from('stage_events').select('deal_id,to_stage_id,changed_at').gte('changed_at', mStart)
 ]);
-if(openR.error) throw openR.error; S.openDeals = openR.data||[];
+if(openR.error) throw openR.error; S.openDeals = (openR.data||[]).filter(d=>isNonRepairsPipeline(d.pipeline_id));
 if(fuR.error) throw fuR.error; S.followUps = fuR.data||[];
 if(actR.error) throw actR.error; S.activity = actR.data||[];
 if(mpR.error) throw mpR.error; S.monthPerf = mpR.data||[];
 if(weR.error) throw weR.error;
-const wonStageIds = new Set(S.stages.filter(s=>s.is_won && (dashRepId==null || s.pipeline_id!==dashRepId)).map(s=>s.id));
+const wonStageIds = new Set(S.stages.filter(s=>s.is_won && isNonRepairsPipeline(s.pipeline_id)).map(s=>s.id));
 S.monthWonIds = [...new Set((weR.data||[]).filter(r=>wonStageIds.has(r.to_stage_id)).map(r=>r.deal_id))];
 }
 
@@ -607,7 +607,7 @@ const pipeRepId = repairsPipelineId();
 const [teamR,trendR,srcR,prodR,duesR,pipeR] = await Promise.all([
 sb.from('cre_performance_daily').select('*').gte('day', since),
 sb.from('cre_performance_daily').select('day,value_delivered,money_collected').gte('day', trendSince),
-sb.from('deals').select('source_id').gte('created_at', since),
+(pipeRepId!=null ? sb.from('deals').select('source_id').gte('created_at', since).neq('pipeline_id', pipeRepId) : sb.from('deals').select('source_id').in('stage_id', [-1])),
 sb.from('product_movement').select('*').limit(5),
 sb.from('customer_balance_summary').select('total_balance'),
 (pipeRepId!=null ? sb.from('deals').select('value').in('stage_id', openIds.length?openIds:[-1]).neq('pipeline_id', pipeRepId) : sb.from('deals').select('value').in('stage_id', [-1]))
