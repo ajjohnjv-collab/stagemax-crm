@@ -49,6 +49,350 @@ nav button.on{border-top-color:transparent;border-left-color:var(--amber)}
 .fab{left:216px;right:auto}
 }
 
+/* ── Owner redesign · Phase 1: shell + tokens + sidebar (owner-only; body.owner-ui is set by shell() and cleared for CRE/login) ── */
+body.owner-ui{--ink:#0B0D10;--panel:#171A21;--panel-2:#1E222B;--line:#262B36;--paper:#F2F1EE;--muted:#8A93A6;--accent:#FF7A29;--accent-2:#FFB35C}
+body.owner-ui .mark span,body.owner-ui .oa-link{color:var(--accent)}
+body.owner-ui input:focus,body.owner-ui select:focus{outline-color:var(--accent)}
+body.owner-ui .btn:not(.ghost),body.owner-ui .avatar,body.owner-ui .fab{background:var(--accent)}
+body.owner-ui header{background:rgba(11,13,16,.92)}
+body.owner-ui nav{background:var(--panel)}
+body.owner-ui nav button.on{border-top-color:var(--accent)}
+body.owner-ui .ow-brand,body.owner-ui .ow-grp,body.owner-ui .ow-title,body.owner-ui .ow-date,body.owner-ui .ow-av,body.owner-ui nav button svg{display:none}
+@media (min-width:860px){
+body.owner-ui{--ow-side:216px}
+body.owner-ui header{position:fixed;top:0;left:var(--ow-side);right:0;height:56px;border-bottom:1px solid var(--line)}
+body.owner-ui .hbar{max-width:none;height:56px;padding:0 28px;gap:14px}
+body.owner-ui .hbar .mark{display:none}
+body.owner-ui .ow-title{display:block;font:700 18px Archivo;letter-spacing:.01em;color:var(--paper);white-space:nowrap}
+body.owner-ui .ow-date{display:inline-flex;align-items:center;margin-left:6px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font:600 11.5px Archivo;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
+body.owner-ui .who{display:flex;align-items:center;gap:10px;margin-left:auto;padding:5px 6px 5px 6px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font:600 12.5px Archivo;color:var(--paper)}
+body.owner-ui .ow-av{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#1A1206;font:700 12px Archivo Narrow;flex:none}
+body.owner-ui .who button{margin-left:0;padding:4px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);text-decoration:none;font:600 11.5px Archivo;background:var(--panel-2)}
+body.owner-ui .who button:hover{color:var(--paper);border-color:var(--muted)}
+body.owner-ui nav{top:0;bottom:0;left:0;right:auto;width:var(--ow-side);padding:0 10px 16px;overflow-y:auto;background:#12141A;border-right:1px solid var(--line);flex-direction:column;gap:2px}
+body.owner-ui .ow-brand{display:flex;align-items:center;gap:10px;height:56px;margin:0 -10px 10px;padding:0 20px;border-bottom:1px solid var(--line);font:700 17px Archivo Narrow;letter-spacing:.14em;text-transform:uppercase;color:var(--paper);order:0;flex:none}
+body.owner-ui .ow-brand span{color:var(--accent)}
+body.owner-ui .ow-grp{display:block;margin:14px 10px 4px;font:700 10px Archivo;letter-spacing:.16em;text-transform:uppercase;color:#5E667A;flex:none}
+body.owner-ui nav button{display:flex;align-items:center;gap:11px;flex:none;width:100%;padding:9px 12px;border:0;border-radius:9px;text-align:left;font:600 13.5px Archivo;letter-spacing:0;text-transform:none;color:#B7BFCF;transition:background .15s,color .15s}
+body.owner-ui nav button svg{display:block;flex:none;width:18px;height:18px}
+body.owner-ui nav button:hover{background:var(--panel-2);color:var(--paper)}
+body.owner-ui nav button.on{background:rgba(255,122,41,.13);color:var(--accent-2);box-shadow:inset 3px 0 0 var(--accent)}
+body.owner-ui nav button[data-tab="new"]{order:1;margin:0 0 4px;justify-content:center;background:var(--accent);color:#1A1206;font-weight:700;box-shadow:0 4px 14px -4px rgba(255,122,41,.55)}
+body.owner-ui nav button[data-tab="new"]:hover{background:var(--accent-2);color:#1A1206}
+body.owner-ui nav button[data-tab="new"].on{background:var(--accent);color:#1A1206;box-shadow:0 4px 14px -4px rgba(255,122,41,.55),inset 0 0 0 2px var(--accent-2)}
+body.owner-ui .ow-grp.g1{order:10}body.owner-ui nav button[data-tab="dashboard"]{order:11}
+body.owner-ui .ow-grp.g2{order:20}body.owner-ui nav button[data-tab="pipeline"]{order:21}body.owner-ui nav button[data-tab="customers"]{order:22}body.owner-ui nav button[data-tab="products"]{order:23}
+body.owner-ui .ow-grp.g3{order:30}body.owner-ui nav button[data-tab="money"]{order:31}body.owner-ui nav button[data-tab="dues"]{order:32}
+body.owner-ui .ow-grp.g4{order:40}body.owner-ui nav button[data-tab="dispatch"]{order:41}body.owner-ui nav button[data-tab="moving"]{order:42}body.owner-ui nav button[data-tab="repairs"]{order:43}
+body.owner-ui .wrap{max-width:1480px;margin-left:max(var(--ow-side),calc(50vw - 632px));margin-right:auto;padding:80px 32px 48px}
+body.owner-ui .wrap.ow-narrow{max-width:940px;margin-right:auto;margin-left:max(var(--ow-side),calc(50vw - 632px))}
+body.owner-ui .fab{left:calc(var(--ow-side) + 16px)}
+}
+
+/* ── Owner redesign · Phase 2: Needs Attention command layer (replaces the .oa-grid card layout; owner dashboard only) ── */
+.od-head{display:flex;align-items:center;gap:14px;margin:0 0 12px}
+.od-head h2{margin:0}
+.od-legend{margin-left:auto;display:flex;gap:14px;font:600 11px Archivo;color:var(--muted);white-space:nowrap}
+.od-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.od-deck{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px;align-items:start}
+.od-g{display:contents}
+.od-tile{order:1;grid-column:span 1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px 11px;display:flex;flex-direction:column;gap:3px;min-width:0;align-self:stretch}
+.od-tile.t5{grid-column:span 2}
+.od-tile[data-tab]{cursor:pointer;transition:background .15s,border-color .15s}
+.od-tile[data-tab]:hover{background:var(--panel-2);border-color:#394055}
+.od-tl{display:flex;align-items:center;gap:7px}
+.od-lab{flex:1;min-width:0;font:700 10.5px Archivo;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.od-dot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--muted)}
+.od-num{margin-top:4px;font:700 34px/1 'Archivo Narrow',Archivo,sans-serif;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.od-num.sm{font-size:28px;padding-top:3px}
+.od-ctx{font-size:12px;color:var(--muted);line-height:1.35}
+.od-ctx b{color:var(--paper);font-weight:600}
+.tone-rose .od-num{color:#E8899E}.tone-rose .od-dot{background:#E8899E}
+.tone-amber .od-num{color:var(--amber)}.tone-amber .od-dot{background:var(--amber)}
+.tone-green .od-num{color:#9BC489}.tone-green .od-dot{background:#9BC489}
+.od-colh{order:2;grid-column:span 2;display:flex;align-items:center;gap:8px;margin-top:6px;font:700 11px Archivo;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.od-colh.w{order:3}
+.od-colh .pip{width:6px;height:6px;border-radius:2px;background:var(--accent,#FF7A29)}
+.od-colh .n{font:600 11.5px Archivo;letter-spacing:0;text-transform:none;color:var(--muted)}
+.od-colh .go{margin-left:auto;font:600 12px Archivo;letter-spacing:0;text-transform:none;color:var(--accent,#FF7A29);cursor:pointer}
+.od-panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;min-width:0}
+.od-do{order:2;grid-column:span 2;display:flex;flex-direction:column;align-self:start;padding:6px}
+.od-chips{display:flex;flex-wrap:wrap;gap:4px 14px;padding:6px 8px 4px;font-size:12px;color:var(--muted)}
+.od-chips b{color:var(--paper);font-weight:600;margin-left:3px}
+.od-chips .nt{font-size:11.5px}
+.od-chips .z{opacity:.55}
+.od-rows{display:flex;flex-direction:column;gap:0}
+.od-do .od-rows .trow{margin:0;background:none;border:0;border-radius:8px;padding:8px 8px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"st nm ra" "st sb ra";column-gap:11px;row-gap:1px;align-items:center}
+.od-do .od-rows .trow+.trow{border-top:1px solid var(--line);border-radius:0}
+.od-do .od-rows .trow:hover{background:var(--panel-2)}
+.od-st{font:700 10px Archivo;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;white-space:nowrap;min-width:74px;text-align:center}
+.od-st.miss{background:rgba(194,80,107,.16);color:#E8899E}
+.od-st.due{background:rgba(232,163,61,.16);color:var(--amber)}
+.od-st{grid-area:st;align-self:center}
+.od-rn{grid-area:nm}
+.od-rs{grid-area:sb}
+.od-ra{grid-area:ra}
+.od-rn{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.od-rn span{font-weight:400;color:var(--muted);margin-left:3px;font-size:13px}
+.od-rs{font-size:11.5px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.od-ra{display:flex;gap:5px}
+.od-ra .iact{width:28px;height:28px}
+.od-ra .iact svg{width:15px;height:15px}
+.od-empty{display:flex;align-items:center;gap:9px;padding:14px 10px;font-size:13.5px;color:var(--muted)}
+.od-empty .ok{color:#9BC489;display:flex}
+.od-more{margin-top:auto;padding:9px 10px 5px;font:600 12px Archivo;color:var(--accent,#FF7A29);cursor:pointer}
+.od-w{order:3;grid-column:span 2;padding:11px 13px 10px;display:flex;flex-direction:column;gap:6px}
+.od-wh{display:flex;align-items:center;gap:9px;min-width:0}
+.od-wh[data-tab]{cursor:pointer}
+.od-wt{font:700 12px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--paper);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.od-wn{font:700 11.5px Archivo;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.od-wn.rose{background:rgba(194,80,107,.16);color:#E8899E}
+.od-wn.amber{background:rgba(232,163,61,.16);color:var(--amber)}
+.od-wn.green{background:rgba(110,158,92,.16);color:#9BC489}
+.od-wh .sub{margin:0;display:flex;color:var(--muted)}
+.od-w .od-chips{padding:0}
+.od-w .oa-rows{gap:4px;margin-top:2px}
+.od-w .oa-row{padding:6px 9px;background:var(--panel-2);border-radius:8px}
+.od-w .oa-row:hover{background:#252A35}
+.od-w .oa-row .grow{display:flex;align-items:baseline;gap:9px;min-width:0;overflow:hidden}
+.od-w .oa-row .name{font-size:13.5px;flex:none;max-width:50%}
+.od-w .oa-row .grow .sub{font-size:11.5px;margin:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.od-w .oa-row>.sub{flex:none;white-space:nowrap;margin:0;font-size:11.5px}
+.od-w .oa-link{font-size:12px;font-weight:600}
+.od-w.quiet{padding:9px 13px 8px;gap:4px}
+.od-w .oa-note{font-size:11.5px;color:var(--muted)}
+.od-age{display:flex;height:5px;border-radius:3px;overflow:hidden;background:var(--panel-2);gap:2px}
+.od-age i{display:block;height:100%}
+@media (min-width:760px){
+.od-deck{grid-template-columns:repeat(10,minmax(0,1fr))}
+.od-tile,.od-tile.t5{grid-column:span 2}
+.od-colh,.od-do{grid-column:span 10}
+.od-w{grid-column:span 5}
+}
+@media (min-width:1180px){
+.od-deck{grid-template-rows:auto auto auto auto auto auto 1fr}
+.od-colh.d{grid-column:1/span 6;grid-row:2}
+.od-do{grid-column:1/span 6;grid-row:3/span 5}
+.od-colh.w{grid-column:7/span 4;grid-row:2}
+.od-w{grid-column:7/span 4}
+.od-w.w-leads{grid-row:3}.od-w.w-est{grid-row:4}.od-w.w-ord{grid-row:5}.od-w.w-bal{grid-row:6}
+}
+
+/* ── Owner Dashboard · Phase B: Money & Sales + Pipeline (owner-only; Phase 1/2 tokens, no new palette) ── */
+.pb-head{flex-wrap:wrap;row-gap:8px}
+.pb-per{margin-left:auto;display:flex;gap:4px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.pb-chip{font:600 12px Archivo;color:var(--muted);padding:6px 11px;border-radius:7px;white-space:nowrap;background:none;border:0;cursor:pointer}
+.pb-chip:hover{color:var(--paper)}
+.pb-chip.on{background:var(--paper);color:var(--ink)}
+.pb-scope{font-size:12px;color:var(--muted);margin:-2px 0 11px;line-height:1.45}
+.pb-scope b{color:var(--paper);font-weight:600}
+.pb-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.pb-tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px 11px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.pb-tile .od-num{font-size:30px}
+.pb-tile .od-tl{min-height:21px;flex-wrap:wrap;row-gap:3px}
+.pb-tile .od-lab{flex:1 1 auto;overflow:visible}
+.pb-tile .pb-badge{order:3}
+.pb-tile{position:relative}
+.pb-tile .od-dot{position:absolute;top:14px;right:14px}
+.pb-tile .od-tl{padding-right:16px}
+@media (max-width:759px){.pb-tile[data-pb=delivered] .od-tl,.pb-tile[data-pb=avg] .od-tl{min-height:38px;align-items:flex-start}}
+@media (min-width:760px) and (max-width:1279px){.pb-tile .od-tl{min-height:38px;align-items:flex-start}}
+.pb-tile .od-ctx{min-height:32px}
+.pb-tile .od-ctx [data-pbk=rev]{white-space:nowrap}
+.pb-badge{font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:var(--panel-2);color:var(--muted);white-space:nowrap}
+.pb-sec{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 13px;margin-bottom:10px;font-size:12.5px;color:var(--muted)}
+.pb-sec[data-tab]{cursor:pointer}
+.pb-sec[data-tab]:hover{background:var(--panel-2)}
+.pb-sec b{color:var(--paper);font-weight:600}
+.pb-sec .pb-sl{font:700 10.5px Archivo;letter-spacing:.12em;text-transform:uppercase}
+.pb-legacy{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);margin:0 0 14px;padding:0 2px}
+.pb-legacy b{color:var(--paper);font-weight:600}
+.pb-legacy i{font-style:normal;color:var(--amber)}
+.pb-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:6px;align-items:start}
+.pb-panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.pb-ph{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.pb-pt{font:700 11.5px Archivo;letter-spacing:.12em;text-transform:uppercase;color:var(--paper);flex:1;min-width:0}
+.pb-pn{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.pb-foot{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.45}
+.pb-foot b{color:var(--paper);font-weight:600}
+.pb-prow{padding:7px 0}
+.pb-prow+.pb-prow{border-top:1px solid var(--line)}
+.pb-prow .top{display:flex;align-items:baseline;gap:10px}
+.pb-prow .nm{font-weight:600;font-size:13.5px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-prow .nm span{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.pb-prow .qt{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.pb-prow .vl{font:700 14px 'Archivo Narrow',Archivo,sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pb-prow .bar{height:4px;margin-top:5px}
+.pb-prow.mut .nm{color:var(--muted);font-weight:500}
+.pb-prow.mut .bar i{background:var(--line)}
+.pb-fun+.pb-fun{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.pb-fh{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.pb-fh b{font-size:13.5px}
+.pb-fh span{font-size:11.5px;color:var(--muted)}
+.pb-fr{display:grid;grid-template-columns:minmax(84px,.9fr) minmax(40px,1.4fr) 34px minmax(0,auto);gap:9px;align-items:center;padding:5px 6px;margin:0 -6px;border-radius:7px;font-size:13px}
+.pb-fr[data-kpipipe]{cursor:pointer}
+.pb-fr[data-kpipipe]:hover{background:var(--panel-2)}
+.pb-fr .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-fr .bar{margin:0;height:6px}
+.pb-fr .bar i{background:var(--accent,#FF7A29)}
+.pb-fr .ct{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.pb-fr .vl{text-align:right;color:var(--muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pb-fr.z{opacity:.55}
+.pb-ft{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:5px;font-size:12px;color:var(--muted)}
+.pb-ft b{color:var(--paper);font-weight:600;margin-left:3px}
+.pb-od .trow{margin:0;background:none;border:0;border-radius:8px;padding:8px 6px;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:3px;align-items:center;cursor:pointer}
+.pb-od .trow+.trow{border-top:1px solid var(--line);border-radius:0}
+.pb-od .trow:hover{background:var(--panel-2)}
+.pb-od .on{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-od .os{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;gap:6px;align-items:center}
+.pb-od .ov{grid-row:1/span 2;grid-column:2;text-align:right}
+.pb-od .ov .amt{font-size:14px;display:block}
+.pb-od .ov small{font-size:10.5px;color:var(--muted);letter-spacing:.04em}
+.pb-od .tag{padding:2px 6px;font-size:9.5px}
+.pb-err{font-size:13px;color:var(--muted)}
+@media (min-width:760px){
+.pb-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pb-grid .pb-wide{grid-column:1/-1}
+}
+@media (min-width:1180px){
+.pb-grid{grid-template-columns:minmax(0,5fr) minmax(0,5fr)}
+.pb-tile .od-num{font-size:34px}
+}
+
+/* ── Owner Dashboard · Phase C: Service centre band (owner-only, operational — never sales; Phase 1/2/B tokens only) ── */
+.sc-band{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px 12px;margin:0 0 12px;min-width:0}
+.sc-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.sc-t{font:700 11.5px Archivo;letter-spacing:.12em;text-transform:uppercase;color:var(--paper)}
+.sc-n{font-size:11.5px;color:var(--muted)}
+.sc-go{margin-left:auto;font:600 12px Archivo;color:var(--accent,#FF7A29);cursor:pointer;background:none;border:0;padding:2px 0}
+.sc-row{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.sc-cell{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px 9px;min-width:0;display:flex;flex-direction:column;gap:2px;position:relative}
+.sc-cell[data-tab]{cursor:pointer}
+.sc-cell[data-tab]:hover{border-color:#394055}
+.sc-lab{font:700 10px Archivo;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);padding-right:14px;line-height:1.25}
+.sc-num{margin-top:auto;font:700 26px/1.05 'Archivo Narrow',Archivo,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sc-sub{font-size:11.5px;color:var(--muted);line-height:1.35}
+.sc-sub b{color:var(--paper);font-weight:600}
+.sc-dot{position:absolute;top:11px;right:11px;width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.sc-cell.amber .sc-num{color:var(--amber)}.sc-cell.amber .sc-dot{background:var(--amber)}
+.sc-cell.rose .sc-num{color:#E8899E}.sc-cell.rose .sc-dot{background:#E8899E}
+.sc-cell.green .sc-dot{background:#9BC489}
+.sc-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sc-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;background:var(--panel);gap:2px;margin:5px 0 4px}
+.sc-bar i{display:block;background:var(--accent,#FF7A29);min-width:3px}
+.sc-bar i.rdy{background:#9BC489}
+.sc-leg{display:flex;flex-wrap:wrap;gap:1px 10px;font-size:11.5px;color:var(--muted)}
+.sc-leg b{color:var(--paper);font-weight:600}
+.sc-stuck{margin-top:8px;display:flex;flex-direction:column;gap:2px}
+.sc-sr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13px}
+.sc-sr:hover{background:var(--panel-2)}
+.sc-sr .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-sr .st{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-sr .ag{grid-row:1/span 2;grid-column:2;font:700 14px 'Archivo Narrow',Archivo,sans-serif;color:var(--amber);white-space:nowrap}
+.sc-sr .ag.hi{color:#E8899E}
+.sc-more{font:600 12px Archivo;letter-spacing:0;text-transform:none;color:var(--accent,#FF7A29);cursor:pointer}
+.sc-stl{display:flex;align-items:center;justify-content:space-between;gap:10px;font:700 10px Archivo;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);padding:0 8px 2px}
+.sc-err{font-size:13px;color:var(--muted)}
+@media (min-width:760px){
+.sc-sr{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;padding:5px 8px}
+.sc-sr .ag{grid-row:auto;grid-column:3}
+.sc-row{grid-template-columns:minmax(0,1.5fr) minmax(0,3fr);align-items:stretch}
+.sc-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+/* Phase C: Top products — muted "not split" row + quiet reconciliation footer */
+.pb-prow.ns{padding:7px 0}
+.pb-prow.ns .nm{color:var(--muted);font-weight:500;font-size:12.5px}
+.pb-prow.ns .nm span{margin-left:0}
+.pb-prow.ns .vl{color:var(--muted);font-weight:600}
+.pb-tot{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.pb-tot b{color:var(--paper);font-weight:600}
+.pb-tot .ok{color:#9BC489;font-weight:700;margin-left:3px}
+.pb-tot.warn{color:#E8899E}
+.pb-tot.warn b{color:#E8899E}
+.pb-how{margin-top:5px;font-size:11px;color:var(--muted)}
+.pb-how summary{cursor:pointer;list-style:none;display:inline-block;color:var(--muted)}
+.pb-how summary::-webkit-details-marker{display:none}
+.pb-how summary:hover{color:var(--paper)}
+.pb-how p{margin:5px 0 0;line-height:1.45}
+
+/* ── Owner Dashboard · Phase D: Team + Lead sources (owner-only; Phase 1/2/B/C tokens, no new palette) ── */
+.pd-head{margin-top:20px}
+.pd-per{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.pd-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:8px;align-items:start}
+.pd-panel .pb-ph{margin-bottom:7px}
+.pd-hd{display:none}
+.pd-r{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:10px 0;border-top:1px solid var(--line)}
+.pd-hd+.pd-r{border-top:0}
+.pd-r .pd-nm{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;min-width:0}
+.pd-nm b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-c{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pd-l{font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-style:normal}
+.pd-v{font:700 16px 'Archivo Narrow',Archivo,sans-serif;font-variant-numeric:tabular-nums;color:var(--paper)}
+.pd-v.bad{color:#E8899E}.pd-v.ok{color:#9BC489}
+.pd-s{font-size:11.5px;color:var(--muted);line-height:1.35}
+.pd-s.mut{color:var(--muted)}
+.pd-c.fu.none .pd-s{color:var(--amber)}
+.pd-tg{display:flex;flex-direction:column;gap:3px;margin-top:3px}
+.pd-tg .bar{height:4px;margin:0}
+.pd-tg em{font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pd-tot{background:var(--panel-2);border-radius:9px;padding:10px 10px;margin:6px -4px 0;border-top:0}
+.pd-tot .pd-nm b{text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--muted)}
+.pd-hint{font-size:11.5px;color:var(--muted);margin-top:8px}
+.pd-tgt{margin-top:8px}
+.pd-tgt p{margin:6px 0 8px}
+.pd-tr{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:8px 0;border-top:1px solid var(--line)}
+.pd-tr .nm{font-weight:600;font-size:13px}
+.pd-tr label{display:flex;align-items:center;gap:6px;min-width:0}
+.pd-tr label i{font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-style:normal;width:64px;flex:none}
+.pd-tr input{flex:1;min-width:0;padding:7px 9px}
+.pd-tr .btn{margin-top:0;width:auto;padding:7px 12px}
+.pd-warn{background:rgba(232,163,61,.10);border:1px solid rgba(232,163,61,.45);border-radius:9px;padding:8px 11px;margin-bottom:8px;font-size:12px;line-height:1.45;color:var(--paper)}
+.pd-warn b{color:var(--amber);font-weight:700}
+.pd-sh{display:grid;grid-template-columns:minmax(0,1fr) 96px 78px;gap:10px;font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-bottom:5px}
+.pd-sh span:nth-child(n+2){text-align:right}
+.pd-sr{padding:7px 0}
+.pd-sr+.pd-sr{border-top:1px solid var(--line)}
+.pd-sr .top{display:grid;grid-template-columns:minmax(0,1fr) 96px 78px;gap:10px;align-items:baseline}
+.pd-sr .nm{font-weight:600;font-size:13.5px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-sr.unk .nm{color:var(--amber)}
+.pd-sr .wl{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.pd-sr .wl b{color:var(--paper);font-weight:700}
+.pd-sr .wl em{font-style:normal}
+.pd-sr .vl{font:700 14px 'Archivo Narrow',Archivo,sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.pd-sr .bar{height:4px;margin-top:5px}
+.pd-sr.unk .bar i{background:var(--amber)}
+.pd-dealer{font-size:12px;color:var(--muted);margin-top:8px}
+.pd-dealer b{color:var(--paper);font-weight:600}
+.pd-more{font-size:12px;color:var(--muted);margin-top:8px;cursor:pointer}
+.pd-more:hover{color:var(--paper)}
+.pd-showall{display:none}
+@media (max-width:759px){
+.pd-panel[data-pdall="0"] .pd-r.pd-x{display:none}
+.pd-showall{display:block;width:100%;margin-top:6px;padding:9px 12px;background:transparent;border:1px solid var(--line);border-radius:9px;color:var(--paper);font:600 12.5px Archivo;cursor:pointer}
+.pd-showall:hover{background:var(--panel-2)}
+.pd-per{display:none}
+.pd-r{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 10px;padding:9px 0}
+.pd-r .pd-c[data-pdk=leads],.pd-r .pd-c[data-pdk=est],.pd-r .pd-c[data-pdk=fu]{grid-column:span 2}
+.pd-r .pd-c[data-pdk=won],.pd-r .pd-c[data-pdk=money]{grid-column:span 3}
+.pd-r .pd-nm{padding-bottom:0}
+}
+@media (min-width:760px){
+.pd-hd{display:grid;grid-template-columns:var(--pdcols);gap:12px;padding:0 0 6px;font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pd-hd{align-items:end}.pd-hd span:nth-child(n+2):nth-child(-n+3){text-align:right}
+.pd-r{grid-template-columns:var(--pdcols);gap:12px;align-items:start}
+.pd-r .pd-nm{grid-column:auto;align-self:start;padding-top:2px}
+.pd-l{display:none}
+.pd-c[data-pdk=leads],.pd-c[data-pdk=est]{align-items:flex-end}
+.pd-tot{margin:6px -6px 0}
+.pd-tr{grid-template-columns:minmax(90px,.7fr) minmax(0,1fr) minmax(0,1fr);align-items:center;gap:12px}
+}
+.pd-panel{--pdcols:minmax(104px,1.2fr) 44px 74px minmax(100px,1.15fr) minmax(112px,1.25fr) minmax(104px,1.15fr)}
+@media (min-width:1180px){
+.pd-grid{grid-template-columns:minmax(0,7fr) minmax(0,3.6fr)}
+}
+@media (min-width:760px) and (max-width:1179px){.pd-hd span:nth-child(3){white-space:normal}}
+
 /* generic */
 h2{font:700 13px Archivo;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px;margin-bottom:9px}
@@ -486,7 +830,7 @@ const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30, chaseTab:'all', search:'', searchResults:null,
 pipelines:[], stages:[], products:[], brands:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[], ordersOpen:[], ordersDelivered:[], globalEstimates:[],
-dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0,
+dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0, pb:null, pbPeriod:'month', sc:null, pd:null, pdAll:false,
 myPerf:[], myRevivals:[], myPromises:[],
 openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
 sideOpen:false, presetPipeline:null, presetStage:null,
@@ -508,6 +852,7 @@ await loadTab();
 }
 
 function renderLogin(msg){
+document.body.classList.remove('owner-ui');
 app.innerHTML = `<div class="login">
 <div class="mark">StageMax<span> CRM</span></div>
 <p>StageMax CRM — sign in to work your leads.</p>
@@ -777,10 +1122,14 @@ A.bal.promiseDue = A.prom.missed.length + A.prom.dueToday.length;
 }
 
 const oaAgo = n => n==null ? '—' : n===0 ? 'today' : n+' day'+(n===1?'':'s');
-function oaHead(tab,title){ return `<div class="oa-head" data-tab="${tab}"><span class="t">${esc(title)}</span><span class="sub">${ic('chev')}</span></div>`; }
+const oaTone = (rose,amber)=> rose ? 'rose' : amber ? 'amber' : 'green';
+const odCtx = h => `<div class="od-ctx">${h}</div>`;
+function odTile(oa,label,tone,tab,numHtml,ctxHtml,extra=''){
+return `<div class="od-tile tone-${tone}${extra}" ${tab?`data-tab="${tab}"`:''}><div class="od-tl"><span class="od-lab">${label}</span><span class="od-dot"></span></div>${numHtml}${odCtx(ctxHtml)}</div>`;
+}
 function oaFollowups(A){
 const missed=A.fu.missed.length, due=A.fu.dueToday.length;
-const kindLine=(label,k)=>`<div class="oa-line"><span class="grow">${label}</span><span><b>${k.missed.length}</b> overdue · <b>${k.dueToday.length}</b> due today</span></div>`;
+const kindLine=(label,k)=>`<span class="${k.missed.length||k.dueToday.length?'':'z'}">${label}<b>${k.missed.length}</b> overdue · <b>${k.dueToday.length}</b> due today</span>`;
 const cre = A.byCre.slice(0,3).map(c=>`${esc(c.name)} <b>${c.n}</b>`).join(' · ');
 const all = [...A.fu.missed,...A.prom.missed,...A.rev.missed].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.key<b.key?-1:1))
 .concat([...A.fu.dueToday,...A.prom.dueToday,...A.rev.dueToday].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.key<b.key?-1:1)));
@@ -789,20 +1138,23 @@ const isMissed = i.date<A.today;
 const kind = i.kind==='followup'?'Follow-up':i.kind==='promise'?'Payment promised':'Revival';
 const pill = isMissed ? (i.kind==='followup'?'Missed':'Overdue') : 'Due today';
 return `<div class="trow" data-deal="${i.dealId}" data-oakind="${i.kind}" style="cursor:pointer">
-<div class="row"><div class="grow"><div class="name">${esc(i.name)}</div><div class="sub">${esc(i.detail)}</div></div>
-<div style="text-align:right"><span class="tag ${isMissed?'due':''}">${pill}</span><div class="sub" style="margin-top:4px">${kind} · ${day(i.date)}</div></div></div>
-<div class="row" style="margin-top:9px;gap:6px">
+<div class="od-rn">${esc(i.name)} <span>${esc(i.detail)}</span></div>
+<span class="od-st ${isMissed?'miss':'due'}">${pill}</span>
+<div class="od-rs">${kind} · ${day(i.date)}</div>
+<div class="od-ra">
 ${i.phone?`<a class="iact call" href="${telLink(i.phone)}" title="Call">${ic('call')}</a>`:''}
 ${i.phone?`<a class="iact wa" href="${waLink(i.phone)}" title="WhatsApp" target="_blank" rel="noopener">${ic('wa')}</a>`:''}
 ${i.kind==='followup'?`<button class="iact done" data-oadone="${i.fuId}" title="Mark done">${ic('check')}</button>`:''}
 </div></div>`;
 };
-return `<div class="oa-card" data-oa="fu">${oaHead('followups','Follow-ups')}
-<div class="oa-big"><span class="v ${missed?'alert':''}" data-k="missed">${missed}</span><span class="l">Missed follow-ups</span></div>
-<div class="oa-line"><span class="grow">Due today</span><b data-k="due">${due}</b></div>
-${kindLine('Payment promises',A.prom)}${kindLine('Revival reminders',A.rev)}
-${cre?`<div class="oa-line"><span class="grow">Missed by CRE</span><span>${cre}</span></div>`:''}
-<div class="oa-rows">${all.length?all.slice(0,5).map(row).join(''):'<div class="oa-note">Nothing missed or due today.</div>'}</div></div>`;
+const tone = oaTone(missed>0, due>0);
+const chips = [kindLine('Payment promises ',A.prom), kindLine('Revival reminders ',A.rev), cre?`<span>Missed by CRE ${cre}</span>`:''].filter(Boolean).join('');
+return `<div class="od-g" data-oa="fu">
+${odTile('fu','Follow-ups',tone,'followups',`<div class="od-num" data-k="missed">${missed}</div>`,`missed · <b data-k="due">${due}</b> due today`)}
+<div class="od-colh d"><span class="pip"></span>Do now<span class="n">${all.length?`${all.length} open`:'all clear'}</span>${all.length?`<span class="go" data-tab="followups">Open Follow-ups ›</span>`:''}</div>
+<div class="od-panel od-do">${chips?`<div class="od-chips">${chips}</div>`:''}
+<div class="oa-rows od-rows">${all.length?all.slice(0,5).map(row).join(''):`<div class="od-empty"><span class="ok">${ic('check')}</span>Nothing missed or due today.</div>`}</div>
+${all.length>5?`<div class="od-more" data-tab="followups">+ ${all.length-5} more in Follow-ups ›</div>`:''}</div></div>`;
 }
 function oaLeads(A){
 const L=A.leads, h=L.headline;
@@ -810,57 +1162,566 @@ const retailN = h.filter(d=>isRetailPipeline(d.pipeline_id)).length, dealerN = h
 const nc = pf => L.notContacted.filter(d=>pf(d.pipeline_id)).length;
 const row = d => `<div class="oa-row" data-deal="${d.id}"><div class="grow"><div class="name">${esc(d.customers?.name||'No customer')}</div><div class="sub">${esc(d.title||'')} · added ${day(d.created_at)}</div></div><div>${d.tags.map(t=>`<span class="tag ${t==='Hot'?'due':''}" style="margin-left:4px">${t}</span>`).join('')}</div></div>`;
 const links = L.links.map(l=>`<button class="oa-link" data-kpipipe="${l.pid}" data-kpistage="${l.stageId}">View ${esc(l.name)} (${l.count})</button>`).join('');
-return `<div class="oa-card" data-oa="leads"><div class="oa-head"><span class="t">Leads needing attention</span></div>
-<div class="oa-big"><span class="v ${h.length?'alert':''}" data-k="headline">${h.length}</span><span class="l">Leads</span></div>
-<div class="oa-line"><span class="grow">Retail · Dealer</span><span><b>${retailN}</b> · <b>${dealerN}</b></span></div>
-<div class="oa-line"><span class="grow">New today (information)</span><b data-k="newToday">${L.newToday.length}</b></div>
-<div class="oa-line"><span class="grow">Not yet contacted</span><span><b data-k="notContacted">${L.notContacted.length}</b> <span class="oa-note">(Retail ${nc(isRetailPipeline)} · Dealer ${nc(isDealerPipeline)})</span></span></div>
-<div class="oa-line"><span class="grow">No next step</span><b data-k="noNext">${L.noNext.length}</b></div>
-<div class="oa-line"><span class="grow">Hot</span><b data-k="hot">${L.hot.length}</b></div>
-<div class="oa-rows">${h.length?h.slice(0,3).map(row).join(''):'<div class="oa-note">No leads need attention.</div>'}</div>
-${links?`<div class="oa-rows">${links}</div>`:''}</div>`;
+const tone = oaTone(false, h.length>0);
+return `<div class="od-g" data-oa="leads">
+${odTile('leads','Leads',tone,'',`<div class="od-num" data-k="headline">${h.length}</div>`,`<b>${retailN}</b> Retail · <b>${dealerN}</b> Dealer`)}
+<div class="od-colh w"><span class="pip"></span>Watchlists</div>
+<div class="od-panel od-w w-leads${h.length?'':' quiet'}"><div class="od-wh"><span class="od-wt">Leads needing attention</span><span class="od-wn ${tone}">${h.length?h.length+' open':'Clear'}</span></div>
+<div class="od-chips"><span>Retail · Dealer <b>${retailN}</b> · <b>${dealerN}</b></span><span>New today (information) <b data-k="newToday">${L.newToday.length}</b></span><span>Not yet contacted <b data-k="notContacted">${L.notContacted.length}</b> <span class="nt">(Retail ${nc(isRetailPipeline)} · Dealer ${nc(isDealerPipeline)})</span></span><span>No next step <b data-k="noNext">${L.noNext.length}</b></span><span>Hot <b data-k="hot">${L.hot.length}</b></span></div>
+${h.length?`<div class="oa-rows">${h.slice(0,3).map(row).join('')}</div>`:''}
+${links?`<div class="oa-rows">${links}</div>`:''}</div></div>`;
 }
 function oaEstimates(A){
 const E=A.est;
 const row = d => `<div class="oa-row" data-globalest="${d.id}"><div class="grow"><div class="name">${esc(d.customers?.name||'No customer')}</div><div class="sub">${esc(d.title||'')} · sent ${day(d.estimate_sent_at)}</div></div><span class="sub">${oaAgo(istDaysSince(d.estimate_sent_at,A.today))}</span></div>`;
-return `<div class="oa-card" data-oa="est">${oaHead('estimates','Estimates')}
-<div class="oa-big"><span class="v" data-k="awaiting">${E.sent.length}</span><span class="l">Awaiting Decision</span></div>
-<div class="oa-line"><span class="grow">Oldest waiting</span><b data-k="oldest">${E.sent.length?oaAgo(E.oldestDays):'—'}</b></div>
-<div class="oa-line"><span class="grow">Approved / Payment Pending</span><b data-k="approved">${E.approved.length}</b></div>
-<div class="oa-line"><span class="grow">Draft / Not Sent</span><b data-k="draft">${E.draft.length}</b></div>
-${E.sent.length?`<div class="oa-note">Estimate value awaiting decision ${rs(E.sentValue)} (quoted, not sales)</div>`:''}
-<div class="oa-rows">${E.sent.length?E.sent.slice(0,3).map(row).join(''):'<div class="oa-note">No estimates awaiting a decision.</div>'}</div></div>`;
+const tone = oaTone(false, E.sent.length>0);
+return `<div class="od-g" data-oa="est">
+${odTile('est','Estimates',tone,'estimates',`<div class="od-num" data-k="awaiting">${E.sent.length}</div>`,`awaiting · oldest <b data-k="oldest">${E.sent.length?oaAgo(E.oldestDays):'—'}</b>`)}
+<div class="od-panel od-w w-est${E.sent.length?'':' quiet'}"><div class="od-wh" data-tab="estimates"><span class="od-wt">Estimates</span><span class="od-wn ${tone}">${E.sent.length?E.sent.length+' awaiting':'Clear'}</span><span class="sub">${ic('chev')}</span></div>
+<div class="od-chips"><span>Approved / Payment Pending <b data-k="approved">${E.approved.length}</b></span><span>Draft / Not Sent <b data-k="draft">${E.draft.length}</b></span></div>
+${E.sent.length?`<div class="oa-note">Estimate value awaiting decision ${rs(E.sentValue)} (quoted, not sales)</div><div class="oa-rows">${E.sent.slice(0,3).map(row).join('')}</div>`:''}</div></div>`;
 }
 function oaOrders(A){
 const O=A.ord;
 const cnt=(list,pf)=>list.filter(d=>pf(d.pipeline_id)).length;
 const row = d => `<div class="oa-row" data-tab="dispatch"><div class="grow"><div class="name">${esc(d.customers?.name||'No customer')}</div><div class="sub">${esc(d.title||'')} · ${isDealerPipeline(d.pipeline_id)?'Dealer':'Retail'}</div></div><span class="sub">${d.waitDays==null?'—':oaAgo(d.waitDays)}</span></div>`;
-return `<div class="oa-card" data-oa="ord">${oaHead('dispatch','Orders')}
-<div class="oa-big"><span class="v" data-k="awaiting">${O.awaiting.length}</span><span class="l">Awaiting Dispatch</span></div>
-<div class="oa-line"><span class="grow">Retail · Dealer</span><span><b data-k="awRetail">${cnt(O.awaiting,isRetailPipeline)}</b> · <b data-k="awDealer">${cnt(O.awaiting,isDealerPipeline)}</b></span></div>
-<div class="oa-line"><span class="grow">In Transit</span><b data-k="transit">${O.transit.length}</b></div>
-<div class="oa-line"><span class="grow">Oldest waiting</span><b data-k="oldest">${O.awaiting.length?oaAgo(O.oldestDays):'—'}</b></div>
-<div class="oa-rows">${O.awaiting.length?O.awaiting.slice(0,3).map(row).join(''):'<div class="oa-note">Nothing waiting to be dispatched.</div>'}</div></div>`;
+const tone = oaTone(false, O.awaiting.length>0);
+return `<div class="od-g" data-oa="ord">
+${odTile('ord','Orders',tone,'dispatch',`<div class="od-num" data-k="awaiting">${O.awaiting.length}</div>`,`to dispatch · <b data-k="transit">${O.transit.length}</b> in transit`)}
+<div class="od-panel od-w w-ord${O.awaiting.length?'':' quiet'}"><div class="od-wh" data-tab="dispatch"><span class="od-wt">Orders</span><span class="od-wn ${tone}">${O.awaiting.length?O.awaiting.length+' to dispatch':'Clear'}</span><span class="sub">${ic('chev')}</span></div>
+<div class="od-chips"><span>Retail · Dealer <b data-k="awRetail">${cnt(O.awaiting,isRetailPipeline)}</b> · <b data-k="awDealer">${cnt(O.awaiting,isDealerPipeline)}</b></span><span>Oldest waiting <b data-k="oldest">${O.awaiting.length?oaAgo(O.oldestDays):'—'}</b></span></div>
+${O.awaiting.length?`<div class="oa-rows">${O.awaiting.slice(0,3).map(row).join('')}</div>`:''}</div></div>`;
 }
 function oaBalances(A){
 const B=A.bal;
 const row = c => `<div class="oa-row" ${c.id?`data-customer="${c.id}"`:''}><div class="grow"><div class="name">${esc(c.name)}</div></div><span class="amt" style="font-size:14px;color:#E8899E">${rs(c.bal)}</span></div>`;
-return `<div class="oa-card" data-oa="bal">${oaHead('dues','Pending balances')}
-<div class="oa-big"><span class="v" data-k="total">${rs(B.total)}</span><span class="l">${B.customers} customer${B.customers===1?'':'s'}</span></div>
-<div class="oa-line"><span class="grow">0–30 days</span><b data-k="b30">${rs(B.b30)}</b></div>
-<div class="oa-line"><span class="grow">31–60 days</span><b data-k="b60">${rs(B.b60)}</b></div>
-<div class="oa-line"><span class="grow">Over 60 days</span><b data-k="b60p">${rs(B.b60p)}</b></div>
-<div class="oa-line"><span class="grow">Retail · Dealer</span><span><b data-k="retail">${rs(B.retail)}</b> · <b data-k="dealer">${rs(B.dealer)}</b></span></div>
-<div class="oa-line"><span class="grow">Promised payment due</span><b data-k="promiseDue">${B.promiseDue}</b></div>
-<div class="oa-rows">${B.top.length?B.top.map(row).join(''):'<div class="oa-note">No pending customer balances.</div>'}</div></div>`;
+const tone = oaTone(B.b60p>0, B.total>0);
+const seg = (v,c)=> B.total>0 && v>0 ? `<i style="width:${(100*v/B.total).toFixed(2)}%;background:${c}"></i>` : '';
+return `<div class="od-g" data-oa="bal">
+${odTile('bal','Balances',tone,'dues',`<div class="od-num sm" data-k="total">${rs(B.total)}</div>`,`<b>${B.customers}</b> customer${B.customers===1?'':'s'} · <b data-k="promiseDue">${B.promiseDue}</b> promised due`,' t5')}
+<div class="od-panel od-w w-bal${B.top.length?'':' quiet'}"><div class="od-wh" data-tab="dues"><span class="od-wt">Pending balances</span><span class="od-wn ${tone}">${B.total>0?rs(B.total):'Clear'}</span><span class="sub">${ic('chev')}</span></div>
+${B.total>0?`<div class="od-age" title="Balance age mix">${seg(B.b30,'#9BC489')}${seg(B.b60,'#E8A33D')}${seg(B.b60p,'#E8899E')}</div>`:''}
+<div class="od-chips"><span>0–30 days <b data-k="b30">${rs(B.b30)}</b></span><span>31–60 days <b data-k="b60">${rs(B.b60)}</b></span><span>Over 60 days <b data-k="b60p">${rs(B.b60p)}</b></span><span>Retail · Dealer <b data-k="retail">${rs(B.retail)}</b> · <b data-k="dealer">${rs(B.dealer)}</b></span></div>
+${B.top.length?`<div class="oa-rows">${B.top.map(row).join('')}</div>`:''}</div></div>`;
 }
 function ownerAttentionBand(){
 const A = S.ownerAttn;
 if(!A) return '';
-const head = `<h2 id="followups-anchor" style="margin-top:0">Needs attention · today</h2>`;
+const head = `<div class="od-head"><h2 id="followups-anchor" style="margin-top:0">Needs attention · today</h2><div class="od-legend"><span><i style="background:#E8899E"></i>Missed</span><span><i style="background:var(--amber)"></i>Waiting</span><span><i style="background:#9BC489"></i>Clear</span></div></div>`;
 if(A.error) return head+`<div class="card"><div class="empty">Could not load this section.<br><span class="sub">${esc(A.error)}</span></div></div>`;
 const note = A.failClosed ? `<div class="oa-note" style="margin:-4px 0 9px">Repairs pipeline could not be resolved — these figures are held at zero until it can.</div>` : '';
-return head+note+`<div class="oa-grid">${oaFollowups(A)}${oaLeads(A)}${oaEstimates(A)}${oaOrders(A)}${oaBalances(A)}</div>`;
+return head+note+`<div class="od-deck">${oaFollowups(A)}${oaLeads(A)}${oaEstimates(A)}${oaOrders(A)}${oaBalances(A)}</div>`;
+}
+
+/* ── Owner Dashboard · Phase B: "Money & sales" + Pipeline ─────────────────────────────────────────
+   Owner-only, READ-ONLY (no insert/update/delete/rpc anywhere in this block). Every financial figure is Retail Sales
+   ONLY: Repairs are excluded fail-CLOSED (if the Repairs or Retail pipeline cannot be resolved nothing is shown) and
+   Dealer deals never enter Sales / Money Received. Shop calendar = Asia/Kolkata. Every query is paged with
+   fetchAllPages (no 300-row S.openDeals, no cre_performance_daily, no product_movement, no customer_balance_summary).
+     Sales Won      = Retail deal CURRENTLY in a Won stage, dated by its LATEST valid non-Won -> Won stage_event
+                      (events on deals that are not currently Won are ignored). No usable date => "undated legacy win",
+                      listed separately and never back-dated.
+     Money Received = Retail receipts, source <> legacy_migration, dated by occurred_at (reversals net on their own date).
+     Delivered      = Retail deals by delivered_at (fulfilment only -- never Sales).
+     Top products   = proportional allocation of deals.value across deal_items of the positive-value Won deals. ── */
+const PB_PERIODS = [['today','Today'],['d7','7 days'],['month','This month'],['last','Last month']];
+const pbInstant = ymd => Date.parse(ymd+'T00:00:00+05:30');
+const pbAddDays = (ymd,n) => new Date(Date.parse(ymd+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
+function pbAddMonths(ymd,n){ let y=+ymd.slice(0,4), m=+ymd.slice(5,7)-1+n; y+=Math.floor(m/12); m=((m%12)+12)%12; return y+'-'+String(m+1).padStart(2,'0')+'-01'; }
+function pbRange(key,today){
+const m1 = today.slice(0,7)+'-01'; let a,b;
+if(key==='today'){ a=today; b=pbAddDays(today,1); }
+else if(key==='d7'){ a=pbAddDays(today,-6); b=pbAddDays(today,1); }
+else if(key==='last'){ a=pbAddMonths(m1,-1); b=m1; }
+else { key='month'; a=m1; b=pbAddMonths(m1,1); }
+return { key, a, b, start:pbInstant(a), end:pbInstant(b) };
+}
+function pbLabel(R,today){
+const f = y => new Date(y+'T00:00:00Z').toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'UTC'});
+let last = pbAddDays(R.b,-1); if(last>today) last = today;
+return R.a===last ? f(R.a) : f(R.a)+' – '+f(last);
+}
+const pbNone = ids => ids.length ? ids : [-1];
+async function pbFetchItems(ids){
+const out = new Map();
+for(let i=0;i<ids.length;i+=40){
+const chunk = ids.slice(i,i+40);
+const rows = await fetchAllPages(()=>sb.from('deal_items').select('id,deal_id,product_id,product_other,qty,rate,amount,products(name,brands(name))').in('deal_id',chunk).order('id'));
+rows.forEach(r=>{ if(!out.has(r.deal_id)) out.set(r.deal_id,[]); out.get(r.deal_id).push(r); });
+}
+return out;
+}
+async function loadPhaseB(){
+const P = { today:istDate(), failClosed:false, error:null };
+try{ await fillPhaseB(P); }catch(e){ P.error = (e&&e.message)||String(e); }
+S.pb = P;
+}
+async function fillPhaseB(P){
+const retail = S.pipelines.find(p=>p.name==='Retail Sales'), rid = repairsPipelineId();
+if(!retail || rid==null){ P.failClosed = true; return; }
+P.retailId = retail.id;
+const rStages = S.stages.filter(s=>s.pipeline_id===retail.id);
+const wonIds = rStages.filter(s=>s.is_won).map(s=>s.id), wonSet = new Set(wonIds);
+const lowIso = new Date(pbRange('last',P.today).start).toISOString();
+const rSel = 'id,deal_id,amount,occurred_at,source,reverses_receipt_id,deals(pipeline_id)';
+const [wonDeals, wonEvents, recs, legUndated, legSrc, delivered, apprRows, pipeDeals] = await Promise.all([
+fetchAllPages(()=>sb.from('deals').select('id,title,value,amount_collected,stage_id,delivered_at,created_at,customers(name)').eq('pipeline_id',retail.id).in('stage_id',pbNone(wonIds)).order('id')),
+fetchAllPages(()=>sb.from('stage_events').select('id,deal_id,from_stage_id,to_stage_id,changed_at').in('to_stage_id',pbNone(wonIds)).order('id')),
+fetchAllPages(()=>sb.from('receipts').select(rSel).gte('occurred_at',lowIso).order('id')),
+fetchAllPages(()=>sb.from('receipts').select(rSel).is('occurred_at',null).order('id')),
+fetchAllPages(()=>sb.from('receipts').select(rSel).eq('source','legacy_migration').order('id')),
+fetchAllPages(()=>sb.from('deals').select('id,value,delivered_at').eq('pipeline_id',retail.id).gte('delivered_at',lowIso).order('id')),
+fetchAllPages(()=>sb.from('deals').select('id,value,amount_collected,estimate_approved_at,stage_id').eq('pipeline_id',retail.id).not('estimate_approved_at','is',null).order('id')),
+fetchAllPages(()=>sb.from('deals').select('id,title,value,stage_id,pipeline_id,is_hot,created_at,customer_id').neq('pipeline_id',rid).order('id'))
+]);
+const isRetailRec = r => r.deals && r.deals.pipeline_id===retail.id;
+// latest valid crossing per currently-Won Retail deal: a stage_event INTO a Won stage whose from-stage is not itself Won.
+const wonNow = new Set(wonDeals.map(d=>d.id)), latest = new Map();
+wonEvents.forEach(e=>{
+if(!wonNow.has(e.deal_id) || !wonSet.has(e.to_stage_id)) return;
+if(e.from_stage_id!=null && wonSet.has(e.from_stage_id)) return;
+const t = Date.parse(e.changed_at); if(isNaN(t)) return;
+if(!latest.has(e.deal_id) || t>latest.get(e.deal_id)) latest.set(e.deal_id,t);
+});
+P.wonDeals = wonDeals; P.latest = latest;
+P.receipts = recs.filter(isRetailRec);
+const leg = new Map(); [...legUndated,...legSrc].filter(isRetailRec).forEach(r=>leg.set(r.id,r));
+P.legacy = [...leg.values()];
+P.delivered = delivered;
+const openIds = new Set(rStages.filter(s=>!s.is_won && !s.is_lost && !s.is_delivered).map(s=>s.id));
+P.appr = apprRows.filter(d=>d.estimate_approved_at && openIds.has(d.stage_id));
+P.pipeDeals = pipeDeals.filter(d=>isNonRepairsPipeline(d.pipeline_id));
+const lowMs = pbRange('last',P.today).start;
+const need = wonDeals.filter(d=>Number(d.value||0)>0 && latest.has(d.id) && latest.get(d.id)>=lowMs).map(d=>d.id);
+P.items = await pbFetchItems(need);
+// Top open deals need only the customer names of the (max 5) rows shown.
+const topIds = pbTopOpen(P).map(d=>d.customer_id).filter(Boolean);
+const cs = topIds.length ? await fetchByIds('customers','id,name','id',[...new Set(topIds)]) : [];
+P.custName = new Map(cs.map(c=>[c.id,c.name]));
+}
+// Open pipeline deal = a pre-sale stage (not Won, Lost or Delivered) of any non-Repairs pipeline.
+function pbOpenSorted(P){
+const st = new Map(S.stages.map(s=>[s.id,s]));
+return P.pipeDeals.filter(d=>{ const s=st.get(d.stage_id); return s && !s.is_won && !s.is_lost && !s.is_delivered; })
+.sort((a,b)=> (Number(b.value||0)-Number(a.value||0)) || ((b.is_hot?1:0)-(a.is_hot?1:0)) || (Date.parse(a.created_at)-Date.parse(b.created_at)) || (a.id<b.id?-1:1));
+}
+const PB_TOP_OPEN = 5;
+function pbTopOpen(P){ return pbOpenSorted(P).slice(0,PB_TOP_OPEN); }
+function pbProducts(P,deals,salesTotal){
+const rows = new Map(); let manual = {sales:0,qty:0,n:0}, unalloc = {deals:0,value:0}, allocated = 0;
+deals.forEach(d=>{
+const items = P.items.get(d.id)||[], value = Number(d.value||0);
+const amt = it => it.amount!=null ? Number(it.amount) : Number(it.qty||0)*Number(it.rate||0);
+const sub = items.reduce((a,it)=>a+amt(it),0);
+if(!(sub>0)){ unalloc.deals++; unalloc.value+=value; return; }
+items.forEach(it=>{
+const share = amt(it)/sub*value, qty = Number(it.qty||0); allocated += share;
+if(it.product_id==null){ manual.sales+=share; manual.qty+=qty; manual.n++; return; }
+const k = it.product_id; if(!rows.has(k)) rows.set(k,{name:it.products?.name||'Unknown product',brand:it.products?.brands?.name||'',sales:0,qty:0});
+const r = rows.get(k); r.sales+=share; r.qty+=qty;
+});
+});
+const list = [...rows.values()].sort((a,b)=>b.sales-a.sales||(a.name<b.name?-1:1));
+const shown = list.slice(0,8), rest = list.slice(8);
+return { shown, rest:{n:rest.length,sales:rest.reduce((a,r)=>a+r.sales,0),qty:rest.reduce((a,r)=>a+r.qty,0)}, manual, unalloc,
+allocated, total:salesTotal, reconciled: Math.abs(allocated+unalloc.value-salesTotal)<0.5 };
+}
+function pbCompute(P,key){
+const R = pbRange(key,P.today), inP = ms => ms!=null && !isNaN(ms) && ms>=R.start && ms<R.end;
+const o = { R, sales:{count:0,value:0,pos:0,zero:0,avg:null}, undated:{count:0,value:0}, money:{gross:0,reversal:0,net:0,n:0,nRev:0},
+legacy:{count:0,amount:0}, delivered:{count:0,value:0}, appr:{count:0,balance:0} };
+const wonIn = [];
+P.wonDeals.forEach(d=>{
+const t = P.latest.get(d.id);
+if(t==null){ o.undated.count++; o.undated.value+=Number(d.value||0); return; }
+if(inP(t)) wonIn.push(d);
+});
+wonIn.forEach(d=>{ const v=Number(d.value||0); o.sales.count++; o.sales.value+=v; if(v>0) o.sales.pos++; else o.sales.zero++; });
+o.sales.avg = o.sales.pos>0 ? o.sales.value/o.sales.pos : null;
+P.receipts.forEach(r=>{
+if(r.source==='legacy_migration' || r.occurred_at==null) return;
+const t = Date.parse(r.occurred_at); if(!inP(t)) return;
+const a = Number(r.amount||0);
+if(r.reverses_receipt_id!=null || a<0){ o.money.reversal+=a; o.money.nRev++; } else { o.money.gross+=a; o.money.n++; }
+});
+o.money.net = o.money.gross + o.money.reversal;
+P.legacy.forEach(r=>{ o.legacy.count++; o.legacy.amount+=Number(r.amount||0); });
+P.delivered.forEach(d=>{ if(inP(Date.parse(d.delivered_at))){ o.delivered.count++; o.delivered.value+=Number(d.value||0); } });
+P.appr.forEach(d=>{ o.appr.count++; o.appr.balance+=Math.max(0,Number(d.value||0)-Number(d.amount_collected||0)); });
+o.products = pbProducts(P, wonIn.filter(d=>Number(d.value||0)>0), o.sales.value);
+return o;
+}
+const pbMin = n => (n<0?'−':'')+rs(Math.abs(Math.round(n)));
+function pbTiles(c){
+const m=c.money, s=c.sales;
+const moneyCtx = m.n||m.nRev ? `<b>${rs(Math.round(m.gross))}</b> received · ${m.n} receipt${m.n===1?'':'s'}${m.nRev?` · <span data-pbk="rev">reversals ${pbMin(m.reversal)}</span>`:''}` : 'No live receipts in this period';
+const salesCtx = s.count ? `<b>${s.count}</b> deal${s.count===1?'':'s'} won${s.zero?` · ${s.zero} at ₹0`:''}` : 'No Won deals dated in this period';
+const delCtx = `<b>${rs(Math.round(c.delivered.value))}</b> delivered value · not sales`;
+const avgCtx = s.pos ? `across <b>${s.pos}</b> paid deal${s.pos===1?'':'s'}` : 'No positive-value wins in this period';
+const tile = (k,lab,badge,num,ctx,tone) => `<div class="pb-tile ${tone||''}" data-pb="${k}"><div class="od-tl"><span class="od-lab">${lab}</span>${badge?`<span class="pb-badge">${badge}</span>`:''}<span class="od-dot"></span></div><div class="od-num" data-v="${num.v}">${num.t}</div><div class="od-ctx">${ctx}</div></div>`;
+return `<div class="pb-kpis">
+${tile('money','Money received','',{v:Math.round(m.net),t:pbMin(m.net)},moneyCtx,'tone-green')}
+${tile('sales','Sales won','',{v:Math.round(s.value),t:rs(Math.round(s.value))},salesCtx,'')}
+${tile('delivered','Delivered','Fulfilment only',{v:c.delivered.count,t:String(c.delivered.count)},delCtx,'')}
+${tile('avg','Average sale value','',{v:s.avg==null?0:Math.round(s.avg),t:s.avg==null?'—':rs(Math.round(s.avg))},avgCtx,'')}
+</div>`;
+}
+function pbProductsPanel(c){
+const pr = c.products;
+if(!pr.shown.length && !pr.manual.n && !pr.unalloc.deals) return `<div class="pb-panel" data-pb="products"><div class="pb-ph"><span class="pb-pt">Top products</span><span class="pb-pn">Won deals in period</span></div><div class="empty" style="padding:22px 10px">No Won sales with line items in this period.</div></div>`;
+const max = Math.max(1, ...pr.shown.map(r=>r.sales), pr.manual.sales, pr.rest.sales);
+const row = (nm,sub,qty,sales,cls) => `<div class="pb-prow ${cls||''}"><div class="top"><div class="nm">${esc(nm)}${sub?`<span>${esc(sub)}</span>`:''}</div><div class="qt">${qty!=null?'× '+qty:''}</div><div class="vl">${rs(Math.round(sales))}</div></div><div class="bar"><i style="width:${Math.round(sales/max*100)}%"></i></div></div>`;
+const rows = pr.shown.map(r=>row(r.name,r.brand,r.qty,r.sales)).join('')
++ (pr.rest.n ? row(`${pr.rest.n} more product${pr.rest.n===1?'':'s'}`,'',pr.rest.qty,pr.rest.sales,'mut') : '')
++ (pr.manual.n ? row('Other / Manual Items','',pr.manual.qty,pr.manual.sales,'mut') : '');
+const ns = pr.unalloc.deals ? `<div class="pb-prow ns" data-pbk="notsplit" title="Won deals with no line items, or a ₹0 item subtotal, cannot be split by product."><div class="top"><div class="nm">Not split by product <span>· ${pr.unalloc.deals} deal${pr.unalloc.deals===1?'':'s'}</span></div><div class="qt"></div><div class="vl">${rs(Math.round(pr.unalloc.value))}</div></div></div>` : '';
+const how = `<details class="pb-how"><summary>How this is calculated</summary><p>Each Won deal's value is split across its line items in proportion to line amount (line amount ÷ deal item subtotal × deal value). Won deals with no line items, or a ₹0 item subtotal, cannot be split by product and appear as "Not split by product". Only paid (positive-value) Won deals are included.</p></details>`;
+const rowsTotal = Math.round(pr.allocated + pr.unalloc.value);
+const rec = pr.reconciled
+? `<div class="pb-tot" data-pbk="recon">Total <b>${rs(rowsTotal)}</b> = Sales Won <span class="ok" aria-label="reconciled">✓</span></div>${how}`
+: `<div class="pb-tot warn" data-pbk="recon" role="alert">Reconciliation warning — product rows total <b>${rs(rowsTotal)}</b> but Sales Won is <b>${rs(Math.round(pr.total))}</b> (does not reconcile)</div>${how}`;
+return `<div class="pb-panel" data-pb="products"><div class="pb-ph"><span class="pb-pt">Top products</span><span class="pb-pn">Won deals in period</span></div>${rows}${ns}${rec}</div>`;
+}
+function pbFunnel(P,pipe,showValue){
+const sts = S.stages.filter(s=>s.pipeline_id===pipe.id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+const by = {}; P.pipeDeals.filter(d=>d.pipeline_id===pipe.id).forEach(d=>{ const b=by[d.stage_id]||(by[d.stage_id]={n:0,v:0}); b.n++; b.v+=Number(d.value||0); });
+const live = sts.filter(s=>!s.is_lost && !s.is_delivered), term = sts.filter(s=>s.is_lost || s.is_delivered);
+const total = live.reduce((a,s)=>a+(by[s.id]?.n||0),0), max = Math.max(1,...live.map(s=>by[s.id]?.n||0));
+const rows = live.map(s=>{ const b=by[s.id]||{n:0,v:0};
+return `<div class="pb-fr${b.n?'':' z'}" data-st="${s.id}"${b.n?` data-kpipipe="${pipe.id}" data-kpistage="${s.id}"`:''}><span class="nm">${esc(s.name)}</span><span class="bar"><i style="width:${Math.round(b.n/max*100)}%"></i></span><span class="ct">${b.n}</span>${showValue?`<span class="vl">${b.v>0?rs(Math.round(b.v)):''}</span>`:'<span></span>'}</div>`; }).join('');
+const tm = term.map(s=>`<span>${esc(s.name)}<b>${by[s.id]?.n||0}</b></span>`).join('');
+return `<div class="pb-fun" data-pbpipe="${pipe.id}"><div class="pb-fh"><b>${esc(pipe.name)}</b><span>${total} active</span></div>${rows}${tm?`<div class="pb-ft">${tm}</div>`:''}</div>`;
+}
+function pbPipelinePanel(P){
+const ps = S.pipelines.filter(p=>isNonRepairsPipeline(p.id)).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+const body = ps.map(p=>pbFunnel(P,p,isRetailPipeline(p.id))).join('');
+const dealer = ps.some(p=>isDealerPipeline(p.id));
+return `<div class="pb-panel" data-pb="pipeline"><div class="pb-ph"><span class="pb-pt">Pipeline</span><span class="pb-pn">Live deal counts · all dates</span></div>${body}
+<div class="pb-foot">Retail values are deal values — estimates before payment, <b>not sales</b>.${dealer?' Dealer shows operational order counts only; <b>Packed is not a sale</b>.':''} Repairs are excluded.</div></div>`;
+}
+function pbTopOpenPanel(P){
+const rows = pbTopOpen(P), nOpen = pbOpenSorted(P).length;
+const st = new Map(S.stages.map(s=>[s.id,s]));
+const body = rows.length ? rows.map(d=>{
+const dealer = isDealerPipeline(d.pipeline_id), v = Number(d.value||0);
+return `<div class="trow" data-deal="${d.id}"><div class="on">${esc(P.custName.get(d.customer_id)||'No customer')}</div><div class="os"><span>${esc(d.title||'')}</span><span class="tag">${esc(st.get(d.stage_id)?.name||'')}</span>${dealer?'<span class="tag">Dealer</span>':''}${d.is_hot?'<span class="tag due">Hot</span>':''}</div><div class="ov"><span class="amt">${v>0?rs(v):'₹0'}</span><small>${v>0?(dealer?'order value':'estimate'):'no value yet'}</small></div></div>`;
+}).join('') : `<div class="empty" style="padding:22px 10px">No open deals right now.</div>`;
+const more = nOpen>PB_TOP_OPEN ? `<div class="pd-more" data-pbk="openmore" data-tab="pipeline">+ ${nOpen-PB_TOP_OPEN} more open deal${nOpen-PB_TOP_OPEN===1?'':'s'} in Pipeline ›</div>` : '';
+return `<div class="pb-panel pb-od pb-wide" data-pb="topopen"><div class="pb-ph"><span class="pb-pt">Top open deals</span><span class="pb-pn">By value, then Hot, then age</span></div>${body}${more}<div class="pb-foot">Values are estimate / order values on deals not yet won — <b>not sales</b>. Repairs are excluded.</div></div>`;
+}
+function phaseBSection(){
+const P = S.pb;
+const key = PB_PERIODS.some(p=>p[0]===S.pbPeriod) ? S.pbPeriod : 'month';
+const chips = PB_PERIODS.map(([k,l])=>`<button class="pb-chip ${key===k?'on':''}" data-pbperiod="${k}">${l}</button>`).join('');
+const head = `<div class="od-head pb-head"><h2 id="pb-anchor" style="margin-top:0">Money &amp; sales</h2><div class="pb-per">${chips}</div></div>`;
+if(!P) return '';
+if(P.error) return head+`<div class="card"><div class="empty">Could not load this section.<br><span class="sub">${esc(P.error)}</span></div></div>`+serviceCentreBand();
+if(P.failClosed) return head+`<div class="card"><div class="pb-err">Retail Sales or Repairs pipeline could not be resolved — Money &amp; sales is hidden rather than risk mixing Repairs in.</div></div>`+serviceCentreBand();
+const c = pbCompute(P,key);
+const scope = `<div class="pb-scope" data-pbk="scope"><b>${esc(pbLabel(c.R,P.today))}</b> · Asia/Kolkata · Retail Sales only — Repairs excluded, Dealer sales not included. Sales = Won deals (not Delivered); Money received = dated receipts.</div>`;
+const sec = `<div class="pb-sec" data-pb="appr" data-tab="estimates"><span class="pb-sl">Approved · payment pending</span><span><b>${c.appr.count}</b> deal${c.appr.count===1?'':'s'}</span><span><b>${rs(Math.round(c.appr.balance))}</b> balance to collect</span><span style="margin-left:auto">Not sales yet · now</span></div>`;
+const leg = `<div class="pb-legacy"><span data-pb="undated"><i>Undated legacy wins — not included:</i> <b>${c.undated.count}</b> deal${c.undated.count===1?'':'s'} · <b>${rs(Math.round(c.undated.value))}</b></span><span data-pb="legacyrec"><i>Legacy receipts — date unavailable:</i> <b>${c.legacy.count}</b> · <b>${rs(Math.round(c.legacy.amount))}</b> (not in Money received)</span></div>`;
+return head+scope+pbTiles(c)+sec+leg+serviceCentreBand()+`<div class="pb-grid">${pbPipelinePanel(P)}${pbProductsPanel(c)}${pbTopOpenPanel(P)}</div>`;
+}
+
+/* ── Owner Dashboard · Phase C: "Service centre" band (owner-only, READ-ONLY, operational — NEVER sales) ─────────
+   Repairs only; no ₹ value of any kind is read into or shown by this block. Fail-CLOSED: if the Repairs pipeline cannot
+   be resolved nothing is computed. Shop calendar = Asia/Kolkata (IST day numbers, so day counts are whole IST days).
+     Active jobs     = Repairs deals not Returned and not Unrepairable (Received / Diagnosed / Awaiting Parts / Repaired=Ready)
+     Ready to return = Repaired (repaired and physically ready -- not payment, not returned)
+     Returned 7d     = deals in Returned whose repairs.returned_at is inside the rolling 7 IST days (today + previous 6);
+                       a missing returned_at never enters the count. Independent of the Phase B period chips.
+     Unrepairable    = small separate count; never part of Active or Ready.
+     Stage age       = IST days since the LATEST stage_event INTO the job's current stage; legacy jobs with no usable event fall
+                       back to repairs.received_at (then deals.created_at) and are marked approximate (≈).
+     Stuck           = stage age >= Received 3 / Diagnosed 7 / Awaiting Parts 14 / Ready 7 days, OR received 30+ days ago.
+     Estimate awaiting decision = active job with estimate_sent_at and no estimate_approved_at (count + oldest wait only);
+                       attention at 5+ days. ── */
+const SC_STAGE_DAYS = { 'Received':3, 'Diagnosed':7, 'Awaiting Parts':14 };
+const SC_READY_DAYS = 7, SC_CAP_DAYS = 30, SC_EST_DAYS = 5, SC_RETURNED_DAYS = 7;
+function scKind(s){
+const ret = !!s.is_delivered || s.name==='Returned';
+const unrep = !ret && (!!s.is_lost || s.name==='Unrepairable');
+const ready = !ret && !unrep && (!!s.is_won || s.name==='Repaired');
+return { ret, unrep, ready, active: !ret && !unrep };
+}
+async function loadServiceCentre(){
+const C = { today:istDate(), failClosed:false, error:null };
+try{ await fillServiceCentre(C); }catch(e){ C.error = (e&&e.message)||String(e); }
+S.sc = C;
+}
+async function fillServiceCentre(C){
+const rid = repairsPipelineId();
+if(rid==null){ C.failClosed = true; return; }
+C.rid = rid;
+// Operational columns only -- no value / amount column is selected.
+C.deals = await fetchAllPages(()=>sb.from('deals').select('id,title,stage_id,pipeline_id,created_at,estimate_sent_at,estimate_approved_at,customers(name),repairs(received_at,returned_at)').eq('pipeline_id',rid).order('id'));
+const kinds = new Map(S.stages.filter(s=>s.pipeline_id===rid).map(s=>[s.id,scKind(s)]));
+const activeIds = C.deals.filter(d=>kinds.get(d.stage_id)?.active).map(d=>d.id);
+const latest = new Map();
+for(let i=0;i<activeIds.length;i+=40){
+const chunk = activeIds.slice(i,i+40);
+const ev = await fetchAllPages(()=>sb.from('stage_events').select('id,deal_id,to_stage_id,changed_at').in('deal_id',chunk).order('id'));
+const cur = new Map(C.deals.map(d=>[d.id,d.stage_id]));
+ev.forEach(e=>{
+if(cur.get(e.deal_id)!==e.to_stage_id) return;
+const t = Date.parse(e.changed_at); if(isNaN(t)) return;
+if(!latest.has(e.deal_id) || t>latest.get(e.deal_id)) latest.set(e.deal_id,t);
+});
+}
+C.latest = latest;
+}
+function scCompute(C){
+const today = C.today, rid = C.rid;
+const sts = S.stages.filter(s=>s.pipeline_id===rid).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+const kinds = new Map(sts.map(s=>[s.id,scKind(s)])), byId = new Map(sts.map(s=>[s.id,s]));
+const label = s => scKind(s).ready ? 'Ready' : s.name;
+const o = { today, active:0, stages: sts.filter(s=>scKind(s).active).map(s=>({id:s.id,name:label(s),ready:scKind(s).ready,n:0})),
+stuck:[], estimate:{count:0,oldest:null,attn:0}, ready:{count:0,oldest:null,stuck:0}, returned:{count:0,undated:0,from:pbAddDays(today,-(SC_RETURNED_DAYS-1))},
+unrepairable:0 };
+const a = pbInstant(o.returned.from), b = pbInstant(pbAddDays(today,1));
+const stageRow = new Map(o.stages.map(s=>[s.id,s]));
+C.deals.forEach(d=>{
+const st = byId.get(d.stage_id), k = kinds.get(d.stage_id); if(!st) return;
+const rp = repairRow(d.repairs);
+if(k.ret){
+const t = rp&&rp.returned_at ? Date.parse(rp.returned_at) : NaN;
+if(isNaN(t)) o.returned.undated++; else if(t>=a && t<b) o.returned.count++;
+return;
+}
+if(k.unrep){ o.unrepairable++; return; }
+o.active++; stageRow.get(d.stage_id).n++;
+const ev = C.latest.get(d.id);
+const recvTs = (rp&&rp.received_at) || d.created_at;
+const approx = ev==null;
+const stageAge = istDaysSince(ev!=null ? new Date(ev).toISOString() : recvTs, today);
+const jobAge = istDaysSince(recvTs, today);
+const thr = k.ready ? SC_READY_DAYS : SC_STAGE_DAYS[st.name];
+const byStage = thr!=null && stageAge!=null && stageAge>=thr, byCap = jobAge!=null && jobAge>=SC_CAP_DAYS;
+if(k.ready){ o.ready.count++; if(stageAge!=null && (o.ready.oldest==null || stageAge>o.ready.oldest.days)) o.ready.oldest = {days:stageAge,approx}; if(byStage) o.ready.stuck++; }
+if(d.estimate_sent_at && !d.estimate_approved_at){
+const w = istDaysSince(d.estimate_sent_at, today);
+o.estimate.count++; if(w!=null){ if(o.estimate.oldest==null || w>o.estimate.oldest) o.estimate.oldest = w; if(w>=SC_EST_DAYS) o.estimate.attn++; }
+}
+if(byStage || byCap){
+const shown = byStage ? stageAge : jobAge;   // the day count that actually made the job "stuck"
+o.stuck.push({ id:d.id, title:d.title||'Untitled', customer:d.customers?.name||'', stage:label(st), stageAge, jobAge, approx, shown,
+hi: byStage ? (thr>0 && stageAge>=2*thr) : (jobAge>=2*SC_CAP_DAYS), cap: byCap && !byStage });
+}
+});
+o.stuck.sort((x,y)=>y.shown-x.shown || (y.jobAge||0)-(x.jobAge||0) || (x.id<y.id?-1:1));
+return o;
+}
+function scCell(k,lab,num,sub,tone){
+return `<div class="sc-cell ${tone||''}" data-sc="${k}" data-tab="repairs"><span class="sc-lab">${lab}</span><span class="sc-dot"></span><span class="sc-num" data-v="${num}">${num}</span><span class="sc-sub">${sub}</span></div>`;
+}
+function serviceCentreBand(){
+const C = S.sc; if(!C) return '';
+const top = extra => `<div class="sc-top"><span class="sc-t">Service centre</span><span class="sc-n">Repairs · operational, not sales</span>${extra||''}</div>`;
+if(C.error) return `<div class="sc-band" data-sc="band">${top()}<div class="sc-err">Could not load the Service centre.<br><span class="sub">${esc(C.error)}</span></div></div>`;
+if(C.failClosed) return `<div class="sc-band" data-sc="band">${top()}<div class="sc-err">The Repairs pipeline could not be resolved — the Service centre is hidden rather than risk showing the wrong jobs.</div></div>`;
+const c = scCompute(C);
+const f = y => new Date(y+'T00:00:00Z').toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'UTC'});
+const ap = x => x==null ? '—' : (x.approx?'≈':'')+x.days+'d';
+const total = c.stages.reduce((s,x)=>s+x.n,0);
+const bar = total ? c.stages.filter(s=>s.n).map(s=>`<i class="${s.ready?'rdy':''}" style="flex:${s.n}"></i>`).join('') : '';
+const leg = c.stages.map(s=>`<span data-st="${esc(s.name)}">${esc(s.name)} <b>${s.n}</b></span>`).join('');
+const activeCell = `<div class="sc-cell" data-sc="active" data-tab="repairs"><span class="sc-lab">Active jobs</span><span class="sc-num" data-v="${c.active}">${c.active}</span><div class="sc-bar">${bar}</div><div class="sc-leg">${leg}</div></div>`;
+const worst = c.stuck[0];
+const stuckCell = scCell('stuck','Stuck',c.stuck.length, c.stuck.length ? `oldest <b>${worst.shown}d</b>` : 'None past threshold', c.stuck.length ? (c.stuck.some(x=>x.hi)?'rose':'amber') : 'green');
+const estCell = scCell('estimate','Estimate awaiting decision',c.estimate.count, c.estimate.count ? `oldest <b>${c.estimate.oldest==null?'—':c.estimate.oldest+'d'}</b>${c.estimate.attn?` · ${c.estimate.attn} past ${SC_EST_DAYS}d`:''}` : 'None waiting', c.estimate.attn?'amber':(c.estimate.count?'':'green'));
+const rdyCell = scCell('ready','Ready to return',c.ready.count, c.ready.count ? `waiting <b>${ap(c.ready.oldest)}</b> oldest` : 'None waiting', c.ready.stuck?'amber':(c.ready.count?'':'green'));
+const retCell = scCell('returned','Returned · last 7 days',c.returned.count, `${esc(f(c.returned.from))} – ${esc(f(c.today))}`, '').replace('class="sc-cell ','title="Physical returns by repairs.returned_at; returned jobs with no return date are not counted" class="sc-cell ');
+const rows = c.stuck.slice(0,2).map(x=>`<div class="sc-sr" data-deal="${x.id}" data-sc="stuckrow"><span class="nm">${esc(x.title)}${x.customer?` · ${esc(x.customer)}`:''}</span><span class="st">${esc(x.stage)} · ${x.stageAge==null?'stage age unknown':(x.approx?'≈':'')+x.stageAge+'d in stage'}${x.jobAge!=null&&x.jobAge>=SC_CAP_DAYS?` · received ${x.jobAge}d ago`:''}</span><span class="ag ${x.hi?'hi':''}">${x.approx?'≈':''}${x.shown}d</span></div>`).join('');
+const more = c.stuck.length>2 ? `<span class="sc-more" data-sc="more" data-tab="repairs">+${c.stuck.length-2} more in Repairs →</span>` : '';
+const stuckBlock = c.stuck.length ? `<div class="sc-stuck" data-sc="stucklist"><div class="sc-stl"><span>Oldest stuck jobs</span>${more}</div>${rows}</div>` : '';
+const unrep = `<span class="sc-n" data-sc="unrep">Unrepairable <b style="color:var(--paper);font-weight:600">${c.unrepairable}</b> · not active</span>`;
+return `<div class="sc-band" data-sc="band">${top(unrep+`<button class="sc-go" data-sc="open" data-tab="repairs">Open Repairs →</button>`)}<div class="sc-row">${activeCell}<div class="sc-metrics">${stuckCell}${estCell}${rdyCell}${retCell}</div></div>${stuckBlock}</div>`;
+}
+
+/* ── Owner Dashboard · Phase D: "Team" + "Lead sources" (owner-only, READ-ONLY apart from the existing target Save buttons) ──
+   Replaces the old Team targets / Team performance / Leads-by-source donut / Recent updates / Product availability blocks.
+   Uses the Phase B period chips (S.pbPeriod) -- there is no second period control. Retail Sales only: Repairs are excluded
+   fail-CLOSED and Dealer deals never enter a sales, money or source figure (a small operational Dealer note is the only mention).
+     Leads          = Retail deals created in the period (IST).
+     Estimates sent = Retail deals whose estimate_sent_at falls in the period.
+     Won / Won ₹    = EXACTLY the Phase B Sales Won set (pbCompute's rule: latest valid non-Won -> Won stage_event inside the period),
+                      credited to the deal's CURRENT assignee.
+     Money received = EXACTLY the Phase B dated, net-of-reversals Retail receipts, credited to the CURRENT assignee of the receipt's deal.
+     Missed follow-ups = the Phase A set (S.ownerAttn.fu.missed); "scheduled" = every open follow-up (same attribution rule as Phase A).
+   Attribution = the deal's current assigned_to. No assignment history exists, so re-assigning a deal moves its past wins, money
+   and leads to the new assignee. Deals held by an owner/admin form an "Owner-held" row; deals with no (or an inactive) assignee form
+   "Unassigned", so team totals always equal the Phase B tiles. Reply time is deliberately absent: deals.first_response_at is never written. ── */
+const PD_UN = 'unassigned', PD_OWN = 'owner';
+const PD_MOB_ROWS = 4; // mobile shows the first 4 rows until "Show all"
+function pdWho(id){
+if(id==null) return PD_UN;
+const p = S.profiles.find(x=>x.id===id);
+if(!p) return PD_UN;
+return p.role==='cre' ? id : PD_OWN;
+}
+async function loadTeamSources(){
+const D = { failClosed:false, error:null };
+try{ await fillTeamSources(D); }catch(e){ D.error = (e&&e.message)||String(e); }
+S.pd = D;
+}
+async function fillTeamSources(D){
+const rid = repairsPipelineId();
+if(rid==null || !S.pipelines.some(p=>p.name==='Retail Sales')){ D.failClosed = true; return; }
+const [deals, fus] = await Promise.all([
+fetchAllPages(()=>sb.from('deals').select('id,pipeline_id,stage_id,assigned_to,source_id,created_at,estimate_sent_at').neq('pipeline_id',rid).order('id')),
+fetchAllPages(()=>sb.from('follow_ups').select('id,assigned_to,due_date,deals(pipeline_id,assigned_to)').eq('done',false).order('id'))
+]);
+D.deals = deals.filter(d=>isNonRepairsPipeline(d.pipeline_id));
+D.sched = new Map(); const seen = new Set();
+for(const r of fus){
+if(seen.has(r.id) || !r.due_date) continue; seen.add(r.id);
+const d = r.deals; if(!d || !isNonRepairsPipeline(d.pipeline_id)) continue;
+const k = pdWho(r.assigned_to||d.assigned_to||null);
+D.sched.set(k,(D.sched.get(k)||0)+1);
+}
+}
+function pdCompute(D,P,c){
+const R = c.R, inP = ms => ms!=null && !isNaN(ms) && ms>=R.start && ms<R.end;
+const byId = new Map(D.deals.map(d=>[d.id,d]));
+const rows = new Map();
+const row = k => { if(!rows.has(k)) rows.set(k,{k,leads:0,est:0,won:0,wonV:0,money:0,sched:0,missed:0}); return rows.get(k); };
+const dealWho = id => pdWho(byId.get(id)?.assigned_to ?? null);
+S.profiles.filter(p=>p.role==='cre' && p.is_active).forEach(p=>row(p.id));
+D.deals.forEach(d=>{
+if(!isRetailPipeline(d.pipeline_id)) return;
+if(inP(Date.parse(d.created_at))) row(pdWho(d.assigned_to)).leads++;
+if(d.estimate_sent_at && inP(Date.parse(d.estimate_sent_at))) row(pdWho(d.assigned_to)).est++;
+});
+P.wonDeals.forEach(d=>{
+const t = P.latest.get(d.id); if(t==null || !inP(t)) return;
+const r = row(dealWho(d.id)); r.won++; r.wonV += Number(d.value||0);
+});
+P.receipts.forEach(r=>{
+if(r.source==='legacy_migration' || r.occurred_at==null) return;
+if(!inP(Date.parse(r.occurred_at))) return;
+row(dealWho(r.deal_id)).money += Number(r.amount||0);
+});
+D.sched.forEach((n,k)=>{ row(k).sched += n; });
+const A = S.ownerAttn, missedOk = !!A && !A.failClosed && !A.error;
+if(missedOk) A.fu.missed.forEach(i=>{ row(pdWho(i.creId)).missed++; });
+const nameOf = k => k===PD_OWN ? 'Owner-held' : k===PD_UN ? 'Unassigned / inactive' : (S.profiles.find(p=>p.id===k)?.full_name||'Unassigned / inactive');
+const list = [...rows.values()].map(r=>({...r,name:nameOf(r.k),cre:r.k!==PD_OWN && r.k!==PD_UN,prof:S.profiles.find(p=>p.id===r.k)||null}));
+const cres = list.filter(r=>r.cre).sort((a,b)=>b.missed-a.missed || b.wonV-a.wonV || (a.name<b.name?-1:1));
+const rest = [PD_OWN,PD_UN].map(k=>list.find(r=>r.k===k)).filter(r=>r && (r.leads||r.est||r.won||r.wonV||r.money||r.sched||r.missed));
+const out = [...cres,...rest];
+const tot = out.reduce((a,r)=>({leads:a.leads+r.leads,est:a.est+r.est,won:a.won+r.won,wonV:a.wonV+r.wonV,money:a.money+r.money,missed:a.missed+r.missed,sched:a.sched+r.sched}),{leads:0,est:0,won:0,wonV:0,money:0,missed:0,sched:0});
+const reconciled = tot.won===c.sales.count && Math.abs(tot.wonV-c.sales.value)<0.5 && Math.abs(tot.money-c.money.net)<0.5;
+return { rows:out, tot, reconciled, missedOk };
+}
+function pdSourceCompute(D,P,c){
+const R = c.R, inP = ms => ms!=null && !isNaN(ms) && ms>=R.start && ms<R.end;
+const byId = new Map(D.deals.map(d=>[d.id,d]));
+const active = new Map(S.sources.map(s=>[s.id,s.name]));
+const rows = new Map();
+const key = sid => sid==null ? 'unknown' : active.has(sid) ? 's'+sid : 'inactive';
+const name = k => k==='unknown' ? 'Unknown' : k==='inactive' ? 'Other (inactive source)' : active.get(Number(k.slice(1)));
+const row = k => { if(!rows.has(k)) rows.set(k,{k,name:name(k),leads:0,won:0,wonV:0}); return rows.get(k); };
+D.deals.forEach(d=>{ if(isRetailPipeline(d.pipeline_id) && inP(Date.parse(d.created_at))) row(key(d.source_id)).leads++; });
+P.wonDeals.forEach(d=>{
+const t = P.latest.get(d.id); if(t==null || !inP(t)) return;
+const r = row(key(byId.get(d.id)?.source_id ?? null)); r.won++; r.wonV += Number(d.value||0);
+});
+const all = [...rows.values()];
+const un = rows.get('unknown') || {leads:0,won:0,wonV:0};
+const known = all.filter(r=>r.k!=='unknown').sort((a,b)=>b.wonV-a.wonV || b.leads-a.leads || (a.name<b.name?-1:1));
+const tot = all.reduce((a,r)=>({leads:a.leads+r.leads,won:a.won+r.won,wonV:a.wonV+r.wonV}),{leads:0,won:0,wonV:0});
+const reconciled = tot.won===c.sales.count && Math.abs(tot.wonV-c.sales.value)<0.5;
+const stg = new Map(S.stages.map(s=>[s.id,s]));
+const dl = { has:S.pipelines.some(p=>isDealerPipeline(p.id)), n:0, open:0 };
+D.deals.forEach(d=>{
+if(!isDealerPipeline(d.pipeline_id)) return;
+if(inP(Date.parse(d.created_at))) dl.n++;
+const s = stg.get(d.stage_id); if(s && !s.is_lost && !s.is_delivered) dl.open++;
+});
+return { rows:[...(rows.has('unknown')?[rows.get('unknown')]:[]),...known], un, tot, reconciled, dealer:dl };
+}
+function pdPct(v,t){ return t>0 ? Math.round(v/t*100) : null; }
+function pdTarget(v,t,tone){
+if(!(t>0)) return `<span class="pd-s mut" data-pdk="tgtnone">No target set</span>`;
+const pct = pdPct(v,t);
+return `<span class="pd-tg" data-pdk="tgt" data-pct="${pct}"><span class="bar"><i style="width:${Math.min(100,pct)}%${tone?';background:'+tone:''}"></i></span><em>${pct}% of ${rs(t)}</em></span>`;
+}
+function pdTeamPanel(T,c,key){
+const month = key==='month';
+const cell = (l,k,inner,cls) => `<div class="pd-c ${cls||''}" data-pdk="${k}"><i class="pd-l">${l}</i>${inner}</div>`;
+const fuCell = r => {
+if(!T.missedOk) return cell('Follow-ups','fu','<span class="pd-s mut" title="Follow-up data could not be loaded">—</span>','fu');
+if(!r.sched && !r.missed) return cell('Follow-ups','fu','<span class="pd-s mut" data-pdk="nofu">No follow-ups scheduled</span>','fu none');
+if(r.missed) return cell('Follow-ups','fu',`<b class="pd-v bad" data-v="${r.missed}">${r.missed}</b><span class="pd-s">missed · ${r.sched} scheduled</span>`,'fu bad');
+return cell('Follow-ups','fu',`<b class="pd-v ok" data-v="0">0</b><span class="pd-s">missed · ${r.sched} scheduled</span>`,'fu ok');
+};
+const body = T.rows.map((r,i)=>{
+const t1 = Number(r.prof?.monthly_sales_target||0), t2 = Number(r.prof?.monthly_collection_target||0);
+const wonSub = `<span class="pd-s">${r.won} deal${r.won===1?'':'s'}</span>${month&&r.cre?pdTarget(r.wonV,t1):''}`;
+const monSub = `<span class="pd-s">dated receipts</span>${month&&r.cre?pdTarget(r.money,t2,'#9BC489'):''}`;
+return `<div class="pd-r${i>=PD_MOB_ROWS?' pd-x':''}" data-pd="row" data-cre="${esc(String(r.k))}"><div class="pd-c pd-nm" data-pdk="name"><b>${esc(r.name)}</b>${r.k===PD_OWN?'<span class="pd-s">deals held by the owner</span>':r.k===PD_UN?'<span class="pd-s">no active assignee</span>':''}</div>
+${cell('Leads','leads',`<b class="pd-v" data-v="${r.leads}">${r.leads}</b>`)}
+${cell('Estimates sent','est',`<b class="pd-v" data-v="${r.est}">${r.est}</b>`)}
+${fuCell(r)}
+${cell('Retail Sales Won','won',`<b class="pd-v" data-v="${Math.round(r.wonV)}">${rs(Math.round(r.wonV))}</b>${wonSub}`)}
+${cell('Money received','money',`<b class="pd-v" data-v="${Math.round(r.money)}">${rs(Math.round(r.money))}</b>${monSub}`)}</div>`;
+}).join('');
+const nHid = Math.max(0,T.rows.length-PD_MOB_ROWS);
+const showAll = nHid>0 ? `<button type="button" class="pd-showall" data-pdk="showall" data-pdtoggle="1" aria-expanded="${S.pdAll?'true':'false'}">${S.pdAll?'Show fewer':'Show all '+T.rows.length}</button>` : '';
+const t = T.tot;
+const total = `<div class="pd-r pd-tot" data-pd="total"><div class="pd-c pd-nm"><b>Team total</b></div>
+${cell('Leads','leads',`<b class="pd-v" data-v="${t.leads}">${t.leads}</b>`)}
+${cell('Estimates sent','est',`<b class="pd-v" data-v="${t.est}">${t.est}</b>`)}
+${cell('Follow-ups','fu',T.missedOk?`<b class="pd-v${t.missed?' bad':''}" data-v="${t.missed}">${t.missed}</b><span class="pd-s">missed</span>`:'<span class="pd-s mut">—</span>')}
+${cell('Retail Sales Won','won',`<b class="pd-v" data-v="${Math.round(t.wonV)}">${rs(Math.round(t.wonV))}</b><span class="pd-s">${t.won} deal${t.won===1?'':'s'}</span>`)}
+${cell('Money received','money',`<b class="pd-v" data-v="${Math.round(t.money)}">${rs(Math.round(t.money))}</b><span class="pd-s">net of reversals</span>`)}</div>`;
+const rec = T.reconciled
+? `<div class="pb-tot" data-pdk="recon">Won <b>${rs(Math.round(t.wonV))}</b> = Sales Won <span class="ok" aria-label="reconciled">✓</span> · Money <b>${rs(Math.round(t.money))}</b> = Money received <span class="ok" aria-label="reconciled">✓</span></div>`
+: `<div class="pb-tot warn" data-pdk="recon" role="alert">Reconciliation warning — team rows total Won <b>${rs(Math.round(t.wonV))}</b> / Money <b>${rs(Math.round(t.money))}</b> but Money &amp; sales shows Sales Won <b>${rs(Math.round(c.sales.value))}</b> / Money received <b>${rs(Math.round(c.money.net))}</b></div>`;
+const crew = S.profiles.filter(p=>p.role==='cre' && p.is_active);
+const tgRows = crew.map(p=>`<div class="pd-tr"><span class="nm">${esc(p.full_name)}</span>
+<label><i>Sales</i><input data-targetinput="${p.id}" type="number" inputmode="decimal" min="0" placeholder="₹ / month" value="${Number(p.monthly_sales_target||0)||''}"><button class="btn ghost" data-savetarget="${p.id}">Save</button></label>
+<label><i>Collection</i><input data-collinput="${p.id}" type="number" inputmode="decimal" min="0" placeholder="₹ / month" value="${Number(p.monthly_collection_target||0)||''}"><button class="btn ghost" data-savecoll="${p.id}">Save</button></label></div>`).join('');
+const tg = crew.length ? `<details class="pb-how pd-tgt" data-pdk="targets"><summary>Set monthly targets</summary><p>Sales = Retail Won ₹ · Collection = dated Money received ₹ (net) · per calendar month.</p>${tgRows}</details>` : '';
+const noteTg = month ? '' : '<div class="pd-hint" data-pdk="tgthint">Monthly target progress shows on This month.</div>';
+const quiet = !T.rows.length ? `<div class="empty" style="padding:18px 10px">No CRE activity in this period.</div>` : '';
+const head = `<div class="pd-hd"><span>CRE</span><span>Leads</span><span title="Retail estimates sent in the period (by estimate sent date)">Estimates sent</span><span title="Phase A missed follow-ups (now) — scheduled = all open follow-ups">Follow-ups · now</span><span title="Retail Sales Won ₹ — deals won in the period, credited to the deal's current assignee">Retail Sales Won</span><span title="Dated Retail receipts in the period, net of reversals">Money received</span></div>`;
+return `<div class="pb-panel pd-panel" data-pd="team" data-pdall="${S.pdAll?1:0}"><div class="pb-ph"><span class="pb-pt">Team</span><span class="pb-pn">${esc(pbLabel(c.R,S.pb.today))}</span></div>
+${T.rows.length?head+body+showAll+total+rec:quiet}${noteTg}${tg}
+<div class="pb-foot" data-pdk="note">Retail only · Repairs excluded · credit goes to the deal's current assignee</div></div>`;
+}
+function pdSourcesPanel(SR,c){
+const max = Math.max(1,...SR.rows.map(r=>r.wonV));
+const un = SR.un;
+const parts = [];
+if(SR.tot.leads>0 && un.leads>0) parts.push(`<b>${un.leads}</b> of <b>${SR.tot.leads}</b> leads`);
+if(SR.tot.won>0 && un.won>0) parts.push(`<b>${un.won}</b> of <b>${SR.tot.won}</b> Won deals`);
+const warn = parts.length ? `<div class="pd-warn" data-pdk="unknown" role="note"><b>Source not recorded</b> on ${parts.join(' and ')} — channels can't be compared until it is set.</div>` : '';
+const row = r => {
+return `<div class="pd-sr${r.k==='unknown'?' unk':''}" data-pd="srcrow" data-src="${esc(r.k)}"><div class="top"><span class="nm">${esc(r.name)}</span><span class="wl" data-pdk="wl" title="Won in the period (by won date) / leads created in the period — not a conversion rate"><b>${r.won}</b> / ${r.leads}</span><span class="vl" data-v="${Math.round(r.wonV)}">${rs(Math.round(r.wonV))}</span></div><div class="bar"><i style="width:${Math.round(r.wonV/max*100)}%"></i></div></div>`;
+};
+const quiet = !SR.rows.length ? `<div class="empty" style="padding:18px 10px">No Retail leads or Won deals in this period.</div>` : '';
+const hdr = SR.rows.length ? `<div class="pd-sh"><span>Source</span><span>Won / Leads</span><span>Won ₹</span></div>` : '';
+const rec = !SR.rows.length ? '' : SR.reconciled
+? `<div class="pb-tot" data-pdk="srecon">Won ₹ <b>${rs(Math.round(SR.tot.wonV))}</b> = Sales Won <span class="ok" aria-label="reconciled">✓</span> · ${SR.tot.leads} Retail lead${SR.tot.leads===1?'':'s'}</div>`
+: `<div class="pb-tot warn" data-pdk="srecon" role="alert">Reconciliation warning — source rows total <b>${rs(Math.round(SR.tot.wonV))}</b> but Sales Won is <b>${rs(Math.round(c.sales.value))}</b> (does not reconcile)</div>`;
+const d = SR.dealer;
+const dl = d.has ? `<div class="pd-dealer" data-pdk="dealer">Dealer (not in table): <b>${d.n}</b> new in period · <b>${d.open}</b> open now</div>` : '';
+return `<div class="pb-panel pd-panel" data-pd="sources"><div class="pb-ph"><span class="pb-pt">Lead sources</span><span class="pb-pn">${esc(pbLabel(c.R,S.pb.today))}</span></div>
+${warn}${hdr}${SR.rows.map(row).join('')}${quiet}${rec}${dl}
+<div class="pb-foot" data-pdk="note">Retail only · Repairs excluded</div></div>`;
+}
+function phaseDSection(){
+const P = S.pb, D = S.pd;
+if(!P || !D) return '';
+const key = PB_PERIODS.some(p=>p[0]===S.pbPeriod) ? S.pbPeriod : 'month';
+const head = `<div class="od-head pd-head"><h2 id="pd-anchor" style="margin-top:0">Team &amp; lead sources</h2><span class="pd-per">uses the period chosen in Money &amp; sales</span></div>`;
+if(P.error || P.failClosed) return head+`<div class="card" data-pd="hold"><div class="pb-err">Team and Lead sources are hidden because Money &amp; sales could not be loaded or the Repairs pipeline could not be resolved — they are never shown from unverified data.</div></div>`;
+if(D.error) return head+`<div class="card" data-pd="hold"><div class="empty">Could not load this section.<br><span class="sub">${esc(D.error)}</span></div></div>`;
+if(D.failClosed) return head+`<div class="card" data-pd="hold"><div class="pb-err">Retail Sales or Repairs pipeline could not be resolved — Team and Lead sources are hidden rather than risk mixing Repairs in.</div></div>`;
+const c = pbCompute(P,key);
+return head+`<div class="pd-grid">${pdTeamPanel(pdCompute(D,P,c),c,key)}${pdSourcesPanel(pdSourceCompute(D,P,c),c)}</div>`;
 }
 
 async function loadTab(){
@@ -886,40 +1747,12 @@ const { data, error } = await sb.from('product_movement').select('*');
 if(error) throw error; S.movement = data||[];
 }
 if(S.tab==='dashboard'){
-const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
-const trendSince = new Date(Date.now() - 13*86400000).toISOString().slice(0,10);
-const openIds = S.stages.filter(s=>!s.is_lost && !s.is_delivered && isNonRepairsPipeline(s.pipeline_id)).map(s=>s.id);
-const pipeRepId = repairsPipelineId();
-const [teamR,trendR,srcR,prodR,duesR,pipeR] = await Promise.all([
-sb.from('cre_performance_daily').select('*').gte('day', since),
-sb.from('cre_performance_daily').select('day,value_delivered,money_collected').gte('day', trendSince),
-(pipeRepId!=null ? sb.from('deals').select('source_id').gte('created_at', since).neq('pipeline_id', pipeRepId) : sb.from('deals').select('source_id').in('stage_id', [-1])),
-sb.from('product_movement').select('*').limit(5),
-sb.from('customer_balance_summary').select('total_balance'),
-(pipeRepId!=null ? sb.from('deals').select('value').in('stage_id', openIds.length?openIds:[-1]).neq('pipeline_id', pipeRepId) : sb.from('deals').select('value').in('stage_id', [-1]))
-]);
-if(teamR.error) throw teamR.error; S.team = teamR.data||[];
-if(trendR.error) throw trendR.error;
-const byDay={};
-(trendR.data||[]).forEach(r=>{
-const k=r.day; if(!byDay[k]) byDay[k]={day:k,value:0,money:0};
-byDay[k].value += Number(r.value_delivered||0); byDay[k].money += Number(r.money_collected||0);
-});
-S.dashTrend = Object.values(byDay).sort((a,b)=>a.day.localeCompare(b.day));
-if(srcR.error) throw srcR.error;
-const bySrc={};
-(srcR.data||[]).forEach(r=>{ const k=r.source_id??'none'; bySrc[k]=(bySrc[k]||0)+1; });
-S.dashSources = Object.entries(bySrc).map(([sid,count])=>({
-name: sid==='none' ? 'Unknown' : (S.sources.find(s=>s.id===Number(sid))?.name || 'Unknown'), count
-})).sort((a,b)=>b.count-a.count);
-if(prodR.error) throw prodR.error; S.dashProducts = prodR.data||[];
-if(duesR.error) throw duesR.error;
-S.dashDuesTotal = (duesR.data||[]).reduce((a,b)=>a+Number(b.total_balance||0),0);
-if(pipeR.error) throw pipeR.error;
-S.dashPipelineValue = (pipeR.data||[]).reduce((a,b)=>a+Number(b.value||0),0);
 await loadChaseSources();
 await loadDashboardShared();
 await loadOwnerAttention();
+await loadPhaseB();
+await loadServiceCentre();
+await loadTeamSources();
 }
 if(S.tab==='mydash' || S.tab==='followups' || S.tab==='myperf'){
 const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
@@ -1036,16 +1869,23 @@ SOON_TABS.includes(S.tab) ? viewComingSoon(S.tab) : viewNew()
 wire();
 }
 
+const OW_TITLES = {dashboard:'Dashboard',pipeline:'Deals',customers:'Customers',products:'Products',money:'Money in',dispatch:'Dispatch',orders:'Orders',dues:'Dues',moving:'Moving',repairs:'Repairs',new:'Add',addlead:'Add lead',addrepair:'Add repair',followups:'Follow-ups',estimates:'Estimates'};
+const OW_DATE_FMT = new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',weekday:'short',day:'numeric',month:'short'});
 function shell(inner){
-if(!isOwner()) return shellCRE(inner);
-const t=(k,l)=>`<button data-tab="${k}" class="${S.tab===k?'on':''}">${l}</button>`;
+if(!isOwner()){ document.body.classList.remove('owner-ui'); return shellCRE(inner); }
+document.body.classList.add('owner-ui');
+const t=(k,l,i)=>`<button data-tab="${k}" class="${S.tab===k?'on':''}">${ic(i)}<span>${l}</span></button>`;
+const nm=S.me?.full_name||'';
+const ini=nm.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'O';
+const narrow = ['new','addlead','addrepair'].includes(S.tab) || !!S.deal || !!S.customer;
 return `<header><div class="hbar">
 <div class="mark">StageMax<span> CRM</span></div>
-<div class="who">${esc(S.me?.full_name||'')}<button id="out">Sign out</button></div>
+<div class="ow-title">${esc(OW_TITLES[S.tab]||'Dashboard')}</div><div class="ow-date">${OW_DATE_FMT.format(new Date())}</div>
+<div class="who"><span class="ow-av">${esc(ini)}</span>${esc(nm)}<button id="out">Sign out</button></div>
 </div></header>
-<div class="wrap">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
+<div class="wrap${narrow?' ow-narrow':''}">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav>${t('dashboard','Dashboard')}${t('pipeline','Deals')}${t('customers','Customers')}${t('products','Products')}${t('money','Money in')}${t('dispatch','Dispatch')}${t('dues','Dues')}${t('moving','Moving')}${t('repairs','Repairs')}${t('new','Add')}</nav>`;
+<nav><div class="ow-brand">StageMax<span>CRM</span></div><div class="ow-grp g1">Command</div><div class="ow-grp g2">Sales</div><div class="ow-grp g3">Money</div><div class="ow-grp g4">Operations</div>${t('dashboard','Dashboard','home')}${t('pipeline','Deals','target')}${t('customers','Customers','users')}${t('products','Products','box')}${t('money','Money in','wallet')}${t('dispatch','Dispatch','truck')}${t('dues','Dues','clock')}${t('moving','Moving','chart')}${t('repairs','Repairs','wrench')}${t('new','Add','plus')}</nav>`;
 }
 
 /* ── CRE app shell — STAGEMAX reference redesign (Today page + shared chrome) ── */
@@ -2393,37 +3233,6 @@ const m=Math.round(s/60); if(m<60) return m+'m ago';
 const h=Math.round(m/60); if(h<24) return h+'h ago';
 const d=Math.round(h/24); return d+'d ago';
 }
-function recentUpdates(){
-if(!S.activity.length) return `<div class="card"><h2 style="margin-top:0">Recent updates</h2><div class="empty">Nothing logged yet.</div></div>`;
-const rows = S.activity.map(a=>{
-const who = S.profiles.find(p=>p.id===a.actor_id)?.full_name || '';
-const label = VERB_LABEL[a.verb] || a.verb;
-const name = a.deals?.customers?.name || a.detail || '';
-const whoTxt = isOwner() && who ? who+' · ' : '';
-return `<div class="item" ${a.deal_id?`data-deal="${a.deal_id}" style="cursor:pointer"`:''}>
-<div class="grow">${esc(label)}${name?' — '+esc(name):''}<span class="sub" style="display:block">${esc(whoTxt)}${timeAgo(a.created_at)}</span></div>
-</div>`;
-}).join('');
-return `<div class="card"><h2 style="margin-top:0">Recent updates</h2>${rows}</div>`;
-}
-
-function productAvailability(){
-const cats = {};
-S.products.forEach(p=>{
-const k=p.category||'Other';
-if(!cats[k]) cats[k]={name:k,total:0,inStock:0};
-cats[k].total++; if(p.in_stock) cats[k].inStock++;
-});
-const list = Object.values(cats).sort((a,b)=>b.total-a.total).slice(0,8);
-if(!list.length) return '';
-const body = list.map(c=>`<div class="card">
-<div class="n">${esc(c.name)}</div>
-<div class="sub" style="margin-top:3px">${c.total} product${c.total===1?'':'s'}</div>
-<span class="tag ${c.inStock?'paid':'due'}" style="margin-top:7px;display:inline-block">${c.inStock} in stock</span>
-</div>`).join('');
-return `<h2>Product availability</h2><div class="pav">${body}</div>`;
-}
-
 function targetsCard(){
 const t1 = Number(S.me?.monthly_sales_target||0), t2=Number(S.me?.monthly_collection_target||0);
 if(!t1 && !t2) return '';
@@ -2440,27 +3249,6 @@ ${t2?`<div>
 <div class="bar"><i style="width:${pct2}%;background:var(--cyan)"></i></div>
 </div>`:''}
 </div>`;
-}
-
-function teamTargets(){
-const crew = S.profiles.filter(p=>p.role==='cre' && p.is_active);
-if(!crew.length) return '';
-const byCre={};
-S.monthPerf.forEach(r=>{ const k=r.cre_id; if(!k) return; if(!byCre[k]) byCre[k]={value:0,money:0}; byCre[k].value+=Number(r.value_delivered||0); byCre[k].money+=Number(r.money_collected||0); });
-const rows = crew.map(p=>{
-const sums = byCre[p.id]||{value:0,money:0};
-const t1=Number(p.monthly_sales_target||0);
-const pct = t1>0 ? Math.min(100,Math.round(sums.value/t1*100)) : 0;
-return `<div style="margin-bottom:14px">
-<div class="row"><span class="grow name">${esc(p.full_name)}</span><span class="sub">${rs(sums.value)}${t1?' / '+rs(t1):''}</span></div>
-<div class="bar"><i style="width:${pct}%"></i></div>
-<div class="row" style="margin-top:7px;gap:6px">
-<input data-targetinput="${p.id}" type="number" inputmode="decimal" placeholder="Set monthly sales target" value="${t1||''}" style="flex:1">
-<button class="btn ghost" style="margin-top:0;width:auto;padding:9px 14px" data-savetarget="${p.id}">Save</button>
-</div>
-</div>`;
-}).join('');
-return `<div class="card"><h2 style="margin-top:0">Team targets · this month</h2>${rows}</div>`;
 }
 
 function searchResultsBlock(){
@@ -2737,73 +3525,10 @@ render();
 }
 
 function viewDashboard(){
-const ranges=[{d:1,l:'Today'},{d:7,l:'7 days'},{d:30,l:'30 days'}];
-const rangeLabel = ranges.find(r=>r.d===S.teamRange)?.l || '';
-const chips = ranges.map(r=>`<button class="chip ${S.teamRange===r.d?'on':''}" data-range="${r.d}">${r.l}<b></b></button>`).join('');
-const byCre = {};
-S.team.forEach(row=>{
-const k=row.cre_id; if(!k) return;
-if(!byCre[k]) byCre[k]={name:row.full_name, leads:0, value:0, money:0, replySum:0, replyN:0};
-byCre[k].leads += Number(row.leads_handled||0);
-byCre[k].value += Number(row.value_delivered||0);
-byCre[k].money += Number(row.money_collected||0);
-const reply = row.avg_reply_minutes ?? row.avg_reply_min;
-if(reply!=null){ byCre[k].replySum += Number(reply); byCre[k].replyN++; }
-});
-const rows = Object.values(byCre).sort((a,b)=>b.money-a.money);
-const teamCards = rows.length ? rows.map(r=>`<div class="card">
-<div class="row"><div class="grow name">${esc(r.name)}</div><div class="amt">${rs(r.money)}</div></div>
-<div class="row" style="margin-top:9px;gap:7px">
-<span class="tag">${r.leads} leads</span>
-<span class="tag">${rs(r.value)} value</span>
-${r.replyN?`<span class="tag">${Math.round(r.replySum/r.replyN)}m reply</span>`:''}
-</div>
-</div>`).join('') : `<div class="empty">No activity in this period.</div>`;
-
-const maxRev = Math.max(1, ...S.dashProducts.map(m=>Number(m.revenue||0)));
-const products = S.dashProducts.length ? S.dashProducts.map(m=>`<div class="card">
-<div class="row"><div class="grow">
-<div class="name">${esc(m.product)}</div>
-<div class="sub">${esc(m.brand||'Unassigned')}</div>
-</div><div class="amt" style="font-size:14px">${rs(m.revenue)}</div></div>
-<div class="bar"><i style="width:${Math.round(Number(m.revenue||0)/maxRev*100)}%"></i></div>
-</div>`).join('') : `<div class="empty">No sales recorded yet.</div>`;
-
 return `${dashHero()}
 ${ownerAttentionBand()}
-${quickActions()}
-<div class="cols3">
-${salesColumn('Team sales · this month')}
-${pipelineColumn('Team pipeline')}
-${activeDealsColumn('Active deals', true)}
-</div>
-${teamTargets()}
-${recentUpdates()}
-${productAvailability()}
-
-<h2>Outstanding &amp; open pipeline</h2>
-<div class="stats">
-<div class="stat"><div class="v">${rs(S.dashPipelineValue)}</div><div class="l">Open pipeline value</div></div>
-<div class="stat"><div class="v" style="color:#E8899E">${rs(S.dashDuesTotal)}</div><div class="l">Outstanding dues</div></div>
-</div>
-
-<h2>Sales &amp; collections · last 14 days</h2>
-<div class="chips">${chips}</div>
-<div class="card">${trendChart(S.dashTrend)}
-<div class="row" style="margin-top:10px;gap:16px">
-<div class="legend"><span class="dot" style="background:var(--amber)"></span><span class="sub">Value delivered</span></div>
-<div class="legend"><span class="dot" style="background:var(--cyan)"></span><span class="sub">Collected</span></div>
-</div>
-</div>
-
-<h2>Leads by source · ${esc(rangeLabel)}</h2>
-<div class="card">${donutChart(S.dashSources)}</div>
-
-<h2>Top products · all time</h2>
-${products}
-
-<h2>Team performance · ${esc(rangeLabel)}</h2>
-${teamCards}`;
+${phaseBSection()}
+${phaseDSection()}`;
 }
 
 /* ── customers (directory + profile) ──
@@ -3239,6 +3964,15 @@ const p=S.profiles.find(x=>x.id===id); if(p) p.monthly_sales_target=v;
 loadTab();
 }
 
+async function saveCollTarget(id,btn){
+btn.disabled=true;
+const input=document.querySelector(`[data-collinput="${id}"]`);
+const v=Math.max(0,Number(input.value||0)||0);
+await sb.from('profiles').update({monthly_collection_target:v}).eq('id',id);
+const p=S.profiles.find(x=>x.id===id); if(p) p.monthly_collection_target=v;
+loadTab();
+}
+
 async function runSearch(q){
 q=q.trim();
 if(!q){ S.search=''; S.searchResults=null; render(); return; }
@@ -3274,6 +4008,8 @@ document.querySelectorAll('[data-globalest]').forEach(c=>c.onclick=()=>openDeal(
 const payBtn=document.getElementById('payRecord'); if(payBtn) payBtn.onclick=()=>recordPayment(S.deal);
 document.querySelectorAll('[data-reverse-receipt]').forEach(b=>b.onclick=()=>reverseReceiptAction(b.dataset.reverseReceipt));
 document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{ S.teamRange=Number(b.dataset.range); loadTab(); });
+document.querySelectorAll('[data-pbperiod]').forEach(b=>b.onclick=()=>{ S.pbPeriod=b.dataset.pbperiod; render(); });
+document.querySelectorAll('[data-pdtoggle]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); S.pdAll=!S.pdAll; const pn=b.closest('[data-pd=team]'); if(pn) pn.dataset.pdall=S.pdAll?'1':'0'; b.setAttribute('aria-expanded',S.pdAll?'true':'false'); b.textContent=S.pdAll?'Show fewer':'Show all '+pn.querySelectorAll('[data-pd=row]').length; });
 document.querySelectorAll('[data-due]').forEach(el=>el.onclick=()=>toggleDue(el.dataset.due));
 document.querySelectorAll('[data-dispatch]').forEach(b=>b.onclick=()=>markDispatched(b.dataset.dispatch,b));
 document.querySelectorAll('[data-retaildispatch]').forEach(b=>b.onclick=()=>markRetailDispatched(b.dataset.retaildispatch,b));
@@ -3283,6 +4019,7 @@ document.querySelectorAll('[data-chase]').forEach(b=>b.onclick=()=>{ S.chaseTab=
 document.querySelectorAll('[data-donefu]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); markFollowupDone(b.dataset.donefu); });
 document.querySelectorAll('[data-oadone]').forEach(b=>b.onclick=async(e)=>{ e.stopPropagation(); const it=(S.ownerAttn?.fuItems||[]).find(x=>String(x.fuId)===b.dataset.oadone); await sb.from('follow_ups').update({done:true, done_at:new Date().toISOString()}).eq('id',b.dataset.oadone); if(it) await logActivity('followup_completed', it.dealId, it.name||''); loadTab(); });
 document.querySelectorAll('[data-savetarget]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); saveTarget(b.dataset.savetarget,b); });
+document.querySelectorAll('[data-savecoll]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); saveCollTarget(b.dataset.savecoll,b); });
 const bell=document.getElementById('bellbtn'); if(bell) bell.onclick=()=>{ const a=document.getElementById('followups-anchor'); if(a) a.scrollIntoView({behavior:'smooth'}); else if(!isOwner()){ S.tab='followups'; S.deal=null; loadTab(); } };
 const gs=document.getElementById('gsearch');
 if(gs){ gs.onkeydown=e=>{ if(e.key==='Enter') runSearch(gs.value); }; }
