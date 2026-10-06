@@ -80,13 +80,61 @@ body.owner-ui nav button.on{background:rgba(255,122,41,.13);color:var(--accent-2
 body.owner-ui nav button[data-tab="new"]{order:1;margin:0 0 4px;justify-content:center;background:var(--accent);color:#1A1206;font-weight:700;box-shadow:0 4px 14px -4px rgba(255,122,41,.55)}
 body.owner-ui nav button[data-tab="new"]:hover{background:var(--accent-2);color:#1A1206}
 body.owner-ui nav button[data-tab="new"].on{background:var(--accent);color:#1A1206;box-shadow:0 4px 14px -4px rgba(255,122,41,.55),inset 0 0 0 2px var(--accent-2)}
-body.owner-ui .ow-grp.g1{order:10}body.owner-ui nav button[data-tab="dashboard"]{order:11}
+body.owner-ui .ow-grp.g1{order:10}body.owner-ui nav button[data-tab="dashboard"]{order:11}body.owner-ui nav button[data-tab="team"]{order:12}
 body.owner-ui .ow-grp.g2{order:20}body.owner-ui nav button[data-tab="pipeline"]{order:21}body.owner-ui nav button[data-tab="customers"]{order:22}body.owner-ui nav button[data-tab="products"]{order:23}
 body.owner-ui .ow-grp.g3{order:30}body.owner-ui nav button[data-tab="money"]{order:31}body.owner-ui nav button[data-tab="dues"]{order:32}
 body.owner-ui .ow-grp.g4{order:40}body.owner-ui nav button[data-tab="dispatch"]{order:41}body.owner-ui nav button[data-tab="moving"]{order:42}body.owner-ui nav button[data-tab="repairs"]{order:43}
 body.owner-ui .wrap{max-width:1480px;margin-left:max(var(--ow-side),calc(50vw - 632px));margin-right:auto;padding:80px 32px 48px}
 body.owner-ui .wrap.ow-narrow{max-width:940px;margin-right:auto;margin-left:max(var(--ow-side),calc(50vw - 632px))}
 body.owner-ui .fab{left:calc(var(--ow-side) + 16px)}
+}
+
+/* ── Owner TEAM · V1 / T1: Team Overview (owner-only; existing tokens, no new palette) ── */
+.tm-head{margin-top:0}
+.tm-panel{margin-bottom:10px}
+.tm-panel .pb-ph{margin-bottom:7px}
+.tm-hd{display:none}
+.tm-r{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px 12px;padding:11px 0;border-top:1px solid var(--line)}
+.tm-r .tm-nm{grid-column:1/-1;display:flex;flex-direction:row;align-items:baseline;gap:9px;min-width:0}
+.tm-nm b{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-st{display:inline-flex;align-items:center;gap:5px;font:600 10.5px Archivo;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.tm-st i{width:6px;height:6px;border-radius:50%;background:#9BC489;flex:none}
+.tm-go{margin-left:auto;color:var(--muted);opacity:.45;font-size:17px;line-height:1}
+.tm-c{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tm-l{font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-style:normal}
+.tm-v{font:700 16px 'Archivo Narrow',Archivo,sans-serif;font-variant-numeric:tabular-nums;color:var(--paper)}
+.tm-v.bad{color:#E8899E}.tm-v.ok{color:#9BC489}.tm-v.hot{color:var(--amber)}
+.tm-r .tm-c[data-tmk=leads],.tm-r .tm-c[data-tmk=active],.tm-r .tm-c[data-tmk=hot],.tm-r .tm-c[data-tmk=est]{grid-column:span 4}
+.tm-r .tm-c[data-tmk=fu]{grid-column:span 8}
+.tm-r .tm-c[data-tmk=won],.tm-r .tm-c[data-tmk=money],.tm-r .tm-c[data-tmk=stgt],.tm-r .tm-c[data-tmk=ctgt]{grid-column:span 6}
+.tm-tot{background:var(--panel-2);border-radius:9px;padding:10px 10px;margin:6px -4px 0;border-top:0}
+.tm-tot .tm-nm b{text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--muted)}
+.tm-tot .tm-c:empty{display:none}
+.tm-hd+.tm-r{border-top:0}
+.tm-rs{color:var(--muted)}
+.tm-ostats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.tm-ostats .tm-c{min-width:0}
+@media (min-width:560px){
+.tm-r .tm-c[data-tmk=leads],.tm-r .tm-c[data-tmk=active],.tm-r .tm-c[data-tmk=hot],.tm-r .tm-c[data-tmk=est]{grid-column:span 2}
+.tm-r .tm-c[data-tmk=fu]{grid-column:span 4}
+.tm-ostats{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (min-width:900px) and (max-width:1359px){
+.tm-r .tm-c[data-tmk=won],.tm-r .tm-c[data-tmk=money],.tm-r .tm-c[data-tmk=stgt],.tm-r .tm-c[data-tmk=ctgt]{grid-column:span 3}
+}
+@media (min-width:1360px){
+.tm-panel{--tmcols:minmax(160px,1.5fr) 52px 78px 44px 72px minmax(124px,1.2fr) minmax(104px,1fr) minmax(104px,1fr)}
+.tm-panel.tm-m{--tmcols:minmax(160px,1.5fr) 52px 78px 44px 72px minmax(124px,1.2fr) minmax(104px,1fr) minmax(104px,1fr) minmax(118px,1.1fr) minmax(118px,1.1fr)}
+.tm-hd{display:grid;grid-template-columns:var(--tmcols);gap:12px;padding:0 0 6px;font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);align-items:end}
+.tm-hd span:nth-child(n+2):nth-child(-n+5){text-align:right}
+.tm-r{grid-template-columns:var(--tmcols);gap:12px;align-items:start}
+.tm-r .tm-nm,.tm-r .tm-c{grid-column:auto!important}
+.tm-r .tm-nm{padding-top:2px;flex-direction:column;align-items:flex-start;gap:3px;position:relative;padding-right:18px}
+.tm-nm .tm-go{position:absolute;right:0;top:1px}
+.tm-l{display:none}
+.tm-r .tm-c[data-tmk=leads],.tm-r .tm-c[data-tmk=active],.tm-r .tm-c[data-tmk=hot],.tm-r .tm-c[data-tmk=est]{align-items:flex-end}
+.tm-tot{margin:6px -6px 0;padding:10px 6px}
+.tm-ostats{grid-template-columns:repeat(7,minmax(0,1fr))}
 }
 
 /* ── Owner redesign · Phase 2: Needs Attention command layer (replaces the .oa-grid card layout; owner dashboard only) ── */
@@ -830,7 +878,7 @@ const ic = (name,cls='') => `<svg${cls?` class="${cls}"`:''} width="16" height="
 let S = { me:null, tab:'pipeline', pipeline:1, stage:null, deal:null, teamRange:30, chaseTab:'all', search:'', searchResults:null,
 pipelines:[], stages:[], products:[], brands:[], profiles:[], sources:[], deals:[], pending:[], movement:[], team:[],
 dues:[], duesOpen:null, duesDeals:[], dispatchReady:[], dispatchSent:[], ordersOpen:[], ordersDelivered:[], globalEstimates:[],
-dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0, pb:null, pbPeriod:'month', sc:null, pd:null, pdAll:false,
+dashTrend:[], dashSources:[], dashProducts:[], dashDuesTotal:0, dashPipelineValue:0, pb:null, pbPeriod:'month', sc:null, pd:null, pdAll:false, tm:null,
 myPerf:[], myRevivals:[], myPromises:[],
 openDeals:[], followUps:[], activity:[], monthPerf:[], monthWonIds:[], dealFollowUps:[], dealNotes:[], dealReceipts:[], receiptRecorderNames:{}, err:'',
 sideOpen:false, presetPipeline:null, presetStage:null,
@@ -1724,6 +1772,161 @@ const c = pbCompute(P,key);
 return head+`<div class="pd-grid">${pdTeamPanel(pdCompute(D,P,c),c,key)}${pdSourcesPanel(pdSourceCompute(D,P,c),c)}</div>`;
 }
 
+/* ── Owner TEAM · V1 / T1: sidebar item + Team Overview (owner-only, READ-ONLY — no target editing, no CRE Detail yet) ──
+   Reuses the live Owner Dashboard definitions without touching them: Sales Won / Money received come straight from the Phase B
+   data set (S.pb, loaded by loadPhaseB) via the SAME rules as pbCompute/pdCompute, so every TEAM figure ties back to the
+   Dashboard "Money & sales" tiles (a reconciliation line proves it on screen). Period state is shared with the Dashboard (S.pbPeriod).
+     Sales team      = ACTIVE profiles whose role is in TM_SALES_ROLES (today only 'cre'). team_leader / service are deliberately NOT
+                       treated as sales CREs until their semantics are defined: add the role string to TM_SALES_ROLES to include it later.
+     Leads           = Retail deals created in the period (IST), credited to the deal's CURRENT assignee.
+     Active deals    = Retail deals NOW in an open stage (not Won, not Lost, not Delivered) — not period-based. Hot = those with is_hot.
+     Estimates sent  = Retail deals whose estimate_sent_at falls in the period.
+     Sales Won / ₹   = pbCompute's rule (latest valid non-Won -> Won stage_event inside the period) on Retail deals only.
+     Money received  = dated Retail receipts by occurred_at inside the period, reversals netted, legacy/undated excluded.
+     Missed follow-ups = open follow-ups on non-Repairs deals due before today (IST), credited to the follow-up's assignee, else the
+                       deal's; "scheduled" = every open follow-up of that person (same attribution as Phase A / Phase D).
+     Targets         = profiles.monthly_sales_target / monthly_collection_target, shown ONLY for This month (a standing value, so past
+                       periods are never compared to it). Read-only here.
+   Owner-held = deals whose assignee has role 'owner' (kept apart from the CRE rows). Unassigned / other role = no assignee, an inactive
+   or missing profile, or an active non-owner profile outside TM_SALES_ROLES. Repairs never enter a figure; Dealer deals never enter a
+   lead, sales, money, active or hot figure (Dealer follow-ups only count in follow-up workload, like the Dashboard).
+   Attribution = current assignee; re-assigning a deal moves its history (no assignment history exists). cre_performance_daily is NOT used. ── */
+const TM_SALES_ROLES = ['cre'];
+const TM_OWN = 'owner', TM_OTH = 'other';
+const tmIsSalesRole = role => TM_SALES_ROLES.includes(role);
+function tmWho(id){
+if(id==null) return TM_OTH;
+const p = S.profiles.find(x=>x.id===id);
+if(!p) return TM_OTH;
+if(tmIsSalesRole(p.role)) return id;
+return p.role==='owner' ? TM_OWN : TM_OTH;
+}
+async function loadTeamOverview(){
+const T = { today:istDate(), failClosed:false, error:null };
+try{ await fillTeamOverview(T); }catch(e){ T.error = (e&&e.message)||String(e); }
+S.tm = T;
+}
+async function fillTeamOverview(T){
+const rid = repairsPipelineId();
+if(rid==null || !S.pipelines.some(p=>p.name==='Retail Sales')){ T.failClosed = true; return; }
+const [deals, fus] = await Promise.all([
+fetchAllPages(()=>sb.from('deals').select('id,pipeline_id,stage_id,assigned_to,created_at,estimate_sent_at,is_hot').neq('pipeline_id',rid).order('id')),
+fetchAllPages(()=>sb.from('follow_ups').select('id,assigned_to,due_date,deals(pipeline_id,assigned_to)').eq('done',false).order('id'))
+]);
+T.deals = deals.filter(d=>isNonRepairsPipeline(d.pipeline_id));
+T.fus = []; const seen = new Set();
+for(const r of fus){
+if(seen.has(r.id) || !r.due_date) continue; seen.add(r.id);
+const d = r.deals; if(!d || !isNonRepairsPipeline(d.pipeline_id)) continue;
+T.fus.push({ who: tmWho(r.assigned_to||d.assigned_to||null), due: r.due_date });
+}
+}
+function tmCompute(T,P,c){
+const R = c.R, inP = ms => ms!=null && !isNaN(ms) && ms>=R.start && ms<R.end;
+const stg = new Map(S.stages.map(s=>[s.id,s]));
+const byId = new Map(T.deals.map(d=>[d.id,d]));
+const rows = new Map();
+const row = k => { if(!rows.has(k)) rows.set(k,{k,leads:0,active:0,hot:0,est:0,won:0,wonV:0,money:0,sched:0,missed:0}); return rows.get(k); };
+const dealWho = id => tmWho(byId.get(id)?.assigned_to ?? null);
+S.profiles.filter(p=>tmIsSalesRole(p.role) && p.is_active).forEach(p=>row(p.id));
+row(TM_OWN); row(TM_OTH);
+T.deals.forEach(d=>{
+if(!isRetailPipeline(d.pipeline_id)) return;
+const r = row(tmWho(d.assigned_to));
+if(inP(Date.parse(d.created_at))) r.leads++;
+if(d.estimate_sent_at && inP(Date.parse(d.estimate_sent_at))) r.est++;
+const s = stg.get(d.stage_id);
+if(s && !s.is_won && !s.is_lost && !s.is_delivered){ r.active++; if(d.is_hot) r.hot++; }
+});
+P.wonDeals.forEach(d=>{
+const t = P.latest.get(d.id); if(t==null || !inP(t)) return;
+const r = row(dealWho(d.id)); r.won++; r.wonV += Number(d.value||0);
+});
+P.receipts.forEach(rc=>{
+if(rc.source==='legacy_migration' || rc.occurred_at==null) return;
+if(!inP(Date.parse(rc.occurred_at))) return;
+row(dealWho(rc.deal_id)).money += Number(rc.amount||0);
+});
+T.fus.forEach(f=>{ const r = row(f.who); r.sched++; if(f.due < T.today) r.missed++; });
+const cres = [...rows.values()].filter(r=>r.k!==TM_OWN && r.k!==TM_OTH)
+.map(r=>({...r,prof:S.profiles.find(p=>p.id===r.k)||null,name:S.profiles.find(p=>p.id===r.k)?.full_name||'—'}))
+.sort((a,b)=>a.name.localeCompare(b.name) || (a.k<b.k?-1:1));
+const sum = list => list.reduce((a,r)=>({leads:a.leads+r.leads,active:a.active+r.active,hot:a.hot+r.hot,est:a.est+r.est,won:a.won+r.won,wonV:a.wonV+r.wonV,money:a.money+r.money,missed:a.missed+r.missed,sched:a.sched+r.sched}),{leads:0,active:0,hot:0,est:0,won:0,wonV:0,money:0,missed:0,sched:0});
+const all = [...rows.values()], tot = sum(all);
+const reconciled = tot.won===c.sales.count && Math.abs(tot.wonV-c.sales.value)<0.5 && Math.abs(tot.money-c.money.net)<0.5;
+const own = rows.get(TM_OWN), oth = rows.get(TM_OTH);
+const hasOth = !!(oth.leads||oth.active||oth.hot||oth.est||oth.won||oth.wonV||oth.money||oth.sched);
+return { cres, creTot:sum(cres), own, oth, hasOth, tot, reconciled };
+}
+function tmTarget(v,t,tone){
+if(!(t>0)) return `<span class="pd-s mut" data-tmk="tgtnone">No target set</span>`;
+const pct = Math.round(v/t*100);
+return `<span class="pd-tg" data-tmk="tgt" data-pct="${pct}"><span class="bar"><i style="width:${Math.min(100,pct)}%${tone?';background:'+tone:''}"></i></span><em>${pct}% of ${rs(t)}</em></span>`;
+}
+function tmFu(r,l){
+const lab = l===false ? '' : 'Follow-ups';
+const cell = inner => `<div class="tm-c" data-tmk="fu">${lab?`<i class="tm-l">${lab}</i>`:''}${inner}</div>`;
+if(!r.sched && !r.missed) return cell(`<span class="pd-s" data-tmk="nofu" style="color:var(--amber)">No follow-ups scheduled</span>`);
+if(r.missed) return cell(`<b class="tm-v bad" data-v="${r.missed}">${r.missed}</b><span class="pd-s">missed · ${r.sched} scheduled</span>`);
+return cell(`<b class="tm-v ok" data-v="0">0</b><span class="pd-s">missed · ${r.sched} scheduled</span>`);
+}
+function tmCells(r,month,isCre){
+const c = (k,l,inner) => `<div class="tm-c" data-tmk="${k}"><i class="tm-l">${l}</i>${inner}</div>`;
+const n = (k,l,v,cls) => c(k,l,`<b class="tm-v${cls?' '+cls:''}" data-v="${v}">${v}</b>`);
+const t1 = Number(r.prof?.monthly_sales_target||0), t2 = Number(r.prof?.monthly_collection_target||0);
+return n('leads','Leads',r.leads)
++ n('active','Active deals',r.active)
++ n('hot','Hot leads',r.hot,r.hot?'hot':'')
++ n('est','Estimates sent',r.est)
++ tmFu(r)
++ c('won','Retail Sales Won',`<b class="tm-v" data-v="${Math.round(r.wonV)}">${rs(Math.round(r.wonV))}</b><span class="pd-s">${r.won} deal${r.won===1?'':'s'}</span>`)
++ c('money','Money received',`<b class="tm-v" data-v="${Math.round(r.money)}">${rs(Math.round(r.money))}</b><span class="pd-s">dated receipts</span>`)
++ (month && isCre ? c('stgt','Sales target',tmTarget(r.wonV,t1)) + c('ctgt','Collection target',tmTarget(r.money,t2,'#9BC489')) : '');
+}
+function viewTeam(){
+if(!isOwner()) return `<div class="card"><div class="empty">The Team page is available to the owner only.</div></div>`;
+const P = S.pb, T = S.tm;
+const key = PB_PERIODS.some(p=>p[0]===S.pbPeriod) ? S.pbPeriod : 'month';
+const chips = PB_PERIODS.map(([k,l])=>`<button class="pb-chip ${key===k?'on':''}" data-pbperiod="${k}">${l}</button>`).join('');
+const head = `<div class="od-head pb-head tm-head"><h2 style="margin-top:0">Team</h2><div class="pb-per" data-tm="chips">${chips}</div></div>`;
+if(!P || !T) return head+`<div class="card" data-tm="hold"><div class="empty">Loading team…</div></div>`;
+if(P.error || P.failClosed) return head+`<div class="card" data-tm="hold"><div class="pb-err">Team is hidden because Money &amp; sales could not be loaded or the Repairs pipeline could not be resolved — it is never shown from unverified data.</div></div>`;
+if(T.error) return head+`<div class="card" data-tm="hold"><div class="empty">Could not load the Team page.<br><span class="sub">${esc(T.error)}</span></div></div>`;
+if(T.failClosed) return head+`<div class="card" data-tm="hold"><div class="pb-err">Retail Sales or Repairs pipeline could not be resolved — Team is hidden rather than risk mixing Repairs in.</div></div>`;
+const c = pbCompute(P,key), X = tmCompute(T,P,c), month = key==='month';
+const label = pbLabel(c.R,P.today);
+const scope = `<div class="pb-scope" data-tm="scope"><b>${esc(label)}</b> · Asia/Kolkata · Retail Sales only — Repairs excluded, Dealer not included. Sales = Retail Sales Won (not Delivered); Money received = dated receipts net of reversals.</div>`;
+const hd = `<div class="tm-hd"><span>CRE</span><span>Leads</span><span title="Retail deals in an open stage right now (not Won, Lost or Delivered)">Active deals</span><span title="Active Retail deals flagged Hot, right now">Hot</span><span title="Retail estimates sent in the period (by estimate sent date)">Est. sent</span><span title="Open follow-ups due before today (now) — scheduled = all open follow-ups">Follow-ups · now</span><span title="Retail Sales Won ₹ — deals won in the period, credited to the deal's current assignee">Retail Sales Won</span><span title="Dated Retail receipts in the period, net of reversals">Money received</span>${month?'<span>Sales target</span><span>Collection target</span>':''}</div>`;
+const body = X.cres.map(r=>`<div class="tm-r" data-tm="row" data-cre="${esc(String(r.k))}"><div class="tm-c tm-nm" data-tmk="name"><b>${esc(r.name)}</b><span class="tm-st" data-tmk="status"><i></i>${esc((r.prof?.role||'cre').toUpperCase())} · Active</span><span class="tm-go" aria-hidden="true" title="CRE detail page — coming in a later step">›</span></div>${tmCells(r,month,true)}</div>`).join('');
+const t = X.creTot;
+const total = `<div class="tm-r tm-tot" data-tm="total"><div class="tm-c tm-nm"><b>CRE total</b></div>
+<div class="tm-c" data-tmk="leads"><i class="tm-l">Leads</i><b class="tm-v" data-v="${t.leads}">${t.leads}</b></div>
+<div class="tm-c" data-tmk="active"><i class="tm-l">Active deals</i><b class="tm-v" data-v="${t.active}">${t.active}</b></div>
+<div class="tm-c" data-tmk="hot"><i class="tm-l">Hot leads</i><b class="tm-v${t.hot?' hot':''}" data-v="${t.hot}">${t.hot}</b></div>
+<div class="tm-c" data-tmk="est"><i class="tm-l">Estimates sent</i><b class="tm-v" data-v="${t.est}">${t.est}</b></div>
+<div class="tm-c" data-tmk="fu"><i class="tm-l">Follow-ups</i><b class="tm-v${t.missed?' bad':''}" data-v="${t.missed}">${t.missed}</b><span class="pd-s">missed</span></div>
+<div class="tm-c" data-tmk="won"><i class="tm-l">Retail Sales Won</i><b class="tm-v" data-v="${Math.round(t.wonV)}">${rs(Math.round(t.wonV))}</b><span class="pd-s">${t.won} deal${t.won===1?'':'s'}</span></div>
+<div class="tm-c" data-tmk="money"><i class="tm-l">Money received</i><b class="tm-v" data-v="${Math.round(t.money)}">${rs(Math.round(t.money))}</b><span class="pd-s">net of reversals</span></div>${month?'<div class="tm-c" data-tmk="stgt"></div><div class="tm-c" data-tmk="ctgt"></div>':''}</div>`;
+const A = X.tot;
+const rec = X.reconciled
+? `<div class="pb-tot" data-tm="recon">CRE team + Owner-held${X.hasOth?' + unassigned':''}: Won <b>${rs(Math.round(A.wonV))}</b> = Sales Won <span class="ok" aria-label="reconciled">✓</span> · Money <b>${rs(Math.round(A.money))}</b> = Money received <span class="ok" aria-label="reconciled">✓</span> <span class="tm-rs">(same as Dashboard · Money &amp; sales)</span></div>`
+: `<div class="pb-tot warn" data-tm="recon" role="alert">Reconciliation warning — all rows total Won <b>${rs(Math.round(A.wonV))}</b> / Money <b>${rs(Math.round(A.money))}</b> but Money &amp; sales shows Sales Won <b>${rs(Math.round(c.sales.value))}</b> / Money received <b>${rs(Math.round(c.money.net))}</b></div>`;
+const quiet = !X.cres.length ? `<div class="empty" style="padding:18px 10px" data-tm="nocre">No active CRE profiles.</div>` : '';
+const tgNote = month ? '' : `<div class="pd-hint" data-tm="tgthint">Monthly target progress shows on This month.</div>`;
+const team = `<div class="pb-panel tm-panel${month?' tm-m':''}" data-tm="team"><div class="pb-ph"><span class="pb-pt">CRE performance</span><span class="pb-pn">${esc(label)}</span></div>
+${X.cres.length?hd+body+total:quiet}${X.cres.length?rec:''}${tgNote}
+<div class="pb-foot" data-tm="note">Active CRE profiles only · credit goes to the deal's current assignee · Active deals and Hot leads are live counts · CRE detail pages come in a later step</div></div>`;
+const o = X.own;
+const ocell = (k,l,v,sub) => `<div class="tm-c" data-tmk="${k}"><i class="tm-l" style="display:block">${l}</i><b class="tm-v" data-v="${v}">${k==='won'||k==='money'?rs(Math.round(v)):v}</b>${sub?`<span class="pd-s">${sub}</span>`:''}</div>`;
+const ofu = !o.sched && !o.missed ? `<div class="tm-c" data-tmk="fu"><i class="tm-l" style="display:block">Follow-ups</i><span class="pd-s" style="color:var(--amber)">No follow-ups scheduled</span></div>`
+: `<div class="tm-c" data-tmk="fu"><i class="tm-l" style="display:block">Follow-ups</i><b class="tm-v${o.missed?' bad':' ok'}" data-v="${o.missed}">${o.missed}</b><span class="pd-s">missed · ${o.sched} scheduled</span></div>`;
+const oth = X.hasOth ? `<div class="pd-hint" data-tm="other">Unassigned or other role (not owner, not a CRE row): ${X.oth.active} active deal${X.oth.active===1?'':'s'} · Won <b>${rs(Math.round(X.oth.wonV))}</b> · Money <b>${rs(Math.round(X.oth.money))}</b> — included in the reconciliation above.</div>` : '';
+const own = `<div class="pb-panel tm-panel" data-tm="owner"><div class="pb-ph"><span class="pb-pt">Owner-held workload</span><span class="pb-pn">${esc(label)}</span></div>
+<div class="tm-ostats">${ocell('active','Active deals',o.active)}${ocell('hot','Hot leads',o.hot)}${ocell('leads','Leads',o.leads)}${ocell('est','Estimates sent',o.est)}${ofu}${ocell('won','Retail Sales Won',o.wonV,`${o.won} deal${o.won===1?'':'s'}`)}${ocell('money','Money received',o.money,'dated receipts')}</div>${oth}
+<div class="pb-foot" data-tm="ownnote">Deals held by the owner rather than a CRE — shown apart from the CRE rows so the team is not diluted; no targets apply.</div></div>`;
+return head+scope+team+own;
+}
+
 async function loadTab(){
 S.err='';
 try{
@@ -1753,6 +1956,10 @@ await loadOwnerAttention();
 await loadPhaseB();
 await loadServiceCentre();
 await loadTeamSources();
+}
+if(S.tab==='team' && isOwner()){
+await loadPhaseB();
+await loadTeamOverview();
 }
 if(S.tab==='mydash' || S.tab==='followups' || S.tab==='myperf'){
 const since = new Date(Date.now() - S.teamRange*86400000).toISOString().slice(0,10);
@@ -1857,6 +2064,7 @@ S.tab==='orders' ? viewOrders() :
 S.tab==='estimates' ? viewEstimatesGlobal() :
 S.tab==='moving' ? viewMoving() :
 S.tab==='dashboard' ? viewDashboard() :
+S.tab==='team' ? viewTeam() :
 S.tab==='mydash' ? viewMyDashboard() :
 S.tab==='followups' ? viewFollowupsTab() :
 S.tab==='myperf' ? viewMyPerformance() :
@@ -1869,7 +2077,7 @@ SOON_TABS.includes(S.tab) ? viewComingSoon(S.tab) : viewNew()
 wire();
 }
 
-const OW_TITLES = {dashboard:'Dashboard',pipeline:'Deals',customers:'Customers',products:'Products',money:'Money in',dispatch:'Dispatch',orders:'Orders',dues:'Dues',moving:'Moving',repairs:'Repairs',new:'Add',addlead:'Add lead',addrepair:'Add repair',followups:'Follow-ups',estimates:'Estimates'};
+const OW_TITLES = {dashboard:'Dashboard',team:'Team',pipeline:'Deals',customers:'Customers',products:'Products',money:'Money in',dispatch:'Dispatch',orders:'Orders',dues:'Dues',moving:'Moving',repairs:'Repairs',new:'Add',addlead:'Add lead',addrepair:'Add repair',followups:'Follow-ups',estimates:'Estimates'};
 const OW_DATE_FMT = new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',weekday:'short',day:'numeric',month:'short'});
 function shell(inner){
 if(!isOwner()){ document.body.classList.remove('owner-ui'); return shellCRE(inner); }
@@ -1885,7 +2093,7 @@ return `<header><div class="hbar">
 </div></header>
 <div class="wrap${narrow?' ow-narrow':''}">${S.err?`<div class="err">${esc(S.err)}</div>`:''}${inner}</div>
 ${S.tab==='pipeline'?'<button class="fab" id="fab">+</button>':''}
-<nav><div class="ow-brand">StageMax<span>CRM</span></div><div class="ow-grp g1">Command</div><div class="ow-grp g2">Sales</div><div class="ow-grp g3">Money</div><div class="ow-grp g4">Operations</div>${t('dashboard','Dashboard','home')}${t('pipeline','Deals','target')}${t('customers','Customers','users')}${t('products','Products','box')}${t('money','Money in','wallet')}${t('dispatch','Dispatch','truck')}${t('dues','Dues','clock')}${t('moving','Moving','chart')}${t('repairs','Repairs','wrench')}${t('new','Add','plus')}</nav>`;
+<nav><div class="ow-brand">StageMax<span>CRM</span></div><div class="ow-grp g1">Command</div><div class="ow-grp g2">Sales</div><div class="ow-grp g3">Money</div><div class="ow-grp g4">Operations</div>${t('dashboard','Dashboard','home')}${t('team','Team','users')}${t('pipeline','Deals','target')}${t('customers','Customers','users')}${t('products','Products','box')}${t('money','Money in','wallet')}${t('dispatch','Dispatch','truck')}${t('dues','Dues','clock')}${t('moving','Moving','chart')}${t('repairs','Repairs','wrench')}${t('new','Add','plus')}</nav>`;
 }
 
 /* ── CRE app shell — STAGEMAX reference redesign (Today page + shared chrome) ── */
