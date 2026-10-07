@@ -106,7 +106,7 @@ body.owner-ui .fab{left:calc(var(--ow-side) + 16px)}
 .tm-v.bad{color:#E8899E}.tm-v.ok{color:#9BC489}.tm-v.hot{color:var(--amber)}
 .tm-r .tm-c[data-tmk=leads],.tm-r .tm-c[data-tmk=active],.tm-r .tm-c[data-tmk=hot],.tm-r .tm-c[data-tmk=est]{grid-column:span 4}
 .tm-r .tm-c[data-tmk=fu]{grid-column:span 8}
-.tm-r .tm-c[data-tmk=won],.tm-r .tm-c[data-tmk=money],.tm-r .tm-c[data-tmk=stgt],.tm-r .tm-c[data-tmk=ctgt]{grid-column:span 6}
+.tm-r .tm-c[data-tmk=won],.tm-r .tm-c[data-tmk=money],.tm-r .tm-c[data-tmk=ctgt]{grid-column:span 6}
 .tm-tot{background:var(--panel-2);border-radius:9px;padding:10px 10px;margin:6px -4px 0;border-top:0}
 .tm-tot .tm-nm b{text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--muted)}
 .tm-tot .tm-c:empty{display:none}
@@ -120,11 +120,11 @@ body.owner-ui .fab{left:calc(var(--ow-side) + 16px)}
 .tm-ostats{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media (min-width:900px) and (max-width:1359px){
-.tm-r .tm-c[data-tmk=won],.tm-r .tm-c[data-tmk=money],.tm-r .tm-c[data-tmk=stgt],.tm-r .tm-c[data-tmk=ctgt]{grid-column:span 3}
+.tm-r .tm-c[data-tmk=won],.tm-r .tm-c[data-tmk=money],.tm-r .tm-c[data-tmk=ctgt]{grid-column:span 3}
 }
 @media (min-width:1360px){
 .tm-panel{--tmcols:minmax(160px,1.5fr) 52px 78px 44px 72px minmax(124px,1.2fr) minmax(104px,1fr) minmax(104px,1fr)}
-.tm-panel.tm-m{--tmcols:minmax(160px,1.5fr) 52px 78px 44px 72px minmax(124px,1.2fr) minmax(104px,1fr) minmax(104px,1fr) minmax(118px,1.1fr) minmax(118px,1.1fr)}
+.tm-panel.tm-m{--tmcols:minmax(160px,1.5fr) 52px 78px 44px 72px minmax(124px,1.2fr) minmax(104px,1fr) minmax(104px,1fr) minmax(130px,1.2fr)}
 .tm-hd{display:grid;grid-template-columns:var(--tmcols);gap:12px;padding:0 0 6px;font:700 9.5px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);align-items:end}
 .tm-hd span:nth-child(n+2):nth-child(-n+5){text-align:right}
 .tm-r{grid-template-columns:var(--tmcols);gap:12px;align-items:start}
@@ -135,6 +135,55 @@ body.owner-ui .fab{left:calc(var(--ow-side) + 16px)}
 .tm-r .tm-c[data-tmk=leads],.tm-r .tm-c[data-tmk=active],.tm-r .tm-c[data-tmk=hot],.tm-r .tm-c[data-tmk=est]{align-items:flex-end}
 .tm-tot{margin:6px -6px 0;padding:10px 6px}
 .tm-ostats{grid-template-columns:repeat(7,minmax(0,1fr))}
+}
+
+/* ── Owner TEAM · V1 / T2: Set targets button + editor modal + Dashboard "View Team" link (existing tokens only) ── */
+.tm-set{margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--paper);border-radius:7px;padding:4px 10px;font:600 11.5px Archivo;white-space:nowrap;line-height:1.3}
+.tm-set:hover,.tm-set:focus-visible{border-color:var(--amber);color:var(--amber);outline:none}
+.tm-r .tm-nm{flex-wrap:wrap}
+.tm-nm .tm-go{margin-left:0}
+.tm-note{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);font-size:13.5px}
+.tm-note.ok{border-color:#3E5B34;color:#C8E0BB}
+.tm-note span{flex:1;min-width:0}
+.tm-note button{color:var(--muted);font-size:18px;line-height:1;padding:0 4px}
+.tm-ed{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.tm-ed-scrim{position:absolute;inset:0;background:rgba(8,7,6,.74)}
+.tm-ed-box{position:relative;width:100%;max-width:440px;max-height:94vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px 14px 0 0;padding:18px 18px 16px;outline:none}
+.tm-ed-top{display:flex;flex-direction:column;gap:2px;margin-bottom:14px}
+.tm-ed-top h3{font:700 16px Archivo;letter-spacing:.02em}
+.tm-ed-who{font:600 13px Archivo;color:var(--amber)}
+.tm-ed-f{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.tm-ed-l{font:700 10px Archivo;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tm-ed-in{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--ink)}
+.tm-ed-in:focus-within{border-color:var(--amber)}
+.tm-ed-in i{padding:0 4px 0 12px;color:var(--muted);font-style:normal;font-size:16px}
+.tm-ed-in input{flex:1;min-width:0;background:transparent;border:0;outline:none;padding:11px 12px 11px 4px;font:600 16px 'Archivo Narrow',Archivo,sans-serif;font-variant-numeric:tabular-nums;color:var(--paper)}
+.tm-ed-in input:disabled{opacity:.6}
+.tm-ed-h{font-size:12px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)}
+.tm-ed-f.bad .tm-ed-in{border-color:var(--rose)}
+.tm-ed-f.bad .tm-ed-h{color:#E8899E}
+.tm-ed-msg{min-height:20px;margin:2px 0 8px;font-size:13px}
+.tm-ed-msg.err{color:#E8899E}.tm-ed-msg.info{color:var(--muted)}
+.tm-ed-a{display:flex;gap:10px;justify-content:flex-end}
+.tm-ed-b{border:1px solid var(--line);border-radius:8px;padding:10px 16px;font:600 14px Archivo;color:var(--paper);background:transparent;min-height:42px}
+.tm-ed-b.pri{background:var(--amber);border-color:var(--amber);color:#1A1206;font-weight:700}
+.tm-ed-b:disabled{opacity:.55;cursor:default}
+.tm-ed-b:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.tm-ed-foot{margin-top:12px;font-size:11.5px;color:var(--muted)}
+.pd-vt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.pd-vtb{border:1px solid var(--line);border-radius:7px;padding:4px 11px;font:600 12px Archivo;color:var(--paper);background:transparent}
+.pd-vtb:hover,.pd-vtb:focus-visible{border-color:var(--amber);color:var(--amber);outline:none}
+@media (min-width:600px){
+.tm-ed{align-items:center}
+.tm-ed-box{border-radius:14px}
+}
+@media (min-width:1360px){
+.tm-r .tm-nm{flex-wrap:nowrap}
+.tm-nm .tm-set{margin-left:0;margin-top:4px;align-self:flex-start}
+}
+@media (prefers-reduced-motion:no-preference){
+.tm-ed-box{animation:tmedin .16s ease-out}
+@keyframes tmedin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 }
 
 /* ── Owner redesign · Phase 2: Needs Attention command layer (replaces the .oa-grid card layout; owner dashboard only) ── */
@@ -605,7 +654,7 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 
 .cd-body{padding:24px;max-width:1220px}
 
-/* hero: greeting + sales target, one unified card with subtle brand flourish */
+/* hero: greeting + monthly collection target, one unified card with subtle brand flourish */
 .cd-hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#181B22 0%,#14161C 62%,#1B140F 100%);border:1px solid var(--cd-line);border-radius:16px;padding:20px 26px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-bottom:20px}
 .cd-hero::before{content:'';position:absolute;top:-60px;right:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,122,41,.24),transparent 70%);pointer-events:none}
 
@@ -618,6 +667,7 @@ input:focus,select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .cd-target .tgt-top .isq{width:26px;height:26px;border-radius:8px;background:rgba(255,122,41,.16);color:var(--cd-accent);display:flex;align-items:center;justify-content:center;flex:none}
 .cd-target .tgt-top .isq svg{width:14px;height:14px;stroke-width:2}.cd-target .tgt-top .ttl{font:700 10.5px Archivo;letter-spacing:.06em;text-transform:uppercase;color:var(--cd-muted);white-space:nowrap}
 .cd-target .tgt-bot{display:flex;align-items:center;gap:16px}
+@media (max-width:620px){.cd-target-divider{display:none}.cd-target{min-width:0}.cd-target .tgt-bot{flex-wrap:wrap;row-gap:10px;gap:10px 14px}.cd-target .tgt-bot .lbl{flex:1 1 100%}.cd-target .tgt-bot .bar2{flex:1 1 0;min-width:60px}.cd-target .tgt-bot .tgt-div{display:none}}
 .cd-target .tgt-bot .lbl{font-size:13px;color:var(--cd-text);flex:none;white-space:nowrap}
 .cd-target .bar2{flex:1;height:8px;border-radius:5px;background:var(--cd-surface2);overflow:hidden}
 .cd-target .bar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--cd-accent),var(--cd-accent2));border-radius:5px}.cd-target .tgt-bot .pct{font:800 17px Archivo Narrow;color:var(--cd-accent);flex:none}.cd-target .tgt-div{width:1px;align-self:stretch;background:var(--cd-line);flex:none}.cd-target .tgt-stat{flex:none;text-align:left;line-height:1.3;background:none;border:none;padding:0}.cd-target .tgt-stat b{display:block;font:800 15px Archivo Narrow;color:var(--cd-text)}.cd-target .tgt-stat span{display:block;font-size:9.5px;color:var(--cd-muted);text-transform:uppercase;letter-spacing:.04em;margin-top:1px}
@@ -900,6 +950,7 @@ await loadTab();
 }
 
 function renderLogin(msg){
+tmEdClose(true);
 document.body.classList.remove('owner-ui');
 app.innerHTML = `<div class="login">
 <div class="mark">StageMax<span> CRM</span></div>
@@ -1705,15 +1756,15 @@ if(r.missed) return cell('Follow-ups','fu',`<b class="pd-v bad" data-v="${r.miss
 return cell('Follow-ups','fu',`<b class="pd-v ok" data-v="0">0</b><span class="pd-s">missed · ${r.sched} scheduled</span>`,'fu ok');
 };
 const body = T.rows.map((r,i)=>{
-const t1 = Number(r.prof?.monthly_sales_target||0), t2 = Number(r.prof?.monthly_collection_target||0);
-const wonSub = `<span class="pd-s">${r.won} deal${r.won===1?'':'s'}</span>${month&&r.cre?pdTarget(r.wonV,t1):''}`;
+const t2 = Number(r.prof?.monthly_collection_target||0);
+const wonSub = `<span class="pd-s">${r.won} deal${r.won===1?'':'s'}</span>`;
 const monSub = `<span class="pd-s">dated receipts</span>${month&&r.cre?pdTarget(r.money,t2,'#9BC489'):''}`;
 return `<div class="pd-r${i>=PD_MOB_ROWS?' pd-x':''}" data-pd="row" data-cre="${esc(String(r.k))}"><div class="pd-c pd-nm" data-pdk="name"><b>${esc(r.name)}</b>${r.k===PD_OWN?'<span class="pd-s">deals held by the owner</span>':r.k===PD_UN?'<span class="pd-s">no active assignee</span>':''}</div>
 ${cell('Leads','leads',`<b class="pd-v" data-v="${r.leads}">${r.leads}</b>`)}
 ${cell('Estimates sent','est',`<b class="pd-v" data-v="${r.est}">${r.est}</b>`)}
 ${fuCell(r)}
 ${cell('Retail Sales Won','won',`<b class="pd-v" data-v="${Math.round(r.wonV)}">${rs(Math.round(r.wonV))}</b>${wonSub}`)}
-${cell('Money received','money',`<b class="pd-v" data-v="${Math.round(r.money)}">${rs(Math.round(r.money))}</b>${monSub}`)}</div>`;
+${cell('Money Collected','money',`<b class="pd-v" data-v="${Math.round(r.money)}">${rs(Math.round(r.money))}</b>${monSub}`)}</div>`;
 }).join('');
 const nHid = Math.max(0,T.rows.length-PD_MOB_ROWS);
 const showAll = nHid>0 ? `<button type="button" class="pd-showall" data-pdk="showall" data-pdtoggle="1" aria-expanded="${S.pdAll?'true':'false'}">${S.pdAll?'Show fewer':'Show all '+T.rows.length}</button>` : '';
@@ -1723,20 +1774,16 @@ ${cell('Leads','leads',`<b class="pd-v" data-v="${t.leads}">${t.leads}</b>`)}
 ${cell('Estimates sent','est',`<b class="pd-v" data-v="${t.est}">${t.est}</b>`)}
 ${cell('Follow-ups','fu',T.missedOk?`<b class="pd-v${t.missed?' bad':''}" data-v="${t.missed}">${t.missed}</b><span class="pd-s">missed</span>`:'<span class="pd-s mut">—</span>')}
 ${cell('Retail Sales Won','won',`<b class="pd-v" data-v="${Math.round(t.wonV)}">${rs(Math.round(t.wonV))}</b><span class="pd-s">${t.won} deal${t.won===1?'':'s'}</span>`)}
-${cell('Money received','money',`<b class="pd-v" data-v="${Math.round(t.money)}">${rs(Math.round(t.money))}</b><span class="pd-s">net of reversals</span>`)}</div>`;
+${cell('Money Collected','money',`<b class="pd-v" data-v="${Math.round(t.money)}">${rs(Math.round(t.money))}</b><span class="pd-s">net of reversals</span>`)}</div>`;
 const rec = T.reconciled
 ? `<div class="pb-tot" data-pdk="recon">Won <b>${rs(Math.round(t.wonV))}</b> = Sales Won <span class="ok" aria-label="reconciled">✓</span> · Money <b>${rs(Math.round(t.money))}</b> = Money received <span class="ok" aria-label="reconciled">✓</span></div>`
 : `<div class="pb-tot warn" data-pdk="recon" role="alert">Reconciliation warning — team rows total Won <b>${rs(Math.round(t.wonV))}</b> / Money <b>${rs(Math.round(t.money))}</b> but Money &amp; sales shows Sales Won <b>${rs(Math.round(c.sales.value))}</b> / Money received <b>${rs(Math.round(c.money.net))}</b></div>`;
-const crew = S.profiles.filter(p=>p.role==='cre' && p.is_active);
-const tgRows = crew.map(p=>`<div class="pd-tr"><span class="nm">${esc(p.full_name)}</span>
-<label><i>Sales</i><input data-targetinput="${p.id}" type="number" inputmode="decimal" min="0" placeholder="₹ / month" value="${Number(p.monthly_sales_target||0)||''}"><button class="btn ghost" data-savetarget="${p.id}">Save</button></label>
-<label><i>Collection</i><input data-collinput="${p.id}" type="number" inputmode="decimal" min="0" placeholder="₹ / month" value="${Number(p.monthly_collection_target||0)||''}"><button class="btn ghost" data-savecoll="${p.id}">Save</button></label></div>`).join('');
-const tg = crew.length ? `<details class="pb-how pd-tgt" data-pdk="targets"><summary>Set monthly targets</summary><p>Sales = Retail Won ₹ · Collection = dated Money received ₹ (net) · per calendar month.</p>${tgRows}</details>` : '';
-const noteTg = month ? '' : '<div class="pd-hint" data-pdk="tgthint">Monthly target progress shows on This month.</div>';
+const vt = `<div class="pd-vt" data-pdk="viewteam"><span>The monthly collection target is set on the Team page.</span><button type="button" class="pd-vtb" data-tab="team">View Team</button></div>`;
+const noteTg = month ? '' : '<div class="pd-hint" data-pdk="tgthint">Monthly collection-target progress shows on This month.</div>';
 const quiet = !T.rows.length ? `<div class="empty" style="padding:18px 10px">No CRE activity in this period.</div>` : '';
-const head = `<div class="pd-hd"><span>CRE</span><span>Leads</span><span title="Retail estimates sent in the period (by estimate sent date)">Estimates sent</span><span title="Phase A missed follow-ups (now) — scheduled = all open follow-ups">Follow-ups · now</span><span title="Retail Sales Won ₹ — deals won in the period, credited to the deal's current assignee">Retail Sales Won</span><span title="Dated Retail receipts in the period, net of reversals">Money received</span></div>`;
+const head = `<div class="pd-hd"><span>CRE</span><span>Leads</span><span title="Retail estimates sent in the period (by estimate sent date)">Estimates sent</span><span title="Phase A missed follow-ups (now) — scheduled = all open follow-ups">Follow-ups · now</span><span title="Retail Sales Won ₹ — deals won in the period, credited to the deal's current assignee">Retail Sales Won</span><span title="Dated Retail receipts in the period, net of reversals">Money Collected</span></div>`;
 return `<div class="pb-panel pd-panel" data-pd="team" data-pdall="${S.pdAll?1:0}"><div class="pb-ph"><span class="pb-pt">Team</span><span class="pb-pn">${esc(pbLabel(c.R,S.pb.today))}</span></div>
-${T.rows.length?head+body+showAll+total+rec:quiet}${noteTg}${tg}
+${T.rows.length?head+body+showAll+total+rec:quiet}${noteTg}${vt}
 <div class="pb-foot" data-pdk="note">Retail only · Repairs excluded · credit goes to the deal's current assignee</div></div>`;
 }
 function pdSourcesPanel(SR,c){
@@ -1785,7 +1832,7 @@ return head+`<div class="pd-grid">${pdTeamPanel(pdCompute(D,P,c),c,key)}${pdSour
      Money received  = dated Retail receipts by occurred_at inside the period, reversals netted, legacy/undated excluded.
      Missed follow-ups = open follow-ups on non-Repairs deals due before today (IST), credited to the follow-up's assignee, else the
                        deal's; "scheduled" = every open follow-up of that person (same attribution as Phase A / Phase D).
-     Targets         = profiles.monthly_sales_target / monthly_collection_target, shown ONLY for This month (a standing value, so past
+     Target          = profiles.monthly_collection_target (the ONE CRE target; Sales Won is a metric, not a target), shown ONLY for This month (a standing value, so past
                        periods are never compared to it). Read-only here.
    Owner-held = deals whose assignee has role 'owner' (kept apart from the CRE rows). Unassigned / other role = no assignee, an inactive
    or missing profile, or an active non-owner profile outside TM_SALES_ROLES. Repairs never enter a figure; Dealer deals never enter a
@@ -1873,15 +1920,142 @@ return cell(`<b class="tm-v ok" data-v="0">0</b><span class="pd-s">missed · ${r
 function tmCells(r,month,isCre){
 const c = (k,l,inner) => `<div class="tm-c" data-tmk="${k}"><i class="tm-l">${l}</i>${inner}</div>`;
 const n = (k,l,v,cls) => c(k,l,`<b class="tm-v${cls?' '+cls:''}" data-v="${v}">${v}</b>`);
-const t1 = Number(r.prof?.monthly_sales_target||0), t2 = Number(r.prof?.monthly_collection_target||0);
+const t2 = Number(r.prof?.monthly_collection_target||0);
 return n('leads','Leads',r.leads)
 + n('active','Active deals',r.active)
 + n('hot','Hot leads',r.hot,r.hot?'hot':'')
 + n('est','Estimates sent',r.est)
 + tmFu(r)
 + c('won','Retail Sales Won',`<b class="tm-v" data-v="${Math.round(r.wonV)}">${rs(Math.round(r.wonV))}</b><span class="pd-s">${r.won} deal${r.won===1?'':'s'}</span>`)
-+ c('money','Money received',`<b class="tm-v" data-v="${Math.round(r.money)}">${rs(Math.round(r.money))}</b><span class="pd-s">dated receipts</span>`)
-+ (month && isCre ? c('stgt','Sales target',tmTarget(r.wonV,t1)) + c('ctgt','Collection target',tmTarget(r.money,t2,'#9BC489')) : '');
++ c('money','Money Collected',`<b class="tm-v" data-v="${Math.round(r.money)}">${rs(Math.round(r.money))}</b><span class="pd-s">dated receipts</span>`)
++ (month && isCre ? c('ctgt','Collection target',tmTarget(r.money,t2,'#9BC489')) : '');
+}
+/* ── Owner TEAM · V1 / T2 (rev. B): "Set target" — owner-only administration of the ONE monthly CRE target (Monthly Collection Target) ──
+   Business rule: a Retail deal is Won only when it is fully paid, so Sales Won is a performance metric and NOT an employee target.
+   The single editable target is Monthly Collection Target ₹ = profiles.monthly_collection_target. This code never reads or writes the
+   dormant legacy target column. No history table, no schema change. Authorisation is enforced by the database (profiles_owner_write =
+   is_owner()); the UI additionally refuses for non-owners, but never relies on that.
+   Value rules: whole rupees >= 0 (digits, optional commas / ₹ / spaces so "2,00,000" works); blank or 0 both mean "no target" and are
+   stored as 0 — what every reader already treats as "no target" (Number(x||0)). Rejected with an inline message: negative, decimal,
+   non-numeric, exponent forms, NaN/Infinity, anything above TM_TGT_MAX.
+   Write path: UPDATE ... .select() so the confirmed row comes back. A Postgres/network error is shown; an UPDATE that matches no row
+   (what row-level security does when it refuses) is ALSO shown — Supabase returns no error then, so the row count is checked.
+   One save at a time (flag set before the first await). On success S.profiles is updated from the CONFIRMED row and TEAM re-renders at
+   once; Sales Won / Money Collected are never touched. ── */
+const TM_TGT_MAX = 1000000000; // ₹100 crore — typo guard, far above any real monthly target
+let tmEd = null;   // open editor: { id, saving }
+let tmNote = null; // result banner on TEAM: { kind:'ok', text }
+const tmFmt = v => Number(v||0) > 0 ? rs(Number(v)) : 'No target';
+function tmParseRupees(raw){
+const s = String(raw==null?'':raw).trim().replace(/[₹\s,]/g,'');
+if(s==='') return { ok:true, v:0 };
+if(/^-/.test(s)) return { ok:false, msg:'Targets cannot be negative.' };
+if(/^\+?\d*\.\d*$/.test(s) && /\d/.test(s)) return { ok:false, msg:'Enter whole rupees — no decimals.' };
+if(!/^\d+$/.test(s)) return { ok:false, msg:'Enter a number, for example 2,00,000.' };
+if(s.replace(/^0+/,'').length>12) return { ok:false, msg:'That amount is too large — the maximum is '+rs(TM_TGT_MAX)+'.' };
+const v = Number(s);
+if(!Number.isFinite(v) || v>TM_TGT_MAX) return { ok:false, msg:'That amount is too large — the maximum is '+rs(TM_TGT_MAX)+'.' };
+return { ok:true, v };
+}
+function tmEdHTML(p){
+const f = (k,label,hint,val) => `<label class="tm-ed-f" data-tm="field-${k}"><span class="tm-ed-l">${label}</span><span class="tm-ed-in"><i aria-hidden="true">₹</i><input data-tm="in-${k}" inputmode="numeric" autocomplete="off" placeholder="No target" value="${Number(val||0)>0?Number(val).toLocaleString('en-IN'):''}"></span><small class="tm-ed-h" data-tm="hint-${k}">${hint}</small></label>`;
+return `<div class="tm-ed" id="tm-ed" data-tm="editor" data-cre="${esc(String(p.id))}"><div class="tm-ed-scrim" data-tm="scrim"></div>
+<form class="tm-ed-box" role="dialog" aria-modal="true" aria-labelledby="tm-ed-t" tabindex="-1" novalidate data-tm="form">
+<div class="tm-ed-top"><h3 id="tm-ed-t">Set monthly target</h3><span class="tm-ed-who" data-tm="edname">${esc(p.full_name)}</span></div>
+${f('coll','Monthly Collection Target','Retail money collected per calendar month (dated receipts, net of reversals). Blank or 0 = no target.',p.monthly_collection_target)}
+<div class="tm-ed-msg" data-tm="msg" role="alert" aria-live="polite"></div>
+<div class="tm-ed-a"><button type="button" class="tm-ed-b" data-tm="cancel">Cancel</button><button type="submit" class="tm-ed-b pri" data-tm="save">Save target</button></div>
+<div class="tm-ed-foot">The target is a standing monthly value shown on TEAM and the Dashboard (This month). Changing it never changes Sales Won or Money Collected.</div>
+</form></div>`;
+}
+function tmEdClose(force){
+const el = document.getElementById('tm-ed');
+const id = tmEd && tmEd.id;
+if(tmEd && tmEd.saving && !force) return;
+tmEd = null;
+if(el) el.remove();
+document.body.style.overflow = '';
+if(!force && id!=null){ const b = document.querySelector(`[data-tm=settargets][data-cre="${CSS.escape(String(id))}"]`); if(b) b.focus(); }
+}
+function tmEdMsg(kind,text){
+const m = document.querySelector('#tm-ed [data-tm=msg]'); if(!m) return;
+m.className = 'tm-ed-msg'+(kind?' '+kind:''); m.textContent = text||'';
+}
+function tmEdField(k,res){
+const lab = document.querySelector(`#tm-ed [data-tm=field-${k}]`), hint = document.querySelector(`#tm-ed [data-tm=hint-${k}]`); if(!lab||!hint) return;
+if(!res.ok){ lab.classList.add('bad'); hint.textContent = res.msg; hint.setAttribute('role','alert'); return; }
+lab.classList.remove('bad'); hint.removeAttribute('role');
+hint.textContent = res.v>0 ? 'Will save '+rs(res.v)+' per month.' : 'No target will be set.';
+}
+function tmEdBusy(on){
+const root = document.getElementById('tm-ed'); if(!root) return;
+root.querySelectorAll('input,button').forEach(e=>{ e.disabled = on; });
+const sv = root.querySelector('[data-tm=save]'); if(sv) sv.textContent = on ? 'Saving…' : 'Save target';
+root.querySelector('[data-tm=form]').setAttribute('aria-busy', on?'true':'false');
+if(on) root.querySelector('[data-tm=form]').focus();
+}
+function tmEdOpen(id){
+if(!isOwner() || tmEd) return;
+const p = S.profiles.find(x=>x.id===id);
+if(!p || !tmIsSalesRole(p.role) || !p.is_active) return;
+tmEd = { id, saving:false };
+tmNote = null; const n = document.querySelector('[data-tm=notice]'); if(n) n.remove();
+document.body.insertAdjacentHTML('beforeend', tmEdHTML(p));
+document.body.style.overflow = 'hidden';
+const root = document.getElementById('tm-ed'), form = root.querySelector('[data-tm=form]');
+const inC = root.querySelector('[data-tm=in-coll]');
+[['coll',inC]].forEach(([k,inp])=>{
+inp.addEventListener('input',()=>{ tmEdField(k,tmParseRupees(inp.value)); tmEdMsg('',''); });
+inp.addEventListener('blur',()=>{ const r = tmParseRupees(inp.value); if(r.ok && inp.value.trim()!==''){ inp.value = r.v>0 ? r.v.toLocaleString('en-IN') : ''; tmEdField(k,r); } });
+});
+form.addEventListener('submit',e=>{ e.preventDefault(); tmEdSave(); });
+root.querySelector('[data-tm=cancel]').addEventListener('click',()=>tmEdClose());
+root.querySelector('[data-tm=scrim]').addEventListener('click',()=>tmEdClose());
+root.addEventListener('keydown',e=>{
+if(e.key==='Escape'){ e.preventDefault(); tmEdClose(); return; }
+if(e.key==='Tab'){
+const f = [...form.querySelectorAll('input,button')].filter(x=>!x.disabled); if(!f.length){ e.preventDefault(); return; }
+const first = f[0], last = f[f.length-1];
+if(e.shiftKey && (document.activeElement===first || document.activeElement===form)){ e.preventDefault(); last.focus(); }
+else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
+});
+inC.focus(); inC.select();
+}
+async function tmEdSave(){
+const st = tmEd;
+if(!st || st.saving) return; // duplicate submit (double click / Enter + click) is ignored
+if(!isOwner()){ tmEdMsg('err','Only the owner can change targets.'); return; }
+const p = S.profiles.find(x=>x.id===st.id);
+if(!p || !tmIsSalesRole(p.role) || !p.is_active){ tmEdMsg('err','This CRE profile is no longer active — nothing was saved.'); return; }
+const root = document.getElementById('tm-ed'); if(!root) return;
+const rcol = tmParseRupees(root.querySelector('[data-tm=in-coll]').value);
+tmEdField('coll',rcol);
+if(!rcol.ok){ tmEdMsg('err','Not saved — fix the highlighted field.'); const bad = root.querySelector('.tm-ed-f.bad input'); if(bad) bad.focus(); return; }
+const patch = {};
+if(rcol.v !== Number(p.monthly_collection_target||0)) patch.monthly_collection_target = rcol.v;
+if(!Object.keys(patch).length){ tmEdMsg('info','No changes to save.'); return; }
+st.saving = true; tmEdBusy(true); tmEdMsg('info','Saving…');
+let res;
+try { res = await sb.from('profiles').update(patch).eq('id',st.id).select('id,monthly_collection_target'); }
+catch(e){ res = { error:{ message:String((e&&e.message)||e) } }; }
+st.saving = false;
+if(!document.getElementById('tm-ed')) return; // the page was reset while saving (e.g. signed out)
+tmEdBusy(false);
+if(res.error){ tmEdMsg('err','Not saved — '+(res.error.message||'the database refused the change')+'. Nothing was changed; you can try again.'); return; }
+const rows = res.data;
+if(!Array.isArray(rows) || rows.length!==1 || rows[0].id!==st.id){ tmEdMsg('err','Not saved — the database did not confirm the change (no permission, or the profile no longer exists). Nothing was changed.'); return; }
+p.monthly_collection_target = rows[0].monthly_collection_target;
+tmNote = { kind:'ok', text:`Monthly Collection Target saved for ${p.full_name}: ${tmFmt(p.monthly_collection_target)}.` };
+tmEdClose();
+render();
+}
+function tmNoticeHTML(){
+return tmNote ? `<div class="tm-note ${tmNote.kind}" data-tm="notice" role="status"><span>${esc(tmNote.text)}</span><button type="button" data-tm="dismiss" aria-label="Dismiss message">×</button></div>` : '';
+}
+function tmWire(){
+document.querySelectorAll('[data-tm=settargets]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); tmEdOpen(b.dataset.cre); });
+const d = document.querySelector('[data-tm=dismiss]'); if(d) d.onclick = () => { tmNote = null; const n = document.querySelector('[data-tm=notice]'); if(n) n.remove(); };
 }
 function viewTeam(){
 if(!isOwner()) return `<div class="card"><div class="empty">The Team page is available to the owner only.</div></div>`;
@@ -1895,9 +2069,9 @@ if(T.error) return head+`<div class="card" data-tm="hold"><div class="empty">Cou
 if(T.failClosed) return head+`<div class="card" data-tm="hold"><div class="pb-err">Retail Sales or Repairs pipeline could not be resolved — Team is hidden rather than risk mixing Repairs in.</div></div>`;
 const c = pbCompute(P,key), X = tmCompute(T,P,c), month = key==='month';
 const label = pbLabel(c.R,P.today);
-const scope = `<div class="pb-scope" data-tm="scope"><b>${esc(label)}</b> · Asia/Kolkata · Retail Sales only — Repairs excluded, Dealer not included. Sales = Retail Sales Won (not Delivered); Money received = dated receipts net of reversals.</div>`;
-const hd = `<div class="tm-hd"><span>CRE</span><span>Leads</span><span title="Retail deals in an open stage right now (not Won, Lost or Delivered)">Active deals</span><span title="Active Retail deals flagged Hot, right now">Hot</span><span title="Retail estimates sent in the period (by estimate sent date)">Est. sent</span><span title="Open follow-ups due before today (now) — scheduled = all open follow-ups">Follow-ups · now</span><span title="Retail Sales Won ₹ — deals won in the period, credited to the deal's current assignee">Retail Sales Won</span><span title="Dated Retail receipts in the period, net of reversals">Money received</span>${month?'<span>Sales target</span><span>Collection target</span>':''}</div>`;
-const body = X.cres.map(r=>`<div class="tm-r" data-tm="row" data-cre="${esc(String(r.k))}"><div class="tm-c tm-nm" data-tmk="name"><b>${esc(r.name)}</b><span class="tm-st" data-tmk="status"><i></i>${esc((r.prof?.role||'cre').toUpperCase())} · Active</span><span class="tm-go" aria-hidden="true" title="CRE detail page — coming in a later step">›</span></div>${tmCells(r,month,true)}</div>`).join('');
+const scope = `<div class="pb-scope" data-tm="scope"><b>${esc(label)}</b> · Asia/Kolkata · Retail Sales only — Repairs excluded, Dealer not included. Sales = Retail Sales Won (not Delivered) — a performance metric, not a target; Money Collected = dated receipts net of reversals — the only monthly target.</div>`;
+const hd = `<div class="tm-hd"><span>CRE</span><span>Leads</span><span title="Retail deals in an open stage right now (not Won, Lost or Delivered)">Active deals</span><span title="Active Retail deals flagged Hot, right now">Hot</span><span title="Retail estimates sent in the period (by estimate sent date)">Est. sent</span><span title="Open follow-ups due before today (now) — scheduled = all open follow-ups">Follow-ups · now</span><span title="Retail Sales Won ₹ — deals won in the period, credited to the deal's current assignee">Retail Sales Won</span><span title="Dated Retail receipts in the period, net of reversals">Money Collected</span>${month?'<span>Collection target</span>':''}</div>`;
+const body = X.cres.map(r=>`<div class="tm-r" data-tm="row" data-cre="${esc(String(r.k))}"><div class="tm-c tm-nm" data-tmk="name"><b>${esc(r.name)}</b><span class="tm-st" data-tmk="status"><i></i>${esc((r.prof?.role||'cre').toUpperCase())} · Active</span><button type="button" class="tm-set" data-tm="settargets" data-cre="${esc(String(r.k))}" aria-label="Set target for ${esc(r.name)}">Set target</button><span class="tm-go" aria-hidden="true" title="CRE detail page — coming in a later step">›</span></div>${tmCells(r,month,true)}</div>`).join('');
 const t = X.creTot;
 const total = `<div class="tm-r tm-tot" data-tm="total"><div class="tm-c tm-nm"><b>CRE total</b></div>
 <div class="tm-c" data-tmk="leads"><i class="tm-l">Leads</i><b class="tm-v" data-v="${t.leads}">${t.leads}</b></div>
@@ -1906,13 +2080,13 @@ const total = `<div class="tm-r tm-tot" data-tm="total"><div class="tm-c tm-nm">
 <div class="tm-c" data-tmk="est"><i class="tm-l">Estimates sent</i><b class="tm-v" data-v="${t.est}">${t.est}</b></div>
 <div class="tm-c" data-tmk="fu"><i class="tm-l">Follow-ups</i><b class="tm-v${t.missed?' bad':''}" data-v="${t.missed}">${t.missed}</b><span class="pd-s">missed</span></div>
 <div class="tm-c" data-tmk="won"><i class="tm-l">Retail Sales Won</i><b class="tm-v" data-v="${Math.round(t.wonV)}">${rs(Math.round(t.wonV))}</b><span class="pd-s">${t.won} deal${t.won===1?'':'s'}</span></div>
-<div class="tm-c" data-tmk="money"><i class="tm-l">Money received</i><b class="tm-v" data-v="${Math.round(t.money)}">${rs(Math.round(t.money))}</b><span class="pd-s">net of reversals</span></div>${month?'<div class="tm-c" data-tmk="stgt"></div><div class="tm-c" data-tmk="ctgt"></div>':''}</div>`;
+<div class="tm-c" data-tmk="money"><i class="tm-l">Money Collected</i><b class="tm-v" data-v="${Math.round(t.money)}">${rs(Math.round(t.money))}</b><span class="pd-s">net of reversals</span></div>${month?'<div class="tm-c" data-tmk="ctgt"></div>':''}</div>`;
 const A = X.tot;
 const rec = X.reconciled
 ? `<div class="pb-tot" data-tm="recon">CRE team + Owner-held${X.hasOth?' + unassigned':''}: Won <b>${rs(Math.round(A.wonV))}</b> = Sales Won <span class="ok" aria-label="reconciled">✓</span> · Money <b>${rs(Math.round(A.money))}</b> = Money received <span class="ok" aria-label="reconciled">✓</span> <span class="tm-rs">(same as Dashboard · Money &amp; sales)</span></div>`
 : `<div class="pb-tot warn" data-tm="recon" role="alert">Reconciliation warning — all rows total Won <b>${rs(Math.round(A.wonV))}</b> / Money <b>${rs(Math.round(A.money))}</b> but Money &amp; sales shows Sales Won <b>${rs(Math.round(c.sales.value))}</b> / Money received <b>${rs(Math.round(c.money.net))}</b></div>`;
 const quiet = !X.cres.length ? `<div class="empty" style="padding:18px 10px" data-tm="nocre">No active CRE profiles.</div>` : '';
-const tgNote = month ? '' : `<div class="pd-hint" data-tm="tgthint">Monthly target progress shows on This month.</div>`;
+const tgNote = month ? '' : `<div class="pd-hint" data-tm="tgthint">Monthly collection-target progress shows on This month.</div>`;
 const team = `<div class="pb-panel tm-panel${month?' tm-m':''}" data-tm="team"><div class="pb-ph"><span class="pb-pt">CRE performance</span><span class="pb-pn">${esc(label)}</span></div>
 ${X.cres.length?hd+body+total:quiet}${X.cres.length?rec:''}${tgNote}
 <div class="pb-foot" data-tm="note">Active CRE profiles only · credit goes to the deal's current assignee · Active deals and Hot leads are live counts · CRE detail pages come in a later step</div></div>`;
@@ -1922,9 +2096,9 @@ const ofu = !o.sched && !o.missed ? `<div class="tm-c" data-tmk="fu"><i class="t
 : `<div class="tm-c" data-tmk="fu"><i class="tm-l" style="display:block">Follow-ups</i><b class="tm-v${o.missed?' bad':' ok'}" data-v="${o.missed}">${o.missed}</b><span class="pd-s">missed · ${o.sched} scheduled</span></div>`;
 const oth = X.hasOth ? `<div class="pd-hint" data-tm="other">Unassigned or other role (not owner, not a CRE row): ${X.oth.active} active deal${X.oth.active===1?'':'s'} · Won <b>${rs(Math.round(X.oth.wonV))}</b> · Money <b>${rs(Math.round(X.oth.money))}</b> — included in the reconciliation above.</div>` : '';
 const own = `<div class="pb-panel tm-panel" data-tm="owner"><div class="pb-ph"><span class="pb-pt">Owner-held workload</span><span class="pb-pn">${esc(label)}</span></div>
-<div class="tm-ostats">${ocell('active','Active deals',o.active)}${ocell('hot','Hot leads',o.hot)}${ocell('leads','Leads',o.leads)}${ocell('est','Estimates sent',o.est)}${ofu}${ocell('won','Retail Sales Won',o.wonV,`${o.won} deal${o.won===1?'':'s'}`)}${ocell('money','Money received',o.money,'dated receipts')}</div>${oth}
+<div class="tm-ostats">${ocell('active','Active deals',o.active)}${ocell('hot','Hot leads',o.hot)}${ocell('leads','Leads',o.leads)}${ocell('est','Estimates sent',o.est)}${ofu}${ocell('won','Retail Sales Won',o.wonV,`${o.won} deal${o.won===1?'':'s'}`)}${ocell('money','Money Collected',o.money,'dated receipts')}</div>${oth}
 <div class="pb-foot" data-tm="ownnote">Deals held by the owner rather than a CRE — shown apart from the CRE rows so the team is not diluted; no targets apply.</div></div>`;
-return head+scope+team+own;
+return head+tmNoticeHTML()+scope+team+own;
 }
 
 async function loadTab(){
@@ -1958,6 +2132,7 @@ await loadServiceCentre();
 await loadTeamSources();
 }
 if(S.tab==='team' && isOwner()){
+tmNote = null;
 await loadPhaseB();
 await loadTeamOverview();
 }
@@ -1967,6 +2142,7 @@ const { data:perfData, error:perfErr } = await sb.from('cre_performance_daily').
 if(perfErr) throw perfErr; S.myPerf = perfData||[];
 await loadChaseSources();
 await loadDashboardShared();
+if(S.tab==='mydash' || S.tab==='myperf') await loadCreCollected();
 // The CRE Today dashboard's three Estimate KPI tiles (cdKpis) must never
 // disagree with Global Estimates just because a shop has passed the
 // 300-row cap on S.openDeals below. Rather than touching that shared cap
@@ -3329,6 +3505,42 @@ if(row.isWon) return 'var(--amber)';
 return 'var(--cyan)';
 }
 
+/* ── CRE · Money Collected = the progress measure of the ONE monthly CRE target (Monthly Collection Target) ──
+   Same definition as the Owner Dashboard / TEAM Money Collected: Retail receipts only (Repairs and Dealer excluded), source <> legacy_migration,
+   dated receipts only (occurred_at inside the current IST calendar month), reversals netted on their own date, credited to the deal's
+   CURRENT assignee. The CRE's own database access already limits receipts to their deals; the assignee filter below makes it explicit.
+   Never cre_performance_daily / Delivered value / deals.amount_collected. The target itself is re-read from the CRE's own profile row on
+   every load so a target the owner just changed is what the CRE sees (read-only; no write). ── */
+async function loadCreCollected(){
+const C = { uid:S.me?.id, today:istDate(), error:null, receipts:[] };
+try{
+const retail = S.pipelines.find(p=>p.name==='Retail Sales');
+if(!retail || repairsPipelineId()==null) throw new Error('Retail / Repairs pipelines could not be resolved');
+C.R = pbRange('month',C.today);
+const rSel = 'id,deal_id,amount,occurred_at,source,reverses_receipt_id,deals(pipeline_id,assigned_to)';
+const lowIso = new Date(C.R.start).toISOString();
+const [recs, me] = await Promise.all([
+fetchAllPages(()=>sb.from('receipts').select(rSel).gte('occurred_at',lowIso).order('id')),
+sb.from('profiles').select('id,monthly_collection_target').eq('id',S.me.id).maybeSingle()
+]);
+C.receipts = recs.filter(r=>r.deals && r.deals.pipeline_id===retail.id && r.deals.assigned_to===S.me.id);
+if(!me.error && me.data && S.me) S.me.monthly_collection_target = me.data.monthly_collection_target;
+}catch(e){ C.error = (e&&e.message)||String(e); }
+S.creColl = C;
+}
+// null while the figure is unavailable (not loaded yet, another user's data, or a failed load) — never a fake 0
+function creCollected(){
+const C = S.creColl;
+if(!C || C.error || C.uid!==S.me?.id || !C.R) return null;
+const R = C.R; let gross = 0, reversal = 0;
+C.receipts.forEach(r=>{
+if(r.source==='legacy_migration' || r.occurred_at==null) return;
+const t = Date.parse(r.occurred_at); if(isNaN(t) || t<R.start || t>=R.end) return;
+const a = Number(r.amount||0);
+if(r.reverses_receipt_id!=null || a<0) reversal += a; else gross += a;
+});
+return { gross, reversal, net:gross+reversal };
+}
 function sumMonthPerf(){
 return S.monthPerf.reduce((a,r)=>{ a.value+=Number(r.value_delivered||0); a.money+=Number(r.money_collected||0); return a; }, {value:0,money:0});
 }
@@ -3384,7 +3596,7 @@ return `<div class="card"><h2 style="margin-top:0">${esc(title)}</h2>
 <div class="stats">
 <div class="stat"><div class="v">${rs(sums.value)}</div><div class="l">Sales value</div></div>
 <div class="stat"><div class="v">${S.monthWonIds.length}</div><div class="l">Deals won</div></div>
-<div class="stat"><div class="v">${rs(sums.money)}</div><div class="l">Amount collected</div></div>
+<div class="stat" data-mp="money"><div class="v">${(()=>{const c=creCollected(); return c?pbMin(c.net):'—';})()}</div><div class="l">Money Collected</div></div>
 <div class="stat"><div class="v">${quoted}</div><div class="l">Active quotations</div></div>
 </div></div>`;
 }
@@ -3442,20 +3654,13 @@ const h=Math.round(m/60); if(h<24) return h+'h ago';
 const d=Math.round(h/24); return d+'d ago';
 }
 function targetsCard(){
-const t1 = Number(S.me?.monthly_sales_target||0), t2=Number(S.me?.monthly_collection_target||0);
-if(!t1 && !t2) return '';
-const sums = sumMonthPerf();
-const pct1 = t1>0 ? Math.min(100,Math.round(sums.value/t1*100)) : 0;
-const pct2 = t2>0 ? Math.min(100,Math.round(sums.money/t2*100)) : 0;
-return `<div class="card"><h2 style="margin-top:0">My targets · this month</h2>
-${t1?`<div style="margin-bottom:14px">
-<div class="row"><span class="sub grow">Sales</span><span class="sub">${rs(sums.value)} / ${rs(t1)}</span></div>
-<div class="bar"><i style="width:${pct1}%"></i></div>
-</div>`:''}
-${t2?`<div>
-<div class="row"><span class="sub grow">Collections</span><span class="sub">${rs(sums.money)} / ${rs(t2)}</span></div>
-<div class="bar"><i style="width:${pct2}%;background:var(--cyan)"></i></div>
-</div>`:''}
+const t2 = Number(S.me?.monthly_collection_target||0);
+if(!(t2>0)) return '';
+const cc = creCollected();
+const pct = cc ? Math.max(0,Math.round(cc.net/t2*100)) : 0;
+return `<div class="card" data-mp="target"><h2 style="margin-top:0">My target · this month</h2>
+<div class="row"><span class="sub grow" data-mp="lbl">Monthly Collection Target</span><span class="sub" data-mp="progress">${cc ? `Money Collected ${pbMin(cc.net)} / ${rs(t2)} · ${pct}%` : `Money Collected unavailable / ${rs(t2)}`}</span></div>
+<div class="bar"><i style="width:${Math.min(100,pct)}%;background:var(--cyan)"></i></div>
 </div>`;
 }
 
@@ -3487,14 +3692,14 @@ ${S.searchResults ? searchResultsBlock() : ''}`;
 
 /* ── my dashboard (cre) — STAGEMAX reference redesign ── */
 function cdGreetTargets(){
-const t1 = Number(S.me?.monthly_sales_target||0);
-const topRow = `<div class="tgt-top"><span class="isq">${ic('target')}</span><span class="ttl">My Targets (This Month)</span></div>`;
-if(!t1) return `<div class="cd-target-divider"></div><div class="cd-target">${topRow}<div class="sub" style="color:var(--cd-muted);font-size:12.5px">No monthly target set yet — ask your admin to set one.</div></div>`;
-const sums = sumMonthPerf();
-const pct1 = Math.min(100, Math.round(sums.value/t1*100));
-return `<div class="cd-target-divider"></div><div class="cd-target">
+const t2 = Number(S.me?.monthly_collection_target||0);
+const topRow = `<div class="tgt-top"><span class="isq">${ic('target')}</span><span class="ttl">My Target (This Month)</span></div>`;
+if(!(t2>0)) return `<div class="cd-target-divider"></div><div class="cd-target" data-ct="card">${topRow}<div class="sub" data-ct="none" style="color:var(--cd-muted);font-size:12.5px">No monthly target set yet — ask your admin to set one.</div></div>`;
+const cc = creCollected();
+const pct = cc ? Math.max(0,Math.round(cc.net/t2*100)) : 0;
+return `<div class="cd-target-divider"></div><div class="cd-target" data-ct="card">
 ${topRow}
-<div class="tgt-bot"><span class="lbl">Sales Target</span><div class="bar2"><i style="width:${pct1}%"></i></div><b class="pct">${pct1}%</b><div class="tgt-div"></div><div class="tgt-stat"><b>${rs(sums.value)}</b><span>Achieved</span></div><div class="tgt-div"></div><div class="tgt-stat"><b>${rs(t1)}</b><span>Target</span></div></div>
+<div class="tgt-bot"><span class="lbl" data-ct="lbl">Monthly Collection Target</span><div class="bar2"><i style="width:${Math.min(100,pct)}%"></i></div><b class="pct" data-ct="pct">${cc?pct+'%':'—'}</b><div class="tgt-div"></div><div class="tgt-stat"><b data-ct="collected">${cc?pbMin(cc.net):'—'}</b><span>Money Collected</span></div><div class="tgt-div"></div><div class="tgt-stat"><b data-ct="target">${rs(t2)}</b><span>Target</span></div></div>
 
 </div>`;
 }
@@ -4163,24 +4368,6 @@ else if(oi) await logActivity('followup_completed', oi.dealId, oi.name || '');
 loadTab();
 }
 
-async function saveTarget(id,btn){
-btn.disabled=true;
-const input=document.querySelector(`[data-targetinput="${id}"]`);
-const v=Number(input.value||0);
-await sb.from('profiles').update({monthly_sales_target:v}).eq('id',id);
-const p=S.profiles.find(x=>x.id===id); if(p) p.monthly_sales_target=v;
-loadTab();
-}
-
-async function saveCollTarget(id,btn){
-btn.disabled=true;
-const input=document.querySelector(`[data-collinput="${id}"]`);
-const v=Math.max(0,Number(input.value||0)||0);
-await sb.from('profiles').update({monthly_collection_target:v}).eq('id',id);
-const p=S.profiles.find(x=>x.id===id); if(p) p.monthly_collection_target=v;
-loadTab();
-}
-
 async function runSearch(q){
 q=q.trim();
 if(!q){ S.search=''; S.searchResults=null; render(); return; }
@@ -4226,8 +4413,7 @@ document.querySelectorAll('.qa[data-tab]').forEach(b=>b.onclick=()=>{ S.tab=b.da
 document.querySelectorAll('[data-chase]').forEach(b=>b.onclick=()=>{ S.chaseTab=b.dataset.chase; render(); });
 document.querySelectorAll('[data-donefu]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); markFollowupDone(b.dataset.donefu); });
 document.querySelectorAll('[data-oadone]').forEach(b=>b.onclick=async(e)=>{ e.stopPropagation(); const it=(S.ownerAttn?.fuItems||[]).find(x=>String(x.fuId)===b.dataset.oadone); await sb.from('follow_ups').update({done:true, done_at:new Date().toISOString()}).eq('id',b.dataset.oadone); if(it) await logActivity('followup_completed', it.dealId, it.name||''); loadTab(); });
-document.querySelectorAll('[data-savetarget]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); saveTarget(b.dataset.savetarget,b); });
-document.querySelectorAll('[data-savecoll]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); saveCollTarget(b.dataset.savecoll,b); });
+tmWire();
 const bell=document.getElementById('bellbtn'); if(bell) bell.onclick=()=>{ const a=document.getElementById('followups-anchor'); if(a) a.scrollIntoView({behavior:'smooth'}); else if(!isOwner()){ S.tab='followups'; S.deal=null; loadTab(); } };
 const gs=document.getElementById('gsearch');
 if(gs){ gs.onkeydown=e=>{ if(e.key==='Enter') runSearch(gs.value); }; }
